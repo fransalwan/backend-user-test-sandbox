@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fintech Backend Sandbox Dojo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- HTMX & SSE Extension -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/sse.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white">
+    <!-- Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">⚡</span>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+                        Fintech Backend Dojo
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Go + HTMX</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Concurrency, ACID, & Idempotency Simulation Sandbox</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    PostgreSQL ACID Ready
+                </span>
+                <a href="https://github.com/fransalwan/backend-user-test-sandbox" target="_blank" class="text-xs text-slate-400 hover:text-white transition">GitHub Repo &rarr;</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <!-- Scenario Selector & Info Banner -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-lg shadow-emerald-500/5">
+                <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Scenario 01</div>
+                <div class="mt-1 text-sm font-semibold text-white">Race Condition</div>
+                <p class="mt-1 text-xs text-slate-400">Pessimistic vs Optimistic Locking under high contention</p>
+                <div class="mt-3">
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/50">Active Focus</span>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 opacity-60">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scenario 02</div>
+                <div class="mt-1 text-sm font-semibold text-slate-300">Idempotency & Retries</div>
+                <p class="mt-1 text-xs text-slate-400">Idempotency Keys & atomic deduplication</p>
+                <div class="mt-3">
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Upcoming</span>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 opacity-60">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scenario 03</div>
+                <div class="mt-1 text-sm font-semibold text-slate-300">Distributed Outbox & Saga</div>
+                <p class="mt-1 text-xs text-slate-400">Eventual consistency & compensating transactions</p>
+                <div class="mt-3">
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Upcoming</span>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 opacity-60">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scenario 04</div>
+                <div class="mt-1 text-sm font-semibold text-slate-300">High Traffic & Flash Sale</div>
+                <p class="mt-1 text-xs text-slate-400">Rate Limiting & Hot-Account Caching</p>
+                <div class="mt-3">
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Upcoming</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Wallet State & Concurrency Simulation Studio -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left 2 Cols: Simulation Dashboard & Wallets -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Wallets Snapshot Cards -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                            <span>💳</span> Live Wallet Accounts
+                        </h2>
+                        <button hx-get="/api/wallets" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition">
+                            <span>↻</span> Refresh Balances
+                        </button>
+                    </div>
+
+                    <div id="wallet-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Wallet Alice -->
+                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="text-xs text-slate-400 font-mono">wallet-alice-001</div>
+                                    <div class="text-base font-semibold text-white">Alice (Hot Wallet)</div>
+                                </div>
+                                <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Version: 1</span>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between">
+                                <span class="text-xs text-slate-500">Balance</span>
+                                <span class="text-2xl font-mono font-bold text-white">$1,000.00</span>
+                            </div>
+                            <div class="mt-2 text-[11px] text-slate-500 font-mono">100,000 cents (int64)</div>
+                        </div>
+
+                        <!-- Wallet Bob -->
+                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="text-xs text-slate-400 font-mono">wallet-bob-002</div>
+                                    <div class="text-base font-semibold text-white">Bob (Target Wallet)</div>
+                                </div>
+                                <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700">Version: 1</span>
+                            </div>
+                            <div class="mt-4 flex items-baseline justify-between">
+                                <span class="text-xs text-slate-500">Balance</span>
+                                <span class="text-2xl font-mono font-bold text-white">$250.00</span>
+                            </div>
+                            <div class="mt-2 text-[11px] text-slate-500 font-mono">25,000 cents (int64)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Control Panel -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                <span>🧪</span> Concurrency Simulation Lab (Scenario 01)
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Fire concurrent goroutines against Alice's wallet balance simultaneously</p>
+                        </div>
+                    </div>
+
+                    <form hx-post="/api/scenarios/01/run" hx-target="#simulation-output" hx-swap="innerHTML" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Concurrency Mode -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Concurrency Strategy</label>
+                                <select name="strategy" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                                    <option value="naive">1. Naive (Race Hazard ⚠️)</option>
+                                    <option value="pessimistic" selected>2. Pessimistic (SELECT FOR UPDATE 🔒)</option>
+                                    <option value="optimistic">3. Optimistic (Version Check 🔄)</option>
+                                    <option value="redis_lock">4. Redis Distributed Lock 🔑</option>
+                                </select>
+                            </div>
+
+                            <!-- Number of Goroutines -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Concurrent Requests (Goroutines)</label>
+                                <input type="number" name="concurrency" value="50" min="2" max="200" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+
+                            <!-- Debit Amount -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Amount per Request (USD)</label>
+                                <input type="number" name="amount" value="25" min="1" max="1000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="text-xs text-slate-400">
+                                Total attempted deduction: <span class="text-emerald-400 font-mono font-semibold">$1,250.00</span> (exceeds balance of $1,000.00 to test overdraft prevention!)
+                            </div>
+                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition shadow-lg shadow-emerald-900/30">
+                                <span>▶</span> Execute Concurrency Attack
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Simulation Result Summary Placeholder -->
+                    <div id="simulation-output" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono">
+                        Ready. Click "Execute Concurrency Attack" to simulate race condition behavior.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right 1 Col: Live Event Log Stream (SSE) -->
+            <div class="space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col h-[600px]">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Live Concurrency Stream</h3>
+                        </div>
+                        <span class="text-[10px] text-slate-500 font-mono">SSE: /api/events</span>
+                    </div>
+
+                    <!-- Scrollable Event Stream Log Container -->
+                    <div id="event-stream-container" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs font-mono">
+                        <div class="text-slate-500 text-[11px]">[System initialized] SSE listener connected.</div>
+                        <div class="text-slate-500 text-[11px]">[Ready] Select a locking strategy and trigger load.</div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
+        Backend User Test Sandbox &bull; Modular Clean Architecture &bull; Go + PostgreSQL + Redis + HTMX
+    </footer>
+</body>
+</html>
