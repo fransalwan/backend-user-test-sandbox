@@ -76,6 +76,26 @@ func (s *Simulator) Reset(initialBalance int64) {
 	s.wallet.Version = 1
 }
 
+// GetBalance mengembalikan saldo saat ini (memenuhi antarmuka SharedWallet).
+func (s *Simulator) GetBalance() int64 {
+	s.wallet.mu.Lock()
+	defer s.wallet.mu.Unlock()
+	return s.wallet.Balance
+}
+
+// Deduct memotong saldo secara aman (memenuhi antarmuka SharedWallet).
+func (s *Simulator) Deduct(amount int64) bool {
+	s.wallet.mu.Lock()
+	defer s.wallet.mu.Unlock()
+	if s.wallet.Balance < amount {
+		return false
+	}
+	s.wallet.Balance -= amount
+	s.wallet.Version++
+	return true
+}
+
+
 // Run executes the concurrent simulation based on selected strategy
 func (s *Simulator) Run(ctx context.Context, cfg SimulationConfig, publish EventPublisher) SimulationResult {
 	start := time.Now()

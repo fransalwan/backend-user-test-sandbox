@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<html lang="id" class="h-full bg-slate-950 text-slate-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fintech Backend Sandbox Dojo</title>
+    <title>Fintech Backend Dojo - Simulasi Concurrency & Idempotensi</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- HTMX & SSE Extension -->
+    <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/sse.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -24,196 +23,277 @@
                 }
             }
         }
+
+        function switchScenario(tab) {
+            const tab1 = document.getElementById('tab-scenario-1');
+            const tab2 = document.getElementById('tab-scenario-2');
+            const view1 = document.getElementById('scenario-1-view');
+            const view2 = document.getElementById('scenario-2-view');
+
+            if (tab === 1) {
+                tab1.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm";
+                tab2.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800";
+                view1.classList.remove('hidden');
+                view2.classList.add('hidden');
+            } else {
+                tab2.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm";
+                tab1.className = "px-4 py-2 text-xs font-semibold rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800";
+                view2.classList.remove('hidden');
+                view1.classList.add('hidden');
+            }
+        }
+
+        function generateUUID() {
+            const uuid = 'idem-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now().toString(36);
+            document.getElementById('idempotency-key-input').value = uuid;
+        }
     </script>
 </head>
 <body class="h-full flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white">
-    <!-- Navbar -->
-    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <!-- Navbar Header -->
+    <header class="border-b border-slate-800 bg-slate-900/70 backdrop-blur sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <span class="text-2xl">⚡</span>
                 <div>
                     <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
                         Fintech Backend Dojo
-                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Go + HTMX</span>
+                        <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Go + HTMX + PostgreSQL ACID</span>
                     </h1>
-                    <p class="text-xs text-slate-400">Concurrency, ACID, & Idempotency Simulation Sandbox</p>
+                    <p class="text-xs text-slate-400">Sandbox Latihan Teknis & Simulasi Concurrency Finansial</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    PostgreSQL ACID Ready
+                    Sistem Aktif
                 </span>
                 <a href="https://github.com/fransalwan/backend-user-test-sandbox" target="_blank" class="text-xs text-slate-400 hover:text-white transition">GitHub Repo &rarr;</a>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Konten Utama -->
     <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        <!-- Scenario Selector & Info Banner -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-lg shadow-emerald-500/5">
-                <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Scenario 01</div>
-                <div class="mt-1 text-sm font-semibold text-white">Race Condition</div>
-                <p class="mt-1 text-xs text-slate-400">Pessimistic vs Optimistic Locking under high contention</p>
-                <div class="mt-3">
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/50">Active Focus</span>
+        <!-- Pilihan Navigasi Skenario (Tab Switcher) -->
+        <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+                <h2 class="text-lg font-bold text-white">Laboratorium Simulasi Kasus Fintech</h2>
+                <p class="text-xs text-slate-400">Pilih skenario di bawah untuk menguji kelemahan arsitektur dan mengamati proteksi mutasi dana secara live.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="tab-scenario-1" onclick="switchScenario(1)" class="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 text-white shadow-sm transition">
+                    Skenario 01: Race Condition
+                </button>
+                <button id="tab-scenario-2" onclick="switchScenario(2)" class="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-900 text-slate-400 hover:text-white border border-slate-800 transition">
+                    Skenario 02: Idempotency Keys
+                </button>
+            </div>
+        </section>
+
+        <!-- Status Saldo Dompet Real-Time -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <span>💳</span> Status Saldo Dompet Nasabah (Live Ledger Snapshot)
+                    </h2>
+                    <p class="text-xs text-slate-500">Saldo disimpan sebagai bilangan bulat <code class="text-emerald-400 font-mono">int64</code> (sen) untuk menjamin akurasi mutlak tanpa koma desimal floating-point.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button hx-post="/api/wallets/reset" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                        <span>↺</span> Reset Saldo ke $1.000,00
+                    </button>
+                    <button hx-get="/api/wallets" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs px-3 py-1.5 rounded-lg bg-emerald-950 text-emerald-400 hover:bg-emerald-900 border border-emerald-800/50 transition flex items-center gap-1.5">
+                        <span>↻</span> Segarkan
+                    </button>
                 </div>
             </div>
 
-            <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 opacity-60">
-                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scenario 02</div>
-                <div class="mt-1 text-sm font-semibold text-slate-300">Idempotency & Retries</div>
-                <p class="mt-1 text-xs text-slate-400">Idempotency Keys & atomic deduplication</p>
-                <div class="mt-3">
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Upcoming</span>
-                </div>
-            </div>
+            <!-- Auto-refresh saat event 'refreshWallets' dipicu oleh HTMX -->
+            <div id="wallet-cards-wrapper" hx-get="/api/wallets" hx-trigger="refreshWallets from:body" hx-target="#wallet-cards" hx-swap="outerHTML">
+                <div id="wallet-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Kartu Dompet Alice -->
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-xs text-slate-400 font-mono">wallet-alice-001</div>
+                                <div class="text-base font-semibold text-white">Alice (Hot Wallet)</div>
+                            </div>
+                            <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Versi: 1</span>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <span class="text-xs text-slate-500">Saldo Rekening</span>
+                            <span class="text-2xl font-mono font-bold text-white">$1000.00</span>
+                        </div>
+                        <div class="mt-2 text-[11px] text-slate-500 font-mono">100.000 sen (int64)</div>
+                    </div>
 
-            <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 opacity-60">
-                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scenario 03</div>
-                <div class="mt-1 text-sm font-semibold text-slate-300">Distributed Outbox & Saga</div>
-                <p class="mt-1 text-xs text-slate-400">Eventual consistency & compensating transactions</p>
-                <div class="mt-3">
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Upcoming</span>
-                </div>
-            </div>
-
-            <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800 opacity-60">
-                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scenario 04</div>
-                <div class="mt-1 text-sm font-semibold text-slate-300">High Traffic & Flash Sale</div>
-                <p class="mt-1 text-xs text-slate-400">Rate Limiting & Hot-Account Caching</p>
-                <div class="mt-3">
-                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Upcoming</span>
+                    <!-- Kartu Dompet Bob -->
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-xs text-slate-400 font-mono">wallet-bob-002</div>
+                                <div class="text-base font-semibold text-white">Bob (Rekening Tujuan)</div>
+                            </div>
+                            <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700">Versi: 1</span>
+                        </div>
+                        <div class="mt-4 flex items-baseline justify-between">
+                            <span class="text-xs text-slate-500">Saldo Rekening</span>
+                            <span class="text-2xl font-mono font-bold text-white">$250.00</span>
+                        </div>
+                        <div class="mt-2 text-[11px] text-slate-500 font-mono">25.000 sen (int64)</div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Live Wallet State & Concurrency Simulation Studio -->
+        <!-- Area Simulasi & Log Live Stream -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Left 2 Cols: Simulation Dashboard & Wallets -->
+            <!-- Kolom Kiri (2 Kolom): Panel Kontrol Skenario Aktif -->
             <div class="lg:col-span-2 space-y-6">
                 
-                <!-- Wallets Snapshot Cards -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                            <span>💳</span> Live Wallet Accounts
-                        </h2>
-                        <button hx-get="/api/wallets" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition">
-                            <span>↻</span> Refresh Balances
-                        </button>
-                    </div>
-
-                    <div id="wallet-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Wallet Alice -->
-                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <div class="text-xs text-slate-400 font-mono">wallet-alice-001</div>
-                                    <div class="text-base font-semibold text-white">Alice (Hot Wallet)</div>
-                                </div>
-                                <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Version: 1</span>
-                            </div>
-                            <div class="mt-4 flex items-baseline justify-between">
-                                <span class="text-xs text-slate-500">Balance</span>
-                                <span class="text-2xl font-mono font-bold text-white">$1,000.00</span>
-                            </div>
-                            <div class="mt-2 text-[11px] text-slate-500 font-mono">100,000 cents (int64)</div>
-                        </div>
-
-                        <!-- Wallet Bob -->
-                        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <div class="text-xs text-slate-400 font-mono">wallet-bob-002</div>
-                                    <div class="text-base font-semibold text-white">Bob (Target Wallet)</div>
-                                </div>
-                                <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-slate-400 border border-slate-700">Version: 1</span>
-                            </div>
-                            <div class="mt-4 flex items-baseline justify-between">
-                                <span class="text-xs text-slate-500">Balance</span>
-                                <span class="text-2xl font-mono font-bold text-white">$250.00</span>
-                            </div>
-                            <div class="mt-2 text-[11px] text-slate-500 font-mono">25,000 cents (int64)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Simulation Control Panel -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+                <!-- ================= VIEW SKENARIO 01: RACE CONDITION ================= -->
+                <div id="scenario-1-view" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-4">
                         <div>
-                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
-                                <span>🧪</span> Concurrency Simulation Lab (Scenario 01)
+                            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Skenario 01</div>
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2 mt-0.5">
+                                <span>🔒</span> Uji Konkurensi & Penguncian Database (Pessimistic vs Optimistic)
                             </h2>
-                            <p class="text-xs text-slate-400 mt-0.5">Fire concurrent goroutines against Alice's wallet balance simultaneously</p>
+                            <p class="text-xs text-slate-400 mt-1">Uji serbuan puluhan goroutine yang mencoba memotong saldo Alice secara paralel di milidetik yang sama.</p>
                         </div>
                     </div>
 
-                    <form hx-post="/api/scenarios/01/run" hx-target="#simulation-output" hx-swap="innerHTML" class="space-y-4">
+                    <form hx-post="/api/scenarios/01/run" hx-target="#simulation-output-1" hx-swap="innerHTML" class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <!-- Concurrency Mode -->
+                            <!-- Pilihan Strategi Locking -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-300 mb-1">Concurrency Strategy</label>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Strategi Penguncian</label>
                                 <select name="strategy" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                                    <option value="naive">1. Naive (Race Hazard ⚠️)</option>
+                                    <option value="naive">1. Naive (Bahaya Race Hazard ⚠️)</option>
                                     <option value="pessimistic" selected>2. Pessimistic (SELECT FOR UPDATE 🔒)</option>
                                     <option value="optimistic">3. Optimistic (Version Check 🔄)</option>
                                     <option value="redis_lock">4. Redis Distributed Lock 🔑</option>
                                 </select>
                             </div>
 
-                            <!-- Number of Goroutines -->
+                            <!-- Jumlah Goroutine -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-300 mb-1">Concurrent Requests (Goroutines)</label>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Jumlah Request Konkuren (Goroutines)</label>
                                 <input type="number" name="concurrency" value="50" min="2" max="200" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
                             </div>
 
-                            <!-- Debit Amount -->
+                            <!-- Nominal Potongan -->
                             <div>
-                                <label class="block text-xs font-medium text-slate-300 mb-1">Amount per Request (USD)</label>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Nominal per Request (USD)</label>
                                 <input type="number" name="amount" value="25" min="1" max="1000" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
                             </div>
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
                             <div class="text-xs text-slate-400">
-                                Total attempted deduction: <span class="text-emerald-400 font-mono font-semibold">$1,250.00</span> (exceeds balance of $1,000.00 to test overdraft prevention!)
+                                💡 Tip: 50 request &times; $25 = <span class="text-emerald-400 font-mono font-semibold">$1.250,00</span> (melebihi saldo $1.000,00 untuk membuktikan saldo tidak bisa minus).
                             </div>
-                            <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition shadow-lg shadow-emerald-900/30">
-                                <span>▶</span> Execute Concurrency Attack
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition shadow-lg shadow-emerald-900/40">
+                                <span>▶</span> Jalankan Simulasi Konkurensi
                             </button>
                         </div>
                     </form>
 
-                    <!-- Simulation Result Summary Placeholder -->
-                    <div id="simulation-output" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono">
-                        Ready. Click "Execute Concurrency Attack" to simulate race condition behavior.
+                    <!-- Tempat Output Hasil Uji Skenario 1 -->
+                    <div id="simulation-output-1" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono">
+                        Siap. Pilih strategi penguncian dan klik tombol di atas untuk menjalankan pengujian.
+                    </div>
+                </div>
+
+                <!-- ================= VIEW SKENARIO 02: IDEMPOTENCY ================= -->
+                <div id="scenario-2-view" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <div class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Skenario 02</div>
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2 mt-0.5">
+                                <span>🛡️</span> Uji Idempotensi & Pencegahan Double-Spending
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-1">Simulasi kegagalan timeout jaringan, retry liar dari klien, serta pencegahan mutasi saldo ganda.</p>
+                        </div>
+                        <button hx-post="/api/scenarios/02/clear" class="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded bg-slate-800 border border-slate-700 transition">
+                            Hapus Riwayat Kunci
+                        </button>
+                    </div>
+
+                    <form hx-post="/api/scenarios/02/run" hx-target="#simulation-output-2" hx-swap="innerHTML" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Mode Simulasi Idempotensi -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Mode Pengujian Idempotensi</label>
+                                <select name="mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                                    <option value="without_idempotency">1. Tanpa Kunci Idempotensi (Bahaya Pemotongan Ganda ⚠️)</option>
+                                    <option value="with_idempotency" selected>2. Dengan Kunci Idempotensi (Aman & Idempoten ✅)</option>
+                                    <option value="in_flight_conflict">3. In-Flight Collision (Cegat Konflik HTTP 409 ⛔)</option>
+                                    <option value="payload_mismatch">4. Deteksi Manipulasi Payload (Tolak HTTP 422 🛑)</option>
+                                </select>
+                            </div>
+
+                            <!-- Input Kunci Idempotensi -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1 flex justify-between">
+                                    <span>Kunci Idempotensi (UUID)</span>
+                                    <button type="button" onclick="generateUUID()" class="text-emerald-400 hover:underline">Acak Baru</button>
+                                </label>
+                                <input id="idempotency-key-input" type="text" name="idempotency_key" value="tx-order-idem-9812a" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+
+                            <!-- Jumlah Pengulangan Request (Retries) -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Jumlah Pengulangan / Retries</label>
+                                <input type="number" name="retries" value="5" min="2" max="10" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+
+                            <!-- Nominal Transfer -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Nominal Transfer (USD)</label>
+                                <input type="number" name="amount" value="50" min="1" max="500" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <div class="text-xs text-slate-400">
+                                💡 Tip: Bandingkan Mode 1 (saldo terpotong 5x lipat) dengan Mode 2 (saldo hanya terpotong tepat 1x saja!).
+                            </div>
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition shadow-lg shadow-emerald-900/40">
+                                <span>▶</span> Eksekusi Uji Idempotensi
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Tempat Output Hasil Uji Skenario 2 -->
+                    <div id="simulation-output-2" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono">
+                        Siap. Klik "Eksekusi Uji Idempotensi" untuk mengamati perlindungan double-spending secara langsung.
                     </div>
                 </div>
 
             </div>
 
-            <!-- Right 1 Col: Live Event Log Stream (SSE) -->
+            <!-- Kolom Kanan (1 Kolom): Live Event Log Stream (SSE) -->
             <div class="space-y-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col h-[600px]">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col h-[650px]">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Live Concurrency Stream</h3>
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Live Goroutine & Event Log</h3>
                         </div>
-                        <span class="text-[10px] text-slate-500 font-mono">SSE: /api/events</span>
+                        <button onclick="document.getElementById('event-stream-container').innerHTML = '';" class="text-[10px] text-slate-500 hover:text-slate-300 transition">
+                            Bersihkan Log
+                        </button>
                     </div>
 
-                    <!-- Scrollable Event Stream Log Container -->
-                    <div id="event-stream-container" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs font-mono">
-                        <div class="text-slate-500 text-[11px]">[System initialized] SSE listener connected.</div>
-                        <div class="text-slate-500 text-[11px]">[Ready] Select a locking strategy and trigger load.</div>
+                    <!-- Scrollable Log Container -->
+                    <div id="event-stream-container" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs font-mono">
+                        <div class="text-slate-500 text-[11px]">[Sistem] Terhubung ke SSE Stream backend...</div>
+                        <div class="text-slate-500 text-[11px]">[Siap] Silakan jalankan simulasi di sebelah kiri.</div>
                     </div>
                 </div>
             </div>
@@ -224,7 +304,38 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
-        Backend User Test Sandbox &bull; Modular Clean Architecture &bull; Go + PostgreSQL + Redis + HTMX
+        Backend User Test Sandbox (Fintech Dojo) &bull; Modular Clean Architecture &bull; Go + PostgreSQL + Redis + HTMX
     </footer>
+
+    <!-- Script Pendengar Server-Sent Events (SSE) -->
+    <script>
+        const container = document.getElementById('event-stream-container');
+        const evtSource = new EventSource('/api/events');
+
+        evtSource.onmessage = function(e) {
+            const el = document.createElement('div');
+            el.className = 'text-[11px] leading-relaxed break-all';
+            
+            if (e.data.includes('✅') || e.data.includes('🛡️')) {
+                el.className += ' text-emerald-400';
+            } else if (e.data.includes('❌') || e.data.includes('⚠️') || e.data.includes('💥') || e.data.includes('💸')) {
+                el.className += ' text-rose-400 font-semibold';
+            } else if (e.data.includes('⏳') || e.data.includes('🔄') || e.data.includes('📨')) {
+                el.className += ' text-amber-300';
+            } else if (e.data.includes('🔒') || e.data.includes('🔐') || e.data.includes('🔑')) {
+                el.className += ' text-sky-400';
+            } else {
+                el.className += ' text-slate-400';
+            }
+
+            el.textContent = `[${new Date().toLocaleTimeString()}] ${e.data}`;
+            container.appendChild(el);
+            container.scrollTop = container.scrollHeight;
+        };
+
+        evtSource.onerror = function() {
+            // Reconnect otomatis dikelola oleh browser
+        };
+    </script>
 </body>
 </html>

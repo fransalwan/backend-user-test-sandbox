@@ -69,9 +69,13 @@ backend-user-test-sandbox/
   3. **Optimistic Locking (Version Check 🔄)**: Atomic compare-and-swap (`WHERE version = v`), exponential backoff retries.
   4. **Redis Distributed Lock (SETNX 🔑)**: Offloading lock contention from PostgreSQL to Redis.
 
-### 🎯 Scenario 02: Idempotency & Network Retries (`scenarios/02_idempotency`)
+### ✅ Scenario 02: Idempotency & Network Retries (`scenarios/02_idempotency`)
 - **Fintech Problem**: Network drops, gateway timeouts, and duplicate client retries leading to double-spending.
-- **Key Concepts**: `Idempotency-Key` header, atomic deduplication, in-flight locking (HTTP 409 Conflict), cached response replays.
+- **Interactive Demonstrations**:
+  1. **Tanpa Kunci Idempotensi (Bahaya Double-Spending ⚠️)**: Membuktikan bagaimana retry memotong saldo berlipat ganda.
+  2. **Dengan Kunci Idempotensi (Aman & Idempoten ✅)**: Hanya memproses saldo 1 kali, menyajikan cached response untuk request duplikat.
+  3. **In-Flight Conflict (HTTP 409 ⛔)**: Mencegah collision saat request sebelumnya masih berstatus `PROCESSING`.
+  4. **Verifikasi Hash Payload (HTTP 422 🛑)**: Menggagalkan upaya manipulasi parameter pada kunci idempotensi yang sama.
 
 ### 🎯 Scenario 03: Distributed Transactions & Eventual Consistency (`scenarios/03_distributed`)
 - **Fintech Problem**: Coordinating money movement with external third-party payment gateways without 2PC.
