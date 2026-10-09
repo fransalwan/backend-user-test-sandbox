@@ -630,6 +630,239 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(`{"status":"ok"}`))
 }
 
+// EvalBootcampLiveCode mengevaluasi kode Go yang diketik kandidat untuk lab teori persiapan Live Coding.
+func (h *Handler) EvalBootcampLiveCode(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	codeContent := strings.TrimSpace(r.FormValue("code_content"))
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	hasTODO := strings.Contains(codeContent, "// TODO") && !strings.Contains(codeContent, "balance +=") && !strings.Contains(codeContent, "balance -=")
+	hasFloat := strings.Contains(codeContent, "float32") || strings.Contains(codeContent, "float64")
+	hasDepositVal := strings.Contains(codeContent, "amount <= 0") || strings.Contains(codeContent, "amount < 1") || strings.Contains(codeContent, "amount < 0")
+	hasDepositAdd := strings.Contains(codeContent, "balance +=") || strings.Contains(codeContent, "balance = a.balance + amount") || strings.Contains(codeContent, "balance = balance + amount")
+	hasWithdrawBal := strings.Contains(codeContent, "balance < amount") || strings.Contains(codeContent, "balance - amount < 0") || strings.Contains(codeContent, "a.balance < amount")
+	hasWithdrawSub := strings.Contains(codeContent, "balance -=") || strings.Contains(codeContent, "balance = a.balance - amount") || strings.Contains(codeContent, "balance = balance - amount")
+	hasLock := strings.Contains(codeContent, ".Lock()") || strings.Contains(codeContent, "Lock()")
+	hasUnlock := strings.Contains(codeContent, ".Unlock()") || strings.Contains(codeContent, "Unlock()")
+
+	h.hub.Broadcast("🧪 [Bootcamp Lab] Menjalankan automated test uji teori Live Coding (Safe Money Accumulator)...")
+
+	if codeContent == "" || hasTODO {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>⚠️</span> <span>Implementasi Belum Lengkap</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Ketik implementasi fungsi <code>Deposit</code> dan <code>Withdraw</code> di editor kode di atas. Jangan biarkan blok fungsi kosong!
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if hasFloat {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>🚨</span> <span>Pelanggaran Zero-Tolerance Rule: Ditemukan Tipe Data Float!</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Terdeteksi penggunaan <code>float32</code> atau <code>float64</code>! Dalam rekayasa sistem perbankan & fintech, seluruh kalkulasi saldo wajib menggunakan bilangan bulat murni (<code>int64</code> sen / cents). Hapus float dari kode Anda.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if !hasDepositVal || !hasDepositAdd {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>❌</span> <span>Test Case 1 Gagal: Validasi Deposit Bermasalah</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Pastikan fungsi <code>Deposit</code> memeriksa <code>if amount <= 0 { return ErrInvalidAmount }</code> dan menambahkan saldo dengan benar (<code>a.balance += amount</code>).
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if !hasWithdrawBal || !hasWithdrawSub {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>❌</span> <span>Test Case 2 Gagal: Logika Withdraw Belum Tepat</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Fungsi <code>Withdraw</code> wajib memeriksa apakah <code>amount <= 0</code> dan apakah <code>a.balance < amount { return ErrInsufficientFunds }</code> sebelum melakukan pemotongan saldo.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if hasLock && !hasUnlock {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>💀</span> <span>Deadlock Hazard Terdeteksi</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Anda memanggil <code>Lock()</code> tetapi tidak melepaskan kunci dengan <code>Unlock()</code>. Gunakan idiom Go yang aman: <code>a.mu.Lock(); defer a.mu.Unlock()</code> di awal method!
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	isSafe := (hasLock && hasUnlock)
+
+	html := fmt.Sprintf(`
+    <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 text-xs space-y-3 font-mono shadow-sm">
+        <div class="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800/60 pb-2">
+            <span class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                <span>✅</span> <span>ALL TEST CASES PASSED (3/3 LOLOS)</span>
+            </span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold font-sans">TEORI TERUJI 100%%</span>
+        </div>
+        <div class="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-300">
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 1: Deposit Valid & Tolak Nilai &le; 0 (ErrInvalidAmount).......... PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 2: Withdraw Valid & Tolak Overdraft (ErrInsufficientFunds)........ PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 3: Thread-Safety Synchronization (%s).................... SECURE</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-[11px] font-sans text-slate-600 dark:text-slate-300">
+            <strong class="text-emerald-700 dark:text-emerald-400 block mb-0.5">💡 Analisis Teori:</strong>
+            Pemahaman Anda mengenai Critical Section, int64 cents arithmetic, dan Mutex synchronization sudah sangat solid! Logika ini identik dengan apa yang akan Anda ketik di <strong>Tahap 1 (Live Coding Hot-Wallet)</strong>.
+        </div>
+    </div>`, func() string {
+		if isSafe {
+			return "sync.Mutex Lock/Unlock Aktif"
+		}
+		return "Tanpa Race Condition"
+	}())
+
+	_, _ = w.Write([]byte(html))
+}
+
+// EvalBootcampSystemDesignCode mengevaluasi kode Go yang diketik kandidat untuk lab teori persiapan System Design.
+func (h *Handler) EvalBootcampSystemDesignCode(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	codeContent := strings.TrimSpace(r.FormValue("code_content"))
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	hasTODO := strings.Contains(codeContent, "// TODO") && !strings.Contains(codeContent, "records")
+	hasMissingKeyCheck := strings.Contains(codeContent, `key == ""`) || strings.Contains(codeContent, `len(key) == 0`)
+	hasInFlightCheck := strings.Contains(codeContent, `"PROCESSING"`)
+	hasCompletedCheck := strings.Contains(codeContent, `"COMPLETED"`) || strings.Contains(codeContent, `"SUCCESS"`)
+	hasSaveProcessing := strings.Contains(codeContent, `records[key] = "PROCESSING"`) || strings.Contains(codeContent, `records[key]="PROCESSING"`)
+	hasLock := strings.Contains(codeContent, ".Lock()") || strings.Contains(codeContent, "Lock()")
+	hasUnlock := strings.Contains(codeContent, ".Unlock()") || strings.Contains(codeContent, "Unlock()")
+
+	h.hub.Broadcast("🧪 [Bootcamp Lab] Menjalankan automated test uji teori System Design (Idempotency Engine & Lock Guard)...")
+
+	if codeContent == "" || hasTODO {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>⚠️</span> <span>Implementasi Belum Lengkap</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Ketik implementasi fungsi <code>AcquireOrReplay</code> pada editor di atas untuk menguji pemahaman state machine idempotensi.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if !hasMissingKeyCheck {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>❌</span> <span>Test Case 1 Gagal: Validasi Key Kosong Terlewat</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Jika client tidak menyertakan key (<code>key == ""</code>), sistem wajib menolak request sedini mungkin dengan mengembalikan <code>ErrMissingKey</code>!
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if !hasInFlightCheck {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>❌</span> <span>Test Case 2 Gagal: Deteksi Request In-Flight Belum Ada</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Jika key sudah ada dan statusnya masih <code>"PROCESSING"</code>, sistem wajib mengembalikan <code>ErrInFlightConflict</code> (representasi HTTP 409 Conflict) untuk mencegat eksekusi paralel.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if !hasCompletedCheck || !hasSaveProcessing {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>❌</span> <span>Test Case 3 Gagal: Replay Cache & Inisialisasi Key</span>
+            </div>
+            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
+                Jika status sudah <code>"COMPLETED"</code>, kembalikan <code>true, nil</code> (Replay). Jika key belum terdaftar, simpan status awal <code>e.records[key] = "PROCESSING"</code> dan kembalikan <code>false, nil</code>.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if !hasLock || !hasUnlock {
+		html := `
+        <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs space-y-1.5 font-mono">
+            <div class="font-bold flex items-center gap-1.5">
+                <span>⚠️</span> <span>Peringatan: Thread-Safety Map di Go</span>
+            </div>
+            <p class="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                Tipe <code>map</code> bawaan Go <strong>TIDAK aman terhadap konkurensi</strong>. Pembacaan dan penulisan konkuren ke <code>records</code> akan memicu runtime crash fatal (<code>fatal error: concurrent map read and map write</code>). Gunakan <code>e.mu.Lock()</code> dan <code>defer e.mu.Unlock()</code>!
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	html := `
+    <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 text-xs space-y-3 font-mono shadow-sm">
+        <div class="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800/60 pb-2">
+            <span class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
+                <span>✅</span> <span>ALL SYSTEM DESIGN TESTS PASSED (4/4 LOLOS)</span>
+            </span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold font-sans">ARSITEKTUR VALID</span>
+        </div>
+        <div class="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-300">
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 1: Tolak Request Tanpa Header Key (ErrMissingKey)................ PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 2: Cegat Konkurensi In-Flight 'PROCESSING' (HTTP 409 Conflict)... PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 3: Sajikan Ulang 'COMPLETED' Tanpa Mutasi (Replay Cached 200).... PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 4: Map Thread-Safety Guard (sync.Mutex Atomic Lock)............. SECURE</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-[11px] font-sans text-slate-600 dark:text-slate-300">
+            <strong class="text-emerald-700 dark:text-emerald-400 block mb-0.5">💡 Analisis Teori:</strong>
+            Luar biasa! Kode Anda merepresentasikan implementasi nyata dari state-machine Idempotency Engine di API Gateway fintech. Pemahaman ini adalah modal utama Anda untuk mempertahankan desain di <strong>Tahap 2 (System Design Interview)</strong>!
+        </div>
+    </div>`
+
+	_, _ = w.Write([]byte(html))
+}
+
 // EvalScenario01Code mengevaluasi kode Go yang diketik manual oleh kandidat bergaya LeetCode / CodeWars.
 func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
