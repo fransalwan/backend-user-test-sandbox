@@ -128,3 +128,4 @@ func TestSagaSuccessPath_MarksOutboxPublished(t *testing.T) {
 		t.Errorf("status outbox harus PUBLISHED, didapat %s", events[0].Status)
 	}
 }
+

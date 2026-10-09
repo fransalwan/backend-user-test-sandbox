@@ -227,3 +227,4 @@ func (s *Simulator) Run(ctx context.Context, cfg SimulationConfig, wallet Shared
 		DurationMs:        duration,
 	}
 }
+
