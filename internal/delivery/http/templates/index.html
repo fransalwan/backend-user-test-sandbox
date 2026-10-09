@@ -119,10 +119,14 @@ func TwoSum(nums []int, target int) []int {
 }`;
 
         function resetLiveCode() {
+            localStorage.removeItem('code_draft_livecode');
             const editor = document.getElementById('live-code-editor');
             if (editor) {
                 editor.value = STARTER_CODE_SKELETON;
                 editor.focus();
+                if (typeof updateEditorGutter === 'function') updateEditorGutter('live-code-editor', 'livecode-gutter');
+                const status = document.getElementById('livecode-save-status');
+                if (status) status.innerText = "↺ Template di-reset";
             }
         }
 
@@ -208,18 +212,26 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
         }
 
         function resetBootcampLiveCode() {
+            localStorage.removeItem('code_draft_bootcamp_live');
             const editor = document.getElementById('bootcamp-livecode-editor');
             if (editor) {
                 editor.value = BOOTCAMP_STARTER_LIVECODE;
                 editor.focus();
+                if (typeof updateEditorGutter === 'function') updateEditorGutter('bootcamp-livecode-editor', 'bootcamp-livecode-gutter');
+                const status = document.getElementById('bootcamp-livecode-save-status');
+                if (status) status.innerText = "↺ Template di-reset";
             }
         }
 
         function resetBootcampSysDesignCode() {
+            localStorage.removeItem('code_draft_bootcamp_sys');
             const editor = document.getElementById('bootcamp-sysdesign-editor');
             if (editor) {
                 editor.value = BOOTCAMP_STARTER_SYSDESIGN;
                 editor.focus();
+                if (typeof updateEditorGutter === 'function') updateEditorGutter('bootcamp-sysdesign-editor', 'bootcamp-sysdesign-gutter');
+                const status = document.getElementById('bootcamp-sysdesign-save-status');
+                if (status) status.innerText = "↺ Template di-reset";
             }
         }
 
@@ -314,6 +326,172 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                 }
             });
         }
+
+        // ================= EDITOR DX (GUTTER, TAB, AUTO-INDENT & AUTOSAVE) =================
+        function updateEditorGutter(editorId, gutterId) {
+            const editor = document.getElementById(editorId);
+            const gutter = document.getElementById(gutterId);
+            if (!editor || !gutter) return;
+            const lines = editor.value.split('\n').length;
+            let html = '';
+            for (let i = 1; i <= lines; i++) {
+                html += i + '<br>';
+            }
+            gutter.innerHTML = html;
+            gutter.scrollTop = editor.scrollTop;
+        }
+
+        function setupCodeEditor(editorId, gutterId, statusId, storageKey, defaultSkeleton, formId) {
+            const editor = document.getElementById(editorId);
+            const gutter = document.getElementById(gutterId);
+            const statusEl = document.getElementById(statusId);
+            const form = formId ? document.getElementById(formId) : null;
+            if (!editor) return;
+
+            // 1. Restore dari localStorage jika ada draft
+            const saved = localStorage.getItem(storageKey);
+            if (saved && saved.trim().length > 0) {
+                editor.value = saved;
+                if (statusEl) {
+                    statusEl.innerText = "✓ Draf lokal dipulihkan";
+                    statusEl.className = "text-[10px] text-emerald-500 dark:text-emerald-400 font-mono";
+                }
+            } else if (defaultSkeleton && (!editor.value || editor.value.trim().length === 0)) {
+                editor.value = defaultSkeleton;
+            }
+
+            updateEditorGutter(editorId, gutterId);
+
+            // 2. Synchronize scroll gutter
+            editor.addEventListener('scroll', function() {
+                if (gutter) gutter.scrollTop = editor.scrollTop;
+            });
+
+            // 3. Debounced Auto-Save
+            let saveTimeout = null;
+            function autoSave() {
+                if (statusEl) {
+                    statusEl.innerText = "● Menyimpan...";
+                    statusEl.className = "text-[10px] text-amber-500 dark:text-amber-400 font-mono";
+                }
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(function() {
+                    localStorage.setItem(storageKey, editor.value);
+                    if (statusEl) {
+                        statusEl.innerText = "✓ Tersimpan";
+                        statusEl.className = "text-[10px] text-emerald-500 dark:text-emerald-400 font-mono";
+                    }
+                }, 400);
+            }
+
+            // 4. Keyboard Interception (Tab, Enter, Shortcuts)
+            editor.addEventListener('keydown', function(e) {
+                // Shortcut: Ctrl+Enter / Cmd+Enter untuk Run Test Cases
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (form) {
+                        if (e.shiftKey) {
+                            const submitBtn = form.querySelector('button[value="submit"]');
+                            if (submitBtn) submitBtn.click();
+                            else form.requestSubmit();
+                        } else {
+                            const runBtn = form.querySelector('button[value="run"]');
+                            if (runBtn) runBtn.click();
+                            else form.requestSubmit();
+                        }
+                    }
+                    return;
+                }
+
+                // TAB Key (Insert 4 spaces, Shift+Tab to un-indent)
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = editor.selectionStart;
+                    const end = editor.selectionEnd;
+
+                    if (!e.shiftKey) {
+                        if (start === end) {
+                            editor.setRangeText("    ", start, end, "end");
+                        } else {
+                            const lines = editor.value.substring(start, end).split("\n");
+                            const indented = lines.map(l => "    " + l).join("\n");
+                            editor.setRangeText(indented, start, end, "select");
+                        }
+                    } else {
+                        const lines = editor.value.substring(start, end).split("\n");
+                        const unindented = lines.map(l => l.replace(/^ {1,4}/, "")).join("\n");
+                        editor.setRangeText(unindented, start, end, "select");
+                    }
+                    updateEditorGutter(editorId, gutterId);
+                    autoSave();
+                    return;
+                }
+
+                // ENTER Key: Auto-indentation
+                if (e.key === 'Enter') {
+                    const start = editor.selectionStart;
+                    const curLineStart = editor.value.lastIndexOf('\n', start - 1) + 1;
+                    const curLine = editor.value.substring(curLineStart, start);
+                    const match = curLine.match(/^\s*/);
+                    let indent = match ? match[0] : "";
+
+                    const trimmed = curLine.trim();
+                    if (trimmed.endsWith('{') || trimmed.endsWith('(')) {
+                        indent += "    ";
+                    }
+
+                    e.preventDefault();
+                    editor.setRangeText("\n" + indent, start, start, "end");
+                    updateEditorGutter(editorId, gutterId);
+                    autoSave();
+                    return;
+                }
+
+                // Auto-closing brackets & quotes
+                const pairs = { '(': ')', '{': '}', '[': ']', '"': '"', '`': '`' };
+                if (pairs[e.key]) {
+                    const start = editor.selectionStart;
+                    const end = editor.selectionEnd;
+                    if (start === end) {
+                        e.preventDefault();
+                        editor.setRangeText(e.key + pairs[e.key], start, end, "start");
+                        editor.selectionStart = start + 1;
+                        editor.selectionEnd = start + 1;
+                        updateEditorGutter(editorId, gutterId);
+                        autoSave();
+                        return;
+                    }
+                }
+            });
+
+            editor.addEventListener('input', function() {
+                updateEditorGutter(editorId, gutterId);
+                autoSave();
+            });
+        }
+
+        // Toggle Contekan Sintaks Golang
+        function toggleCheatsheet(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.toggle('hidden');
+        }
+
+        // Sisipkan snippet ke editor
+        function insertSnippet(editorId, gutterId, snippet) {
+            const editor = document.getElementById(editorId);
+            if (!editor) return;
+            const start = editor.selectionStart;
+            editor.setRangeText(snippet, start, start, "end");
+            editor.focus();
+            updateEditorGutter(editorId, gutterId);
+            editor.dispatchEvent(new Event('input'));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupCodeEditor('live-code-editor', 'livecode-gutter', 'livecode-save-status', 'code_draft_livecode', STARTER_CODE_SKELETON, 'form-live-code');
+            setupCodeEditor('bootcamp-livecode-editor', 'bootcamp-livecode-gutter', 'bootcamp-livecode-save-status', 'code_draft_bootcamp_live', BOOTCAMP_STARTER_LIVECODE, 'form-bootcamp-livecode');
+            setupCodeEditor('bootcamp-sysdesign-editor', 'bootcamp-sysdesign-gutter', 'bootcamp-sysdesign-save-status', 'code_draft_bootcamp_sys', BOOTCAMP_STARTER_SYSDESIGN, 'form-bootcamp-sysdesign');
+        });
     </script>
 </head>
 <body class="h-full flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white bg-slate-50 dark:bg-[#0a0f1d] text-slate-800 dark:text-slate-100 transition-colors duration-200">
@@ -568,10 +746,22 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                             <div>return false</div>
                         </div>
 
-                        <!-- Code Editor Form -->
-                        <form hx-post="/api/bootcamp/eval-livecode" hx-target="#bootcamp-livecode-result" hx-swap="innerHTML" class="space-y-3">
-                            <div class="relative">
-                                <textarea id="bootcamp-livecode-editor" name="code_content" rows="12" spellcheck="false" class="w-full font-mono text-xs p-3.5 rounded-xl bg-slate-900 text-emerald-400 border border-slate-700 focus:outline-none focus:border-emerald-500 leading-relaxed resize-y">package main
+                        <!-- Code Editor Form (Enhanced DX) -->
+                        <form id="form-bootcamp-livecode" hx-post="/api/bootcamp/eval-livecode" hx-target="#bootcamp-livecode-result" hx-swap="innerHTML" class="space-y-3">
+                            <div class="rounded-xl border border-slate-700 bg-[#070b14] overflow-hidden shadow-md">
+                                <div class="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800 text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span class="font-mono text-slate-300 font-bold text-[11px]">has_target_sum.go</span>
+                                        <span id="bootcamp-livecode-save-status" class="text-[10px] text-emerald-400 font-mono">✓ Draf siap</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono hidden sm:inline">Ctrl+Enter untuk Uji</span>
+                                </div>
+                                <div class="relative flex font-mono text-xs bg-[#070b14] overflow-hidden">
+                                    <div id="bootcamp-livecode-gutter" class="select-none py-3 pl-2.5 pr-2 text-right text-slate-600 bg-[#060910] border-r border-slate-800/80 min-w-[2.5rem] overflow-hidden leading-relaxed pointer-events-none font-mono text-xs">
+                                        1<br>2<br>3
+                                    </div>
+                                    <textarea id="bootcamp-livecode-editor" name="code_content" spellcheck="false" class="flex-1 bg-transparent py-3 px-3 font-mono text-xs text-emerald-400 leading-relaxed focus:outline-none resize-y select-text border-0 font-medium whitespace-pre min-h-[14rem]">package main
 
 // HasTargetSum mengecek apakah terdapat pasangan dua angka di dalam nums yang bernilai target.
 // Kembalikan true jika ditemukan, atau false jika tidak ada pasangan yang cocok.
@@ -581,6 +771,7 @@ func HasTargetSum(nums []int, target int) bool {
     // Petunjuk: Gunakan map[int]bool untuk mencatat angka yang sudah dilewati
     return false
 }</textarea>
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-between">
@@ -709,10 +900,22 @@ func HasTargetSum(nums []int, target int) bool {
                             <div>return false, nil</div>
                         </div>
 
-                        <!-- Code Editor Form -->
-                        <form hx-post="/api/bootcamp/eval-systemdesign" hx-target="#bootcamp-sysdesign-result" hx-swap="innerHTML" class="space-y-3">
-                            <div class="relative">
-                                <textarea id="bootcamp-sysdesign-editor" name="code_content" rows="14" spellcheck="false" class="w-full font-mono text-xs p-3.5 rounded-xl bg-slate-900 text-cyan-400 border border-slate-700 focus:outline-none focus:border-cyan-500 leading-relaxed resize-y">package main
+                        <!-- Code Editor Form (Enhanced DX) -->
+                        <form id="form-bootcamp-sysdesign" hx-post="/api/bootcamp/eval-systemdesign" hx-target="#bootcamp-sysdesign-result" hx-swap="innerHTML" class="space-y-3">
+                            <div class="rounded-xl border border-slate-700 bg-[#070b14] overflow-hidden shadow-md">
+                                <div class="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800 text-xs">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                                        <span class="font-mono text-slate-300 font-bold text-[11px]">idempotency_engine.go</span>
+                                        <span id="bootcamp-sysdesign-save-status" class="text-[10px] text-teal-400 font-mono">✓ Draf siap</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono hidden sm:inline">Ctrl+Enter untuk Uji</span>
+                                </div>
+                                <div class="relative flex font-mono text-xs bg-[#070b14] overflow-hidden">
+                                    <div id="bootcamp-sysdesign-gutter" class="select-none py-3 pl-2.5 pr-2 text-right text-slate-600 bg-[#060910] border-r border-slate-800/80 min-w-[2.5rem] overflow-hidden leading-relaxed pointer-events-none font-mono text-xs">
+                                        1<br>2<br>3
+                                    </div>
+                                    <textarea id="bootcamp-sysdesign-editor" name="code_content" spellcheck="false" class="flex-1 bg-transparent py-3 px-3 font-mono text-xs text-cyan-400 leading-relaxed focus:outline-none resize-y select-text border-0 font-medium whitespace-pre min-h-[14rem]">package main
 
 import (
     "errors"
@@ -739,6 +942,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
     // TODO: Ketik implementasi state machine idempotensi Anda di sini
     return false, nil
 }</textarea>
+                                </div>
                             </div>
 
                             <div class="flex items-center justify-between">
@@ -904,21 +1108,58 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                     </div>
                 </div>
 
-                <!-- Code Editor & Form Submission -->
-                <form hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="space-y-4">
+                <!-- Code Editor & Form Submission (Enhanced Developer Experience) -->
+                <form id="form-live-code" hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="space-y-4">
                     <div class="rounded-xl border border-slate-300 dark:border-slate-800 bg-[#070b14] overflow-hidden shadow-xl">
-                        <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800">
+                        <!-- Toolbar Header -->
+                        <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-900 border-b border-slate-800 flex-wrap gap-2">
                             <div class="flex items-center gap-2 text-xs">
                                 <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-                                <span class="ml-2 font-mono font-bold text-slate-200">solution.go</span>
-                                <span class="text-[10px] text-slate-400 font-mono">(Ketik manual sintaks Go algoritma Anda)</span>
+                                <span class="ml-1 font-mono font-bold text-slate-200">solution.go</span>
+                                <span id="livecode-save-status" class="text-[10px] text-emerald-400 font-mono">✓ Draf lokal siap</span>
                             </div>
-                            <span class="text-[11px] font-mono text-emerald-400">// LeetCode #1 &bull; TwoSum(nums []int, target int) []int</span>
+                            <div class="flex items-center gap-2">
+                                <span class="hidden md:inline text-[10px] text-slate-400 font-mono">⌨️ Ctrl+Enter: Run &bull; Tab: Indent 4 spasi</span>
+                                <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-mono border border-slate-700 transition flex items-center gap-1 active:scale-95">
+                                    <span>💡</span> <span>Contekan Go</span>
+                                </button>
+                            </div>
                         </div>
 
-                        <textarea id="live-code-editor" name="code_content" class="w-full h-64 bg-[#070b14] p-4 text-xs sm:text-sm font-mono text-emerald-400 leading-relaxed focus:outline-none resize-none select-text border-0 font-medium" spellcheck="false">package main
+                        <!-- Cheatsheet Popover Drawer -->
+                        <div id="cheatsheet-livecode" class="hidden p-3 bg-slate-950/95 border-b border-slate-800 text-xs font-mono space-y-2">
+                            <div class="flex items-center justify-between text-[11px] text-teal-300 font-bold border-b border-slate-800/80 pb-1">
+                                <span>📖 Contekan Cepat Sintaks Golang (Klik untuk Menyisipkan)</span>
+                                <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="text-slate-400 hover:text-white">&times; Tutup</button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen := make(map[int]int)\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                    <div class="text-teal-400 font-bold">1. Deklarasi Hash Map</div>
+                                    <div class="text-[10px] text-slate-400">seen := make(map[int]int)</div>
+                                </button>
+                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'if prevIdx, exists := seen[complement]; exists {\n    return []int{prevIdx, i}\n}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                    <div class="text-teal-400 font-bold">2. Pengecekan Comma-Ok</div>
+                                    <div class="text-[10px] text-slate-400">if idx, ok := seen[comp]; ok</div>
+                                </button>
+                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen[num] = i\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                    <div class="text-teal-400 font-bold">3. Simpan Elemen ke Map</div>
+                                    <div class="text-[10px] text-slate-400">seen[num] = i</div>
+                                </button>
+                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'return []int{0, 0}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                    <div class="text-teal-400 font-bold">4. Return Nil / Slice</div>
+                                    <div class="text-[10px] text-slate-400">return []int{...}</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Editor + Line Numbers Gutter -->
+                        <div class="relative flex font-mono text-xs bg-[#070b14] overflow-hidden">
+                            <div id="livecode-gutter" class="select-none py-3.5 pl-3 pr-2 text-right text-slate-600 bg-[#060910] border-r border-slate-800/80 min-w-[2.8rem] overflow-hidden leading-relaxed pointer-events-none font-mono text-xs">
+                                1<br>2<br>3<br>4
+                            </div>
+                            <textarea id="live-code-editor" name="code_content" class="flex-1 bg-transparent py-3.5 px-3 font-mono text-xs sm:text-sm text-emerald-400 leading-relaxed focus:outline-none resize-y select-text border-0 font-medium whitespace-pre min-h-[16rem]" spellcheck="false">package main
 
 // TwoSum mencari dua indeks dari elemen nums yang jika dijumlahkan menghasilkan target.
 // Asumsikan setiap input tepat memiliki satu solusi, dan elemen yang sama tidak boleh digunakan dua kali.
@@ -929,6 +1170,7 @@ func TwoSum(nums []int, target int) []int {
 
     return nil
 }</textarea>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->

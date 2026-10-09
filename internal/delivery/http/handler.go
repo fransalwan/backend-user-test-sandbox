@@ -697,6 +697,13 @@ func (h *Handler) EvalBootcampLiveCode(w http.ResponseWriter, r *http.Request) {
             <strong class="text-emerald-700 dark:text-emerald-400 block mb-0.5">💡 Analisis Algoritma:</strong>
             Kerja bagus! Anda telah menguasai pola dasar Hash Map untuk mencari komplemen target dalam satu kali lintasan (*single pass*). Anda sudah siap menaklukkan <strong>Tahap 1 (Live Coding: Two Sum)</strong>!
         </div>
+        <div class="pt-2 border-t border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between font-sans">
+            <span class="text-[11px] text-emerald-800 dark:text-emerald-300">Fondasi teori siap diuji di sesi wawancara live!</span>
+            <button type="button" onclick="switchScenario(1)" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow flex items-center gap-1.5 active:scale-95">
+                <span>💻 Lanjut ke Tahap 1: Live Coding</span>
+                <span>&rarr;</span>
+            </button>
+        </div>
     </div>`, complexityBadge)
 
 	_, _ = w.Write([]byte(html))
@@ -809,6 +816,13 @@ func (h *Handler) EvalBootcampSystemDesignCode(w http.ResponseWriter, r *http.Re
         <div class="p-2.5 rounded-lg bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-[11px] font-sans text-slate-600 dark:text-slate-300">
             <strong class="text-emerald-700 dark:text-emerald-400 block mb-0.5">💡 Analisis Teori:</strong>
             Luar biasa! Kode Anda merepresentasikan implementasi nyata dari state-machine Idempotency Engine di API Gateway fintech. Pemahaman ini adalah modal utama Anda untuk mempertahankan desain di <strong>Tahap 2 (System Design Interview)</strong>!
+        </div>
+        <div class="pt-2 border-t border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between font-sans">
+            <span class="text-[11px] text-emerald-800 dark:text-emerald-300">Pemahaman arsitektur siap diuji di hadapan Lead Architect!</span>
+            <button type="button" onclick="switchScenario(2)" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs transition shadow flex items-center gap-1.5 active:scale-95">
+                <span>🏛️ Lanjut ke Tahap 2: System Design</span>
+                <span>&rarr;</span>
+            </button>
         </div>
     </div>`
 
@@ -1017,7 +1031,13 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                 Sempurna! Anda berhasil memecahkan soal Two Sum dengan algoritma optimal <strong>O(N) Time Complexity</strong> dan <strong>O(N) Space Complexity</strong> menggunakan Hash Map lookup. Kemampuan mentransformasikan algoritma kuadratik O(N²) menjadi linear O(N) adalah fondasi esensial yang dicari perusahaan teknologi terkemuka.
             </p>
             <div class="text-[11px] text-slate-300 pt-1">
-                👉 <strong>Langkah Berikutnya:</strong> Klik tab <strong>"Tahap 2: System Design"</strong> di atas untuk mempresentasikan diagram arsitektur sistem pembayaran yang resilien di hadapan Lead Architect!
+                👉 <strong>Langkah Berikutnya:</strong> Presentasikan diagram arsitektur sistem pembayaran yang resilien di hadapan Lead Architect!
+            </div>
+            <div class="pt-2 border-t border-emerald-800/60 flex items-center justify-end font-sans">
+                <button type="button" onclick="switchScenario(2)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-white font-bold text-xs transition shadow-md shadow-emerald-950/60 flex items-center gap-1.5 active:scale-95">
+                    <span>🏛️ Lanjut ke Tahap 2: System Design</span>
+                    <span>&rarr;</span>
+                </button>
             </div>
         </div>
     </div>`
@@ -1067,6 +1087,13 @@ func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
                         <span class="text-slate-400">Nilai Interview</span>
                         <div class="text-amber-600 dark:text-amber-400 font-bold">Nilai: A+</div>
                     </div>
+                </div>
+                <div class="pt-2 border-t border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
+                    <span class="text-[11px] text-emerald-800 dark:text-emerald-300">Tahap Desain Sistem Lolos dengan Predikat Sempurna!</span>
+                    <button type="button" onclick="switchScenario(3)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md flex items-center gap-1.5 active:scale-95">
+                        <span>📦 Lanjut ke Tahap 3: Take-Home Test</span>
+                        <span>&rarr;</span>
+                    </button>
                 </div>
             </div>
         </div>`
