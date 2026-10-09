@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootcamp: Teori Fundamental Arsitektur Fintech Backend</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            800: '#1e293b',
+                            850: '#172033',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .code-editor-line { line-height: 1.5rem; }
+    </style>
+    <script>
+        // Theme management
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        }
+
+        function switchBootcampTrack(track) {
+            const liveTrack = document.getElementById('bootcamp-track-livecode');
+            const sysTrack = document.getElementById('bootcamp-track-sysdesign');
+            const btnLive = document.getElementById('btn-track-livecode');
+            const btnSys = document.getElementById('btn-track-sysdesign');
+
+            if (track === 'livecode') {
+                if (liveTrack) liveTrack.classList.remove('hidden');
+                if (sysTrack) sysTrack.classList.add('hidden');
+                if (btnLive) btnLive.className = "flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md border border-emerald-500/40 transition flex items-center justify-center gap-2 w-full";
+                if (btnSys) btnSys.className = "flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition flex items-center justify-center gap-2 w-full";
+            } else {
+                if (liveTrack) liveTrack.classList.add('hidden');
+                if (sysTrack) sysTrack.classList.remove('hidden');
+                if (btnSys) btnSys.className = "flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md border border-teal-500/40 transition flex items-center justify-center gap-2 w-full";
+                if (btnLive) btnLive.className = "flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition flex items-center justify-center gap-2 w-full";
+            }
+        }
+
+        function toggleFlashcard(answerId, btn) {
+            const ans = document.getElementById(answerId);
+            if (!ans) return;
+            if (ans.classList.contains('hidden')) {
+                ans.classList.remove('hidden');
+                btn.innerHTML = '<span>🔒</span> <span>Sembunyikan Kunci Jawaban</span>';
+            } else {
+                ans.classList.add('hidden');
+                btn.innerHTML = '<span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>';
+            }
+        }
+
+        const BOOTCAMP_STARTER_LIVECODE = `package main
+
+import "fmt"
+
+// FindTwoSumLookup mencari dua indeks angka yang menghasilkan nilai target.
+// Wajib O(N) Time Complexity menggunakan Single-Pass Hash Map (map[int]int).
+func FindTwoSumLookup(nums []int, target int) []int {
+    // seen mencatat angka yang sudah diperiksa -> map[nilai]indeks
+    seen := make(map[int]int)
+
+    for i, num := range nums {
+        complement := target - num
+        if prevIdx, found := seen[complement]; found {
+            return []int{prevIdx, i}
+        }
+        seen[num] = i
+    }
+    return nil
+}`;
+
+        const BOOTCAMP_STARTER_SYSDESIGN = `package main
+
+import (
+    "errors"
+    "sync"
+)
+
+var (
+    ErrConcurrentRequest = errors.New("request sedang diproses goroutine lain (HTTP 409 Conflict)")
+    ErrAlreadyCompleted  = errors.New("transaksi sudah sukses, replay response (HTTP 200 OK)")
+)
+
+type IdempotencyEngine struct {
+    mu      sync.Mutex
+    records map[string]string // key -> status ("PROCESSING" / "COMPLETED")
+}
+
+func NewIdempotencyEngine() *IdempotencyEngine {
+    return &IdempotencyEngine{records: make(map[string]string)}
+}
+
+func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
+    e.mu.Lock()
+    defer e.mu.Unlock()
+
+    status, exists := e.records[key]
+    if exists {
+        if status == "PROCESSING" {
+            return false, ErrConcurrentRequest
+        }
+        return false, ErrAlreadyCompleted
+    }
+
+    e.records[key] = "PROCESSING"
+    return true, nil
+}`;
+
+        function setupEditor(editorId, gutterId, statusId, storageKey, defaultCode) {
+            const editor = document.getElementById(editorId);
+            const gutter = document.getElementById(gutterId);
+            const status = document.getElementById(statusId);
+            if (!editor || !gutter) return;
+
+            const saved = localStorage.getItem(storageKey);
+            editor.value = (saved && saved.trim().length > 0) ? saved : defaultCode;
+
+            function updateGutter() {
+                const lineCount = editor.value.split('\n').length;
+                let numHtml = '';
+                for (let i = 1; i <= Math.max(lineCount, 12); i++) {
+                    numHtml += `<div class="code-editor-line">${i}</div>`;
+                }
+                gutter.innerHTML = numHtml;
+            }
+
+            updateGutter();
+            editor.addEventListener('input', function() {
+                updateGutter();
+                localStorage.setItem(storageKey, editor.value);
+                if (status) {
+                    status.textContent = 'Tersimpan otomatis di browser';
+                    status.className = 'text-[11px] text-emerald-500 font-mono';
+                }
+            });
+
+            editor.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 4;
+                    updateGutter();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEditor('bootcamp-livecode-editor', 'bootcamp-livecode-gutter', 'bootcamp-livecode-save-status', 'draft_bootcamp_live', BOOTCAMP_STARTER_LIVECODE);
+            setupEditor('bootcamp-sysdesign-editor', 'bootcamp-sysdesign-gutter', 'bootcamp-sysdesign-save-status', 'draft_bootcamp_sys', BOOTCAMP_STARTER_SYSDESIGN);
+        });
+    </script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white bg-slate-50 dark:bg-[#0a0f1d] text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <!-- ================= NAVBAR GLOBAL: 3 PILAR UTAMA ================= -->
+    <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-md sticky top-0 z-40 shadow-sm transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2.5 sm:space-x-3 overflow-hidden">
+                <a href="/" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-teal-500 to-emerald-500 flex items-center justify-center shadow-md flex-shrink-0 hover:scale-105 transition">
+                    <span class="text-lg sm:text-xl">📚</span>
+                </a>
+                <div class="truncate">
+                    <h1 class="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+                        Fintech Engineering Sandbox
+                        <span class="hidden md:inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30">Bootcamp Mode</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Pondasi Teori Arsitektur Finansial, Algoritma DSA, & Active Recall</p>
+                </div>
+            </div>
+
+            <!-- Navigasi 3 Page Utama -->
+            <nav class="flex items-center gap-1 sm:gap-2">
+                <a href="/bootcamp" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40 shadow-sm flex items-center gap-1.5 transition">
+                    <span>📚</span> <span class="hidden sm:inline">Bootcamp</span>
+                </a>
+                <a href="/exercise" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-transparent transition flex items-center gap-1.5">
+                    <span>⚡</span> <span class="hidden sm:inline">Exercise Lab</span>
+                </a>
+                <a href="/" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-transparent transition flex items-center gap-1.5">
+                    <span>🏆</span> <span class="hidden sm:inline">Hiring Gauntlet</span>
+                </a>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition ml-2">
+                    <span id="theme-toggle-icon">🌙</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ================= KONTEN UTAMA BOOTCAMP ================= -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Banner Intro Bootcamp -->
+        <div class="bg-gradient-to-r from-cyan-900/30 via-teal-900/20 to-slate-900/40 border border-cyan-500/30 rounded-2xl p-5 sm:p-7 shadow-lg">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 text-[11px] font-bold uppercase tracking-wider">
+                        <span>📖 Learning Foundation & Theory Hub</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                        Bootcamp: Teori Fundamental Arsitektur Fintech Backend
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
+                        Kuasai konsep inti yang menjadi standar penilaian Tech Lead di industri teknologi finansial (Fintech). Mulai dari efisiensi algoritma Big-O, pemodelan data atomik buku besar (double-entry ledger), hingga ketahanan jaringan (idempotency key & rate limiter).
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row md:flex-col gap-2 flex-shrink-0">
+                    <a href="/exercise" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md shadow-emerald-950/40 flex items-center justify-center gap-2">
+                        <span>⚡ Masuk ke Exercise Lab (Debugging)</span>
+                        <span>&rarr;</span>
+                    </a>
+                    <a href="/" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition flex items-center justify-center gap-2">
+                        <span>🏆 Simulasi Ujian Hiring Gauntlet</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-Navigasi Dua Jalur: Live Coding vs System Design -->
+        <div class="flex flex-col sm:flex-row items-center gap-2 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+            <button id="btn-track-livecode" type="button" onclick="switchBootcampTrack('livecode')" class="flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md border border-emerald-500/40 transition flex items-center justify-center gap-2 w-full">
+                <span>💻</span>
+                <span>Jalur 1: Fondasi Teori Algoritma DSA & Hash Map</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-700/60 text-emerald-100 font-mono hidden md:inline">O(1) vs O(N)</span>
+            </button>
+            <button id="btn-track-sysdesign" type="button" onclick="switchBootcampTrack('sysdesign')" class="flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition flex items-center justify-center gap-2 w-full">
+                <span>🏛️</span>
+                <span>Jalur 2: Fondasi Teori System Design & Keandalan Transaksi</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono hidden md:inline">Idempotency & ACID</span>
+            </button>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ================= JALUR 1: FONDASI TEORI ALGORITMA DSA ================== -->
+        <!-- ========================================================================= -->
+        <div id="bootcamp-track-livecode" class="space-y-6">
+            
+            <!-- KARTU TEORI 1: ANALISIS BIG-O COMPLEXITY -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-3 shadow-md">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
+                        <span>⚡</span> Modul L1 &bull; Analisis Kompleksitas Algoritma (Big-O Notation)
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 font-mono">O(1) vs O(N) vs O(N²)</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Mengapa Solusi O(N²) Brute Force Ditolak di Interview Industri?</h3>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Di lingkungan produksi fintech dengan jutaan catatan transaksi, perbedaan kompleksitas waktu antara <strong>O(N)</strong> dan <strong>O(N²)</strong> adalah perbedaan antara sistem yang responsif dalam milidetik atau sistem yang mengalami kelumpuhan (Time Limit Exceeded).
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                    <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 space-y-1">
+                        <strong class="text-rose-700 dark:text-rose-400 block font-sans">❌ Brute Force Nested Loop O(N²):</strong>
+                        <div>for i := 0; i &lt; n; i++ {</div>
+                        <div>&nbsp;&nbsp;for j := i + 1; j &lt; n; j++ { ... }</div>
+                        <div>} // N = 10.000 &rarr; 100.000.000 iterasi! (TLE)</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 space-y-1">
+                        <strong class="text-emerald-700 dark:text-emerald-400 block font-sans">✅ Single-Pass Hash Map O(N):</strong>
+                        <div>seen := make(map[int]bool)</div>
+                        <div>for _, num := range nums {</div>
+                        <div>&nbsp;&nbsp;// Lookup O(1) amortized &rarr; N iterasi saja!</div>
+                        <div>} // N = 10.000 &rarr; hanya 10.000 operasi (&lt; 1 ms)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KARTU TEORI 2: HASH MAP & TARGET COMPLEMENT -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-3 shadow-md">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span class="text-xs font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase tracking-wide">
+                        <span>🎯</span> Modul L2 &bull; Pola Pencarian Target Complement
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20 font-mono">Complement Pattern</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Bagaimana Mengubah Masalah Pasangan Menjadi Pencarian O(1)?</h3>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Alih-alih mencari pasangan secara membabi-buta dengan membandingkan tiap angka satu per satu, gunakan identitas matematika dasar:
+                </p>
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-1.5 text-slate-700 dark:text-slate-300">
+                    <div class="text-teal-600 dark:text-teal-400 font-bold">// Relasi Matematika:</div>
+                    <div>A + B = Target &nbsp;&harr;&nbsp; B = Target - A &nbsp;(di mana B adalah "Komplemen")</div>
+                    <div class="text-slate-400 pt-1">// Alur Eksekusi Single-Pass:</div>
+                    <div>1. Saat berada di angka A, hitung komplemen yang kita butuhkan: <code>target - A</code></div>
+                    <div>2. Cek ke Hash Map: "Apakah komplemen ini sudah pernah kita temui sebelumnya?"</div>
+                    <div>3. Jika YA &rarr; Pasangan ditemukan! Kembalikan hasil langsung.</div>
+                    <div>4. Jika BELUM &rarr; Simpan A ke dalam Hash Map, lalu lanjutkan ke elemen berikutnya.</div>
+                </div>
+            </div>
+
+            <!-- KARTU TEORI 3: PRIMITIVE MAP & MEMORY TRADEOFF DI GO -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-3 shadow-md">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5 uppercase tracking-wide">
+                        <span>🧠</span> Modul L3 &bull; Struktur Data Go: Slice vs Hash Map (map[K]V)
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/20 font-mono">Time-Space Trade-off</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase font-mono text-slate-400">
+                                <th class="py-2">Struktur Data</th>
+                                <th class="py-2">Waktu Pencarian</th>
+                                <th class="py-2">Ruang Memori</th>
+                                <th class="py-2">Idiom Sintaks Go</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800/40 text-slate-700 dark:text-slate-300 text-xs">
+                            <tr>
+                                <td class="py-2.5 font-mono font-bold text-rose-600 dark:text-rose-400">[]int (Slice)</td>
+                                <td class="py-2.5">O(N) Linear Scan</td>
+                                <td class="py-2.5">O(1) Auxiliary Space</td>
+                                <td class="py-2.5"><code>for i, v := range slice</code></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">map[int]bool</td>
+                                <td class="py-2.5">O(1) Amortized Lookup</td>
+                                <td class="py-2.5">O(N) Auxiliary Space</td>
+                                <td class="py-2.5"><code>if seen[target] { ... }</code></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 font-mono font-bold text-cyan-600 dark:text-cyan-400">map[int]int</td>
+                                <td class="py-2.5">O(1) Amortized Lookup</td>
+                                <td class="py-2.5">O(N) Menyimpan Nilai &amp; Indeks</td>
+                                <td class="py-2.5"><code>if idx, ok := m[k]; ok { ... }</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MINI HANDS-ON LAB CODE EXPLORER: DSA COMPLEMENT LOOKUP -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>🧪</span> Lab Eksperimen Koding Teori: Two-Sum Target Complement O(N)
+                        </h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Coba ubah kode di editor dan klik tombol uji untuk memvalidasi algoritma complement lookup O(N).
+                        </p>
+                    </div>
+                    <span id="bootcamp-livecode-save-status" class="text-[11px] text-slate-400 font-mono">Tersimpan di browser</span>
+                </div>
+
+                <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#070b14] flex">
+                    <div id="bootcamp-livecode-gutter" class="w-10 bg-[#05070e] py-3 text-right pr-2 text-slate-600 font-mono text-xs select-none border-r border-slate-800/80"></div>
+                    <textarea id="bootcamp-livecode-editor" name="code" spellcheck="false" class="flex-1 bg-transparent text-emerald-400 font-mono text-xs p-3 focus:outline-none resize-y min-h-[220px] code-editor-line"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs text-slate-500">Mendukung Go 1.27 Hash Map runtime</span>
+                    <button type="button" hx-post="/api/bootcamp/eval-livecode" hx-include="#bootcamp-livecode-editor" hx-target="#bootcamp-livecode-output" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-950/40">
+                        ▶ Jalankan Uji Kode Lab
+                    </button>
+                </div>
+                <div id="bootcamp-livecode-output"></div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ================= JALUR 2: FONDASI TEORI SYSTEM DESIGN ================== -->
+        <!-- ========================================================================= -->
+        <div id="bootcamp-track-sysdesign" class="hidden space-y-6">
+
+            <!-- KARTU TEORI 1: IDEMPOTENCY KEY -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-3 shadow-md">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
+                    <span class="text-xs font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase tracking-wide">
+                        <span>🛡️</span> Modul S1 &bull; Mengapa Disable Button di Frontend Tidak Cukup?
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20 font-mono">API Idempotency</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Anomali Timeout Jaringan & Retry Otomatis</h3>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Di dunia nyata, request HTTP transfer uang bisa sukses didebit di database, tetapi koneksi putus saat mengirim respons balik ke aplikasi mobile nasabah. Aplikasi mobile yang timeout akan secara otomatis me-retry request kedua.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 space-y-1">
+                        <strong class="text-rose-700 dark:text-rose-400 block">❌ Tanpa Idempotency Key:</strong>
+                        <p class="text-[11px] leading-relaxed">
+                            Server menganggap retry kedua sebagai transaksi transfer baru. Saldo nasabah terpotong dua kali untuk pesanan yang sama (Double Spending / Overbilling)!
+                        </p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 space-y-1">
+                        <strong class="text-emerald-700 dark:text-emerald-400 block">✅ Dengan Idempotency Key (UUID):</strong>
+                        <p class="text-[11px] leading-relaxed">
+                            Server memeriksa status key. Jika sudah pernah sukses diproses, kembalikan response tersimpan tanpa memotong saldo ulang (Safe Replay &bull; HTTP 200 OK).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KARTU TEORI 2: ATOMIC LEDGER & DOUBLE-ENTRY BOOKKEEPING -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-3 shadow-md">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5 uppercase tracking-wide">
+                        <span>📒</span> Modul S2 &bull; Double-Entry Bookkeeping & Audit Trail
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/20 font-mono">Debit = Kredit</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Mengapa Tabel Saldo Sederhana Dilarang di Sistem Finansial?</h3>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Menyimpan saldo hanya sebagai satu kolom angka (<code class="font-mono text-cyan-500">UPDATE accounts SET balance = balance - 100</code>) tidak dapat diaudit ketika terjadi perbedaan saldo. Sistem perbankan wajib menggunakan <strong>Double-Entry Ledger</strong>:
+                </p>
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-1 text-slate-700 dark:text-slate-300">
+                    <div class="text-cyan-600 dark:text-cyan-400 font-bold">// Hukum Dasar Pembukuan Akuntansi:</div>
+                    <div>&Sigma; Total Debit &equiv; &Sigma; Total Kredit &nbsp;(Jumlah mutasi selalu NET ZERO)</div>
+                    <div class="text-slate-400 pt-1">// Contoh Transfer $100 dari Alice ke Bob dalam 1 Transaksi Database:</div>
+                    <div class="text-rose-500">Entry 1: Debit Account Alice -$100 (Uang keluar dari pengirim)</div>
+                    <div class="text-emerald-500">Entry 2: Kredit Account Bob +$100 (Uang masuk ke penerima)</div>
+                    <div class="text-slate-500">// Selisih = (-100) + (+100) = 0 &rarr; Rekonsiliasi Akurat 100%</div>
+                </div>
+            </div>
+
+            <!-- KARTU TEORI 3: RATE LIMITING & THUNDERING HERD -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-3 shadow-md">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
+                        <span>🔥</span> Modul S3 &bull; Perlindungan Flash Sale & Thundering Herd
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 font-mono">Token Bucket Rate Limiter</span>
+                </div>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Mengapa Database Pool Bisa Tumbang Saat Flash Sale?</h3>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Saat ribuan pengguna menekan tombol "Beli Sekarang" pada detik ke-0 flash sale, jika semua request diteruskan langsung ke PostgreSQL, connection pool database akan habis (exhausted) dan latensi melonjak dari 5ms menjadi 30 detik.
+                </p>
+                <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-xs space-y-1">
+                    <strong class="text-amber-700 dark:text-amber-400 block font-sans">Solusi Pertahanan Gerbang (Token Bucket di Reverse Proxy / Gateway):</strong>
+                    <p class="text-[11px] leading-relaxed">
+                        Batasi throughput (misal 40 RPS). Request yang melebihi kapasitas gerbang langsung dijawab dengan <strong>HTTP 429 Too Many Requests</strong> dalam hitungan mikrodetik tanpa menyentuh koneksi database sama sekali!
+                    </p>
+                </div>
+            </div>
+
+            <!-- MINI HANDS-ON LAB CODE EXPLORER: IDEMPOTENCY ENGINE -->
+            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>🧪</span> Lab Eksperimen Koding Teori: Idempotency Engine Lock &amp; Replay
+                        </h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Coba ubah mekanisme locking atau status check di editor dan uji eksekusi concurrency-nya.
+                        </p>
+                    </div>
+                    <span id="bootcamp-sysdesign-save-status" class="text-[11px] text-slate-400 font-mono">Tersimpan di browser</span>
+                </div>
+
+                <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#070b14] flex">
+                    <div id="bootcamp-sysdesign-gutter" class="w-10 bg-[#05070e] py-3 text-right pr-2 text-slate-600 font-mono text-xs select-none border-r border-slate-800/80"></div>
+                    <textarea id="bootcamp-sysdesign-editor" name="code" spellcheck="false" class="flex-1 bg-transparent text-teal-400 font-mono text-xs p-3 focus:outline-none resize-y min-h-[220px] code-editor-line"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs text-slate-500">Mendukung Go 1.27 Concurrency Mutex</span>
+                    <button type="button" hx-post="/api/bootcamp/eval-systemdesign" hx-include="#bootcamp-sysdesign-editor" hx-target="#bootcamp-sysdesign-output" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs transition shadow-md shadow-teal-950/40">
+                        ▶ Jalankan Uji Kode Lab
+                    </button>
+                </div>
+                <div id="bootcamp-sysdesign-output"></div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ================= FLASHCARDS ACTIVE RECALL INTERAKTIF ==================== -->
+        <!-- ========================================================================= -->
+        <div class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-7 shadow-lg space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>💡</span> Active Recall Flashcard Simulator: 5 Pertanyaan Wawancara Tech Lead
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Latih daya ingat konsep secara aktif. Jawab pertanyaan di benak Anda terlebih dahulu, lalu klik tombol untuk memverifikasi jawaban.
+                    </p>
+                </div>
+                <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-mono">
+                    Verbal Interview Drill
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                <!-- Flashcard 1 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Topik: Data Integrity</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        Mengapa tipe data float64 dilarang keras untuk menyimpan saldo uang di sistem backend?
+                    </h4>
+                    <button type="button" onclick="toggleFlashcard('fc-ans-1', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                        <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                    </button>
+                    <div id="fc-ans-1" class="hidden p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed">
+                        <strong>Poin Jawaban Verbal:</strong> Representasi biner IEEE-754 memiliki kelemahan presisi (misal: 0.1 + 0.2 = 0.30000000000000004). Di sistem fintech, selalu gunakan <strong>int64 dalam satuan sen terkecil</strong> (contoh: Rp 50.000 disimpan sebagai 5000000 sen) atau tipe data <code>NUMERIC(18, 4)</code> di database SQL.
+                    </div>
+                </div>
+
+                <!-- Flashcard 2 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Topik: Database Concurrency</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        Kapan kita harus memilih Pessimistic Locking dibanding Optimistic Locking?
+                    </h4>
+                    <button type="button" onclick="toggleFlashcard('fc-ans-2', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                        <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                    </button>
+                    <div id="fc-ans-2" class="hidden p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed">
+                        <strong>Poin Jawaban Verbal:</strong> Gunakan <strong>Pessimistic Locking (SELECT FOR UPDATE)</strong> ketika frekuensi konflik transaksi sangat tinggi pada entitas yang sama (seperti dompet akun hot-wallet atau flash sale) agar tidak terjadi retry loop yang membebani CPU. Gunakan <strong>Optimistic Locking (kolom version)</strong> ketika transaksi sangat jarang bertabrakan (misal: update profil nama user).
+                    </div>
+                </div>
+
+                <!-- Flashcard 3 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Topik: Distributed Systems</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        Apa yang harus dilakukan jika request kedua masuk saat request pertama masih berstatus PROCESSING?
+                    </h4>
+                    <button type="button" onclick="toggleFlashcard('fc-ans-3', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                        <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                    </button>
+                    <div id="fc-ans-3" class="hidden p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed">
+                        <strong>Poin Jawaban Verbal:</strong> Kembalikan <strong>HTTP 409 Conflict</strong> dengan header <code>Retry-After</code>. Ini menandakan operasi sedang berlangsung sehingga klien tidak boleh melakukan retry acak yang bisa menyebabkan race hazard atau dual execution.
+                    </div>
+                </div>
+
+                <!-- Flashcard 4 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <span class="text-[10px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Topik: Go Language Idioms</span>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        Mengapa Go memilih explicit error checking (if err != nil) daripada try-catch exception?
+                    </h4>
+                    <button type="button" onclick="toggleFlashcard('fc-ans-4', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                        <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                    </button>
+                    <div id="fc-ans-4" class="hidden p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed">
+                        <strong>Poin Jawaban Verbal:</strong> Error di Go diperlakukan sebagai first-class values biasa. Ini memaksa perekayasa perangkat lunak untuk secara sadar menangani setiap kemungkinan kegagalan di titik terjadinya (fallibility transparency) tanpa alur program tersembunyi yang bisa memicu panic di tengah transaksi keuangan.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tombol Lanjut ke Halaman Exercise & Hiring -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>⚡</span> Langkah Selanjutnya: Latih Mental &amp; Repetisi Debugging
+                </h4>
+                <p class="text-xs text-slate-400 mt-1">
+                    Jangan langsung terjun ke ujian hiring tanpa pemanasan. Asah reflek koding dan mental Anda di Exercise Lab!
+                </p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                <a href="/exercise" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md shadow-emerald-950/40 flex items-center gap-1.5">
+                    <span>⚡ Buka Halaman Exercise (Debugging Drills)</span>
+                    <span>&rarr;</span>
+                </a>
+                <a href="/" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                    <span>🏆 Langsung Masuk Hiring Gauntlet</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#070b14] py-4 text-center text-xs text-slate-500 transition-colors duration-200">
+        Fintech Hiring Gauntlet &bull; Bootcamp Theory Foundation &bull; Go 1.27 + PostgreSQL + Redis
+    </footer>
+</body>
+</html>

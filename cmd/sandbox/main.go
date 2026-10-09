@@ -18,6 +18,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler.Index)
+	mux.HandleFunc("/hiring", handler.Index)
+	mux.HandleFunc("/bootcamp", handler.Bootcamp)
+	mux.HandleFunc("/exercise", handler.Exercise)
 	mux.HandleFunc("/health", handler.HealthCheck)
 	mux.HandleFunc("/api/events", handler.EventsStream)
 	mux.HandleFunc("/api/wallets", handler.GetWallets)
@@ -35,6 +38,8 @@ func main() {
 	mux.HandleFunc("/api/bootcamp/eval-systemdesign", handler.EvalBootcampSystemDesignCode)
 	mux.HandleFunc("/api/gamification/status", handler.GetGamificationStatus)
 	mux.HandleFunc("/api/gamification/reset", handler.ResetGamification)
+	mux.HandleFunc("/api/exercise/eval-drill", handler.EvalExerciseDrill)
+	mux.HandleFunc("/api/exercise/quiz-check", handler.CheckExerciseQuiz)
 	mux.HandleFunc("/api/docs/postman", handler.DownloadPostmanCollection)
 
 	port := ":8080"

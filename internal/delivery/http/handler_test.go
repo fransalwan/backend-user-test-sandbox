@@ -157,6 +157,44 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			containsBody:   "Fintech Core Banking & Transfer Sandbox API",
 		},
+		{
+			name:           "Bootcamp Page View",
+			method:         "GET",
+			url:            "/bootcamp",
+			expectedStatus: http.StatusOK,
+			containsBody:   "Bootcamp: Teori Fundamental",
+		},
+		{
+			name:           "Exercise Page View",
+			method:         "GET",
+			url:            "/exercise",
+			expectedStatus: http.StatusOK,
+			containsBody:   "Exercise Lab",
+		},
+		{
+			name:   "Exercise Drill Evaluation - Money Float Refactor",
+			method: "POST",
+			url:    "/api/exercise/eval-drill",
+			formData: url.Values{
+				"drill":  {"money"},
+				"action": {"submit"},
+				"code":   {"package main\nfunc CalculateTransactionFee(amountCents int64, feePercent float64) (int64, int64, int64) {\n feeCents := (amountCents * 25) / 1000\n taxCents := (feeCents * 11) / 100\n return feeCents, taxCents, feeCents + taxCents\n}"},
+			},
+			expectedStatus: http.StatusOK,
+			containsBody:   "ACCEPTED & VERIFIED",
+		},
+		{
+			name:   "Exercise Theory Quiz Check - All Correct",
+			method: "POST",
+			url:    "/api/exercise/quiz-check",
+			formData: url.Values{
+				"q1": {"B"},
+				"q2": {"A"},
+				"q3": {"C"},
+			},
+			expectedStatus: http.StatusOK,
+			containsBody:   "SKOR SEMPURNA: 100/100",
+		},
 	}
 
 	for _, tt := range tests {
@@ -174,6 +212,10 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 			switch tt.url {
 			case "/health":
 				handler.HealthCheck(w, req)
+			case "/bootcamp":
+				handler.Bootcamp(w, req)
+			case "/exercise":
+				handler.Exercise(w, req)
 			case "/api/gamification/status":
 				handler.GetGamificationStatus(w, req)
 			case "/api/scenarios/02/defend":
@@ -182,6 +224,10 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 				handler.SubmitScenario03Repo(w, req)
 			case "/api/docs/postman":
 				handler.DownloadPostmanCollection(w, req)
+			case "/api/exercise/eval-drill":
+				handler.EvalExerciseDrill(w, req)
+			case "/api/exercise/quiz-check":
+				handler.CheckExerciseQuiz(w, req)
 			}
 
 			resp := w.Result()

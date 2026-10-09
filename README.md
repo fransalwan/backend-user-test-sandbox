@@ -56,20 +56,41 @@ backend-user-test-sandbox/
 
 ---
 
-## 📋 Pipeline Evaluasi Kompetensi Kandidat
+## 🌐 3 Pilar Ekosistem Sandbox (Pemisahan Pembelajaran, Latihan, & Ujian)
 
-Sandbox ini membagi alur penilaian teknis kandidat ke dalam 5 tahapan berbobot standar rekrutmen engineering fintech:
+Untuk memberikan pengalaman belajar yang terstruktur dan memisahkan proses seleksi formal dari tempat berlatih bebas tekanan, sandbox ini membagi fitur ke dalam **3 Halaman Mandiri**:
 
-| Tahap | Modul Evaluasi | Bobot | Fokus Penilaian & Deliverables |
-| :---: | :--- | :---: | :--- |
-| **0** | **Bootcamp Teori & Lab** | Persiapan | Fondasi invarian uang sen (`int64`), *double-entry bookkeeping*, dan lab coding interaktif. |
-| **1** | **Live Coding Algoritma DSA** | **20%** | Implementasi deteksi transaksi duplikat dalam kompleksitas waktu optimal $\mathcal{O}(N)$ Hash Map. |
-| **2** | **System Design Architecture Defense** | **20%** | Mempertahankan arsitektur *Idempotency Storage*, *Double-Entry Ledger*, dan *External Gateway Resiliency*. |
-| **3** | **Clean Architecture Take-Home Submission** | **20%** | Menyerahkan repositori terstruktur, skema SQL Migrations, Docker Compose lokal, dan *table-driven tests*. |
-| **4** | **Production War Room Incident Resiliency** | **20%** | Mengaktifkan *Token Bucket Rate Limiter* (40 RPS) untuk mencegah *thundering herd* dan *database pool exhaustion*. |
-| **5** | **Surat Penawaran Resmi (Offer Letter)** | **20%** | Penerbitan formal Surat Penawaran Kerja A4 resmi (*Junior Backend Engineer*) dengan verifikasi kelulusan 100%. |
+```text
+┌─────────────────────────┐     ┌─────────────────────────────┐     ┌─────────────────────────┐
+│     📚 BOOTCAMP         │     │     ⚡ EXERCISE LAB         │     │   🏆 HIRING GAUNTLET    │
+│       (/bootcamp)       │────▶│       (/exercise)           │────▶│      (/ atau /hiring)       │
+│  Fondasi Teori & Konsep │     │  Latihan Mental & Debugging │     │ 5 Tahap Seleksi Formal  │
+│  Active Recall Flashcard│     │  Repetisi Bebas Tekanan     │     │ Offer Letter Cetak A4   │
+└─────────────────────────┘     └─────────────────────────────┘     └─────────────────────────┘
+```
 
----
+1. **📚 Bootcamp (`/bootcamp`) — Tempat Mempelajari Teori Fundamental**:
+   - Modul Algoritma: Analisis Big-O $\mathcal{O}(1)$ vs $\mathcal{O}(N)$ vs $\mathcal{O}(N^2)$, pola Target Complement, dan trade-off memori Slice vs Hash Map di Go.
+   - Modul System Design: Mengapa disable button di frontend tidak cukup (API Idempotency), Double-Entry Ledger atomik, dan proteksi Token Bucket Rate Limiting.
+   - **Active Recall Flashcard Simulator**: 5 pertanyaan verbal wawancara Tech Lead untuk melatih daya ingat aktif.
+
+2. **⚡ Exercise Lab (`/exercise`) — Melatih Mental Live Coding & Repetisi Debugging**:
+   - **Tujuan Khusus**: Mengasah ketenangan mental kandidat menghadapi sesi live coding tanpa rasa takut gagal atau konsekuensi penolakan rekrutmen.
+   - **4 Live Debugging Drills (Repetisi Kasus Nyata)**:
+     1. *Drill 1: Floating-Point Fee Disaster* &mdash; Refactor kalkulasi fee desimal rentan bocor menjadi `int64` (sen).
+     2. *Drill 2: Unprotected Concurrent Hot Wallet* &mdash; Amankan operasi debit multi-goroutine menggunakan `sync.Mutex` (lolos Go `-race` detector).
+     3. *Drill 3: In-Flight Idempotency State Trap* &mdash; Tangani status `PROCESSING` untuk mengembalikan `HTTP 409 Conflict` dan mencegah *double billing*.
+     4. *Drill 4: Goroutine Context Leak* &mdash; Tambahkan `select { case <-ctx.Done(): ... }` pada background poller pihak ketiga untuk mengeliminasi zombie goroutines.
+   - **Rapid-Fire Theory Mastery Quiz**: Kuis evaluasi pemahaman teori dengan umpan balik teknis industri instan.
+   - **Stopwatch Mental Timer**: Fitur pengukur waktu opsional untuk melatih ritme mengetik di bawah simulasi batas waktu.
+
+3. **🏆 Hiring Gauntlet (`/` atau `/hiring`) — Simulasi Ujian Seleksi Resmi 5 Tahap**:
+   - Pipeline evaluasi teknis formal berbobot 20% per tahap:
+     * **Tahap 1: Live Coding DSA** (Financial Transaction Deduplication $\mathcal{O}(N)$).
+     * **Tahap 2: System Design Architecture Defense** (Idempotency, Double-Entry Ledger, Circuit Breaker).
+     * **Tahap 3: Take-Home Code Review** (Clean Architecture, SQL Migration, Docker Compose, Postman).
+     * **Tahap 4: Incident Resiliency War Room** (Token Bucket Rate Limiting 40 RPS).
+     * **Tahap 5: Surat Penawaran Kerja Resmi (Offer Letter)** (Format cetak resmi legal A4 2 Halaman Pas).
 
 ## 🛠️ Persyaratan Sistem & Tech Stack
 

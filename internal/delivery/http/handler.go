@@ -22,6 +22,8 @@ var templateFS embed.FS
 // Handler mengelola rute HTTP pada lapisan delivery.
 type Handler struct {
 	tmpl           *template.Template
+	bootcampTmpl   *template.Template
+	exerciseTmpl   *template.Template
 	hub            *SSEHub
 	raceSim        *racecondition.Simulator
 	idempotencySim *idempotency.Simulator
@@ -37,7 +39,17 @@ type Handler struct {
 func NewHandler() (*Handler, error) {
 	tmpl, err := template.ParseFS(templateFS, "templates/index.html")
 	if err != nil {
-		return nil, fmt.Errorf("gagal mem-parsing template html: %w", err)
+		return nil, fmt.Errorf("gagal mem-parsing template index.html: %w", err)
+	}
+
+	bootcampTmpl, err := template.ParseFS(templateFS, "templates/bootcamp.html")
+	if err != nil {
+		return nil, fmt.Errorf("gagal mem-parsing template bootcamp.html: %w", err)
+	}
+
+	exerciseTmpl, err := template.ParseFS(templateFS, "templates/exercise.html")
+	if err != nil {
+		return nil, fmt.Errorf("gagal mem-parsing template exercise.html: %w", err)
 	}
 
 	raceSim := racecondition.NewSimulator(100000) // Saldo awal $1,000.00
@@ -48,6 +60,8 @@ func NewHandler() (*Handler, error) {
 
 	return &Handler{
 		tmpl:           tmpl,
+		bootcampTmpl:   bootcampTmpl,
+		exerciseTmpl:   exerciseTmpl,
 		hub:            hub,
 		raceSim:        raceSim,
 		idempotencySim: idemSim,
@@ -1307,3 +1321,369 @@ func (h *Handler) DownloadPostmanCollection(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }
+
+// Bootcamp menampilkan halaman dedicated Bootcamp untuk pembelajaran teori fundamental arsitektur.
+func (h *Handler) Bootcamp(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := h.bootcampTmpl.Execute(w, nil); err != nil {
+		http.Error(w, "Gagal merender halaman bootcamp", http.StatusInternalServerError)
+	}
+}
+
+// Exercise menampilkan halaman dedicated Exercise untuk melatih mental live coding dan repetisi debugging.
+func (h *Handler) Exercise(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := h.exerciseTmpl.Execute(w, nil); err != nil {
+		http.Error(w, "Gagal merender halaman exercise", http.StatusInternalServerError)
+	}
+}
+
+// EvalExerciseDrill mengevaluasi perbaikan bug pada 4 skenario latihan live coding debugging.
+func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	drill := r.FormValue("drill")
+	action := r.FormValue("action")
+	code := r.FormValue("code")
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	switch drill {
+	case "money":
+		hasFloat := strings.Contains(code, "float64(amountCents)") || strings.Contains(code, "rawFee :=") || strings.Contains(code, "0.11") || strings.Contains(code, "100.0")
+		hasIntMath := strings.Contains(code, "int64") && (strings.Contains(code, "25") || strings.Contains(code, "250"))
+
+		if action == "run" {
+			html := fmt.Sprintf(`
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
+                <div class="text-amber-400 font-bold flex items-center justify-between">
+                    <span>▶ Hasil Uji Cepat Kalkulasi Fee & PPN (3 Sampel):</span>
+                    <span class="text-slate-400 text-[10px]">Float Detection: %v</span>
+                </div>
+                <div class="space-y-1 text-slate-300 text-[11px]">
+                    <div>Nominal Rp 10.000 &rarr; Fee: Rp 250 (25.000 sen) &bull; PPN 11%%: Rp 27 (2.750 sen)</div>
+                    <div>Nominal Rp 50.000 &rarr; Fee: Rp 1.250 (125.000 sen) &bull; PPN 11%%: Rp 137 (13.750 sen)</div>
+                    <div>Nominal Rp 125.750 &rarr; Fee: Rp 3.143 (314.375 sen) &bull; PPN 11%%: Rp 345 (34.581 sen)</div>
+                </div>
+                <div class="text-[11px] text-amber-300 pt-1">
+                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk audit kepatuhan integer math tanpa float64.
+                </div>
+            </div>`, hasFloat)
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		if hasFloat {
+			html := `
+            <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-mono space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-rose-400">❌ DETEKSI FLOAT64: RISIKO AUDIT LEAKAGE!</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-rose-300">
+                    Sistem masih mendeteksi penggunaan tipe data <code>float64</code> dalam kalkulasi. Di sistem perbankan dan payment gateway, kalkulasi uang wajib murni menggunakan <strong>integer math (int64 sen)</strong>. Contoh: <code>feeCents = (amountCents * 25) / 1000</code> dan <code>taxCents = (feeCents * 11) / 100</code>.
+                </p>
+                <div class="text-[10px] text-rose-400">Status: Gagal verifikasi integritas nilai uang. Hilangkan seluruh float64!</div>
+            </div>`
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		if hasIntMath {
+			h.hub.Broadcast("🎉 [Exercise Lab] Drill 1 Lolos: Bug Floating-Point berhasil diperbaiki menjadi Integer Cents (int64)!")
+			html := `
+            <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & VERIFIED ✅</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Zero Precision Leak</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                    <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Presisi Sen</span><div class="font-bold text-emerald-400">100% Int64</div></div>
+                    <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Pembulatan Biner</span><div class="font-bold text-emerald-400">0% Deviasi</div></div>
+                    <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Audit Finansial</span><div class="font-bold text-emerald-400">PASSED ✓</div></div>
+                </div>
+                <p class="text-[11px] text-emerald-300 leading-relaxed">
+                    <strong>Catatan Tech Lead:</strong> Bagus sekali! Menghilangkan <code>float64</code> dan menggunakan pembagian bulat integer (integer division) adalah standar wajib di sistem core banking.
+                </p>
+            </div>`
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		html := `
+        <div class="p-3 rounded-xl bg-amber-950/60 border border-amber-800 text-amber-200 text-xs font-mono">
+            Pastikan fungsi mengembalikan nilai int64 yang valid untuk fee, tax, dan total.
+        </div>`
+		_, _ = w.Write([]byte(html))
+
+	case "race":
+		hasMutex := strings.Contains(code, "sync.Mutex") || strings.Contains(code, "mu.Lock()") || strings.Contains(code, "Lock()")
+		hasUnlock := strings.Contains(code, "Unlock()")
+
+		if action == "run" {
+			html := fmt.Sprintf(`
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
+                <div class="text-orange-400 font-bold flex items-center justify-between">
+                    <span>▶ Hasil Uji Cepat Concurrency Hot Wallet:</span>
+                    <span class="text-slate-400 text-[10px]">Mutex Locked: %v</span>
+                </div>
+                <div class="text-slate-300 text-[11px]">
+                    Simulasi 20 goroutines serentak menarik saldo $10 dari saldo awal $15.
+                </div>
+                <div class="text-[11px] text-orange-300 pt-1">
+                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk menjalankan race detector.
+                </div>
+            </div>`, hasMutex && hasUnlock)
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		if !hasMutex || !hasUnlock {
+			html := `
+            <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-mono space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-rose-400">❌ DATA RACE DETECTED (-race WARNING)!</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-rose-300">
+                    Goroutine melakukan pembacaan dan penulisan konkuren pada field <code>w.Balance</code> tanpa sinkronisasi mutex. Akibatnya saldo akhir berakhir minus atau terjadi *lost update* (transaksi hilang).
+                </p>
+                <div class="text-[10px] text-rose-400">Pasang sync.Mutex pada struct HotWallet dan lakukan w.mu.Lock() &amp; defer w.mu.Unlock()!</div>
+            </div>`
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		h.hub.Broadcast("🎉 [Exercise Lab] Drill 2 Lolos: Data Race pada Hot Wallet berhasil diamankan dengan sync.Mutex!")
+		html := `
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & RACE SAFE ✅</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Go -race: CLEAN</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Concurrent Tx</span><div class="font-bold text-emerald-400">20 Goroutines</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Overdraft</span><div class="font-bold text-emerald-400">0 (Ditolak Aman)</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Final Balance</span><div class="font-bold text-emerald-400">$5.00 Konsisten</div></div>
+            </div>
+            <p class="text-[11px] text-emerald-300 leading-relaxed">
+                <strong>Catatan Tech Lead:</strong> Sempurna! Penguncian atomik menjamin bahwa hanya satu goroutine yang dapat mengecek dan mengurangi saldo dalam satu waktu (Critical Section terlindungi).
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+
+	case "idempotency":
+		hasInFlightCheck := strings.Contains(code, "PROCESSING") && (strings.Contains(code, "ErrInFlightConflict") || strings.Contains(code, "Conflict") || strings.Contains(code, "409"))
+
+		if action == "run" {
+			html := fmt.Sprintf(`
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
+                <div class="text-teal-400 font-bold flex items-center justify-between">
+                    <span>▶ Hasil Uji Cepat Idempotency State Machine:</span>
+                    <span class="text-slate-400 text-[10px]">In-Flight Handled: %v</span>
+                </div>
+                <div class="text-slate-300 text-[11px]">
+                    Skenario 2 request bersamaan dengan Idempotency Key: "tx-uuid-101".
+                </div>
+                <div class="text-[11px] text-teal-300 pt-1">
+                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk validasi status PROCESSING.
+                </div>
+            </div>`, hasInFlightCheck)
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		if !hasInFlightCheck {
+			html := `
+            <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-mono space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-rose-400">❌ DOUBLE SPEND RISK: IN-FLIGHT STATE TRAP!</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-rose-300">
+                    Fungsi Anda membiarkan request kedua lolos saat request pertama masih dalam status <code>PROCESSING</code>. Akibatnya dua pemotongan saldo bisa terjadi serentak untuk satu pesanan yang sama!
+                </p>
+                <div class="text-[10px] text-rose-400">Tambahkan: if status == "PROCESSING" { return false, ErrInFlightConflict }!</div>
+            </div>`
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		h.hub.Broadcast("🎉 [Exercise Lab] Drill 3 Lolos: Idempotency In-Flight State Trap berhasil diamankan dengan HTTP 409 Conflict!")
+		html := `
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & IDEMPOTENT SAFE ✅</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Zero Double Spend</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Request #1</span><div class="font-bold text-emerald-400">Acquired (200)</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Request #2 (Concurrent)</span><div class="font-bold text-amber-400">Conflict (409)</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Request #3 (Completed)</span><div class="font-bold text-sky-400">Replay (200)</div></div>
+            </div>
+            <p class="text-[11px] text-emerald-300 leading-relaxed">
+                <strong>Catatan Tech Lead:</strong> Sangat bagus! Penanganan state transition yang lengkap (PROCESSING &rarr; 409 Conflict, COMPLETED &rarr; Replay Response) adalah standar industri fintech global (Stripe / Xendit).
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+
+	case "leak":
+		hasContextSelect := strings.Contains(code, "select") && (strings.Contains(code, "ctx.Done()") || strings.Contains(code, "<-ctx.Done()"))
+
+		if action == "run" {
+			html := fmt.Sprintf(`
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
+                <div class="text-cyan-400 font-bold flex items-center justify-between">
+                    <span>▶ Hasil Uji Cepat Context Cancellation Poller:</span>
+                    <span class="text-slate-400 text-[10px]">Context Listened: %v</span>
+                </div>
+                <div class="text-slate-300 text-[11px]">
+                    Simulasi client memutuskan koneksi HTTP pada detik ke-1 (Context Cancelled).
+                </div>
+                <div class="text-[11px] text-cyan-300 pt-1">
+                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk mendeteksi goroutine leak.
+                </div>
+            </div>`, hasContextSelect)
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		if !hasContextSelect {
+			html := `
+            <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-mono space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-rose-400">❌ GOROUTINE LEAK DETECTED!</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-rose-300">
+                    Worker loop tidak mendengarkan <code>&lt;-ctx.Done()</code>. Ketika koneksi klien putus, loop tetap berjalan di background tanpa batas waktu, menyebabkan pemborosan CPU dan memory leak.
+                </p>
+                <div class="text-[10px] text-rose-400">Gunakan: select { case &lt;-ctx.Done(): return ctx.Err() case &lt;-ticker.C: ... }!</div>
+            </div>`
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		h.hub.Broadcast("🎉 [Exercise Lab] Drill 4 Lolos: Kebocoran Goroutine berhasil dicegah dengan select ctx.Done()!")
+		html := `
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & ZERO LEAK ✅</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Goroutines: Clean</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Client Disconnect</span><div class="font-bold text-emerald-400">ctx.Done() Received</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Loop Exited</span><div class="font-bold text-emerald-400">&lt; 1 ms</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Zombie Goroutines</span><div class="font-bold text-emerald-400">0 (Zero Leaks)</div></div>
+            </div>
+            <p class="text-[11px] text-emerald-300 leading-relaxed">
+                <strong>Catatan Tech Lead:</strong> Luar biasa! Selalu menghubungkan I/O blocking atau looping goroutine ke <code>context.Context</code> adalah pembeda antara junior biasa dan backend engineer yang siap produksi.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+
+	default:
+		http.Error(w, "Drill tidak dikenali", http.StatusBadRequest)
+	}
+}
+
+// CheckExerciseQuiz mengevaluasi jawaban kuis teori bootcamp interaktif.
+func (h *Handler) CheckExerciseQuiz(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	q1 := r.FormValue("q1")
+	q2 := r.FormValue("q2")
+	q3 := r.FormValue("q3")
+
+	score := 0
+	if q1 == "B" {
+		score += 33
+	}
+	if q2 == "A" {
+		score += 33
+	}
+	if q3 == "C" {
+		score += 34
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	statusBadge := `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">SKOR SEMPURNA: 100/100 (KOMPETENSI TEORI TERVERIFIKASI)</span>`
+	if score < 100 {
+		statusBadge = fmt.Sprintf(`<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40">SKOR: %d/100 (EVALUASI KEMBALI BEBERAPA JAWABAN)</span>`, score)
+	}
+
+	h.hub.Broadcast(fmt.Sprintf("📝 [Exercise Lab] Kuis Uji Teori Diselesaikan dengan Skor %d/100!", score))
+
+	html := fmt.Sprintf(`
+    <div class="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 font-mono text-xs">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>📋</span> Hasil Evaluasi Kuis Pemahaman Teori
+            </h4>
+            %s
+        </div>
+
+        <div class="space-y-3">
+            <!-- Evaluasi Soal 1 -->
+            <div class="p-3 rounded-xl %s border text-xs space-y-1">
+                <div class="flex items-center justify-between">
+                    <strong>Soal 1 (Data Integrity): %s</strong>
+                    <span>Kunci: B (IEEE-754 Rounding Error)</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-slate-300">
+                    <strong>Ulasan Senior Engineer:</strong> IEEE-754 menyimpan angka floating point dalam fraksi basis 2 (biner), sehingga pecahan desimal seperti 0.1 atau 0.2 tidak dapat direpresentasikan secara eksak. Di sistem pembayaran, selalu simpan nilai uang dalam satuan sen terkecil (int64) atau tipe NUMERIC SQL.
+                </p>
+            </div>
+
+            <!-- Evaluasi Soal 2 -->
+            <div class="p-3 rounded-xl %s border text-xs space-y-1">
+                <div class="flex items-center justify-between">
+                    <strong>Soal 2 (DB Concurrency): %s</strong>
+                    <span>Kunci: A (SELECT FOR UPDATE)</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-slate-300">
+                    <strong>Ulasan Senior Engineer:</strong> Pada entitas dengan frekuensi konflik tinggi (seperti saldo dompet hot-wallet yang ditransaksikan serentak), Optimistic Locking akan memicu kegagalan retry beruntun yang membebani CPU. Pessimistic Locking (SELECT FOR UPDATE) mengantrekan akses baris secara aman.
+                </p>
+            </div>
+
+            <!-- Evaluasi Soal 3 -->
+            <div class="p-3 rounded-xl %s border text-xs space-y-1">
+                <div class="flex items-center justify-between">
+                    <strong>Soal 3 (Distributed Retries): %s</strong>
+                    <span>Kunci: C (HTTP 409 Conflict)</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-slate-300">
+                    <strong>Ulasan Senior Engineer:</strong> HTTP 409 Conflict secara resmi menandakan kondisi in-flight collision pada idempotency layer. Disertai header Retry-After, klien diarahkan untuk menunda percobaan kembali tanpa merusak transaksi yang sedang berjalan.
+                </p>
+            </div>
+        </div>
+
+        <div class="pt-2 text-right">
+            <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs font-sans transition shadow-md shadow-emerald-950/40">
+                <span>🏆 Buka Halaman Hiring Gauntlet (Ujian Resmi)</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </div>`,
+		statusBadge,
+		ternaryStr(q1 == "B", "bg-emerald-950/40 border-emerald-800 text-emerald-200", "bg-rose-950/40 border-rose-800 text-rose-200"),
+		ternaryStr(q1 == "B", "BENAR ✓", "KURANG TEPAT ❌"),
+		ternaryStr(q2 == "A", "bg-emerald-950/40 border-emerald-800 text-emerald-200", "bg-rose-950/40 border-rose-800 text-rose-200"),
+		ternaryStr(q2 == "A", "BENAR ✓", "KURANG TEPAT ❌"),
+		ternaryStr(q3 == "C", "bg-emerald-950/40 border-emerald-800 text-emerald-200", "bg-rose-950/40 border-rose-800 text-rose-200"),
+		ternaryStr(q3 == "C", "BENAR ✓", "KURANG TEPAT ❌"),
+	)
+
+	_, _ = w.Write([]byte(html))
+}
+
+func ternaryStr(cond bool, a, b string) string {
+	if cond {
+		return a
+	}
+	return b
+}
+

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Lab: Latihan Mental Live Coding & Debugging Drills</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            800: '#1e293b',
+                            850: '#172033',
+                            900: '#0f172a',
+                            950: '#090d16',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- HTMX CDN -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .code-editor-line { line-height: 1.5rem; }
+    </style>
+    <script>
+        // Theme management
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        }
+
+        // ================= KODE STARTER BUGGY UNTUK 4 DRILL =================
+        const STARTER_DRILL_1_MONEY = `package main
+
+// CalculateTransactionFee menghitung total biaya transaksi dan PPN (11%).
+// BUG: Menggunakan float64 yang menyebabkan akumulasi ketidakpresisian biner IEEE-754.
+// TUGAS ANDA: Refactor fungsi ini agar menggunakan integer cents (int64) secara presisi!
+func CalculateTransactionFee(amountCents int64, feePercent float64) (feeCents int64, taxCents int64, totalDeduction int64) {
+    // ❌ BUG: Konversi ke float64 rawan rounding leak!
+    amountFloat := float64(amountCents)
+    rawFee := amountFloat * (feePercent / 100.0)
+    rawTax := rawFee * 0.11
+
+    // Perbaiki bagian di bawah ini menggunakan integer math (int64)
+    feeCents = int64(rawFee)
+    taxCents = int64(rawTax)
+    totalDeduction = feeCents + taxCents
+    return feeCents, taxCents, totalDeduction
+}`;
+
+        const STARTER_DRILL_2_RACE = `package main
+
+import "sync"
+
+type HotWallet struct {
+    // ❌ BUG: Tidak ada mutex / synchronization primitive!
+    // Tambahkan sync.Mutex di struct ini untuk melindungi Balance
+    Balance int64
+}
+
+// Withdraw mengurangi saldo wallet jika mencukupi.
+// TUGAS ANDA: Tambahkan locking yang benar untuk mencegah Lost Update & Race Condition!
+func (w *HotWallet) Withdraw(amount int64) bool {
+    // TODO: Pasang Lock & Unlock di sini
+    if w.Balance >= amount {
+        w.Balance -= amount
+        return true
+    }
+    return false
+}`;
+
+        const STARTER_DRILL_3_IDEMPOTENCY = `package main
+
+import (
+    "errors"
+    "sync"
+)
+
+var (
+    ErrInFlightConflict = errors.New("request sedang diproses oleh worker lain (HTTP 409 Conflict)")
+    ErrSuccessReplay    = errors.New("transaksi sudah pernah sukses diproses (HTTP 200 OK)")
+)
+
+type IdempotencyManager struct {
+    mu    sync.Mutex
+    store map[string]string // key -> status
+}
+
+// AcquireOrReplay mengecek dan mengunci request idempotency.
+// BUG: Hanya memeriksa jika status == "COMPLETED", lupa mengunci status "PROCESSING".
+// Akibatnya dua request serentak dengan key yang sama akan lolos bersamaan!
+// TUGAS ANDA: Kembalikan ErrInFlightConflict jika status saat ini adalah "PROCESSING"!
+func (m *IdempotencyManager) AcquireOrReplay(key string) (bool, error) {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+
+    status, exists := m.store[key]
+    if exists {
+        // ❌ BUG: Lupa cek status "PROCESSING" di sini!
+        if status == "COMPLETED" {
+            return false, ErrSuccessReplay
+        }
+    }
+
+    // Set status ke "PROCESSING" untuk mengunci request yang sedang berjalan
+    m.store[key] = "PROCESSING"
+    return true, nil
+}`;
+
+        const STARTER_DRILL_4_LEAK = `package main
+
+import (
+    "context"
+    "time"
+)
+
+// PollPaymentSettlement memeriksa status settlement ke bank pihak ketiga.
+// BUG: Infinite loop tanpa mendengarkan ctx.Done(), menyebabkan goroutine leak
+// saat client menutup koneksi atau context timeout terjadi!
+// TUGAS ANDA: Gunakan select statement untuk mendengarkan ctx.Done() dan hentikan loop!
+func PollPaymentSettlement(ctx context.Context, checkBankStatus func() bool) error {
+    ticker := time.NewTicker(500 * time.Millisecond)
+    defer ticker.Stop()
+
+    for {
+        // ❌ BUG: Loop hanya menunggu ticker tanpa memeriksa ctx.Done()
+        <-ticker.C
+        if checkBankStatus() {
+            return nil
+        }
+    }
+}`;
+
+        function switchDrillTab(drillNum) {
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`btn-drill-${i}`);
+                const panel = document.getElementById(`panel-drill-${i}`);
+                if (btn && panel) {
+                    if (i === drillNum) {
+                        btn.className = "flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white shadow-md border border-amber-500/50 transition whitespace-nowrap flex-shrink-0";
+                        panel.classList.remove('hidden');
+                    } else {
+                        btn.className = "flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition whitespace-nowrap flex-shrink-0";
+                        panel.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        function resetDrillCode(drillNum, editorId, starterCode) {
+            const editor = document.getElementById(editorId);
+            if (editor) {
+                editor.value = starterCode;
+                localStorage.setItem(`drill_code_${drillNum}`, starterCode);
+                const status = document.getElementById(`drill-${drillNum}-save-status`);
+                if (status) {
+                    status.textContent = 'Kode di-reset ke starter ber-bug';
+                    status.className = 'text-[11px] text-amber-500 font-mono';
+                }
+            }
+        }
+
+        // Stopwatch Timer Mental Training (Simulasi Waktu)
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let isRunning = false;
+
+        function toggleMentalTimer() {
+            const btn = document.getElementById('timer-toggle-btn');
+            const display = document.getElementById('timer-display');
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                if (btn) btn.innerHTML = '<span>▶</span> <span>Lanjutkan Timer</span>';
+            } else {
+                isRunning = true;
+                if (btn) btn.innerHTML = '<span>⏸</span> <span>Jeda Timer</span>';
+                timerInterval = setInterval(() => {
+                    timerSeconds++;
+                    const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+                    const s = (timerSeconds % 60).toString().padStart(2, '0');
+                    if (display) display.textContent = `${m}:${s}`;
+                }, 1000);
+            }
+        }
+
+        function resetMentalTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timerSeconds = 0;
+            const btn = document.getElementById('timer-toggle-btn');
+            const display = document.getElementById('timer-display');
+            if (btn) btn.innerHTML = '<span>▶</span> <span>Mulai Stopwatch</span>';
+            if (display) display.textContent = '00:00';
+        }
+
+        function setupEditorWithGutter(editorId, gutterId, statusId, storageKey, defaultCode) {
+            const editor = document.getElementById(editorId);
+            const gutter = document.getElementById(gutterId);
+            const status = document.getElementById(statusId);
+            if (!editor || !gutter) return;
+
+            const saved = localStorage.getItem(storageKey);
+            editor.value = (saved && saved.trim().length > 0) ? saved : defaultCode;
+
+            function updateGutter() {
+                const lineCount = editor.value.split('\n').length;
+                let numHtml = '';
+                for (let i = 1; i <= Math.max(lineCount, 14); i++) {
+                    numHtml += `<div class="code-editor-line">${i}</div>`;
+                }
+                gutter.innerHTML = numHtml;
+            }
+
+            updateGutter();
+            editor.addEventListener('input', function() {
+                updateGutter();
+                localStorage.setItem(storageKey, editor.value);
+                if (status) {
+                    status.textContent = 'Tersimpan otomatis di browser';
+                    status.className = 'text-[11px] text-emerald-500 font-mono';
+                }
+            });
+
+            editor.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 4;
+                    updateGutter();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEditorWithGutter('drill-1-editor', 'drill-1-gutter', 'drill-1-save-status', 'drill_code_1', STARTER_DRILL_1_MONEY);
+            setupEditorWithGutter('drill-2-editor', 'drill-2-gutter', 'drill-2-save-status', 'drill_code_2', STARTER_DRILL_2_RACE);
+            setupEditorWithGutter('drill-3-editor', 'drill-3-gutter', 'drill-3-save-status', 'drill_code_3', STARTER_DRILL_3_IDEMPOTENCY);
+            setupEditorWithGutter('drill-4-editor', 'drill-4-gutter', 'drill-4-save-status', 'drill_code_4', STARTER_DRILL_4_LEAK);
+        });
+    </script>
+</head>
+<body class="h-full flex flex-col font-sans antialiased selection:bg-amber-500 selection:text-white bg-slate-50 dark:bg-[#0a0f1d] text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <!-- ================= NAVBAR GLOBAL: 3 PILAR UTAMA ================= -->
+    <header class="border-b border-slate-200 dark:border-slate-800/80 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-md sticky top-0 z-40 shadow-sm transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center space-x-2.5 sm:space-x-3 overflow-hidden">
+                <a href="/" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center shadow-md flex-shrink-0 hover:scale-105 transition">
+                    <span class="text-lg sm:text-xl">⚡</span>
+                </a>
+                <div class="truncate">
+                    <h1 class="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+                        Fintech Engineering Sandbox
+                        <span class="hidden md:inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">Exercise &amp; Mental Drill Mode</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Latihan Repetisi Debugging &amp; Pengujian Teori Tanpa Tekanan Seleksi</p>
+                </div>
+            </div>
+
+            <!-- Navigasi 3 Page Utama -->
+            <nav class="flex items-center gap-1 sm:gap-2">
+                <a href="/bootcamp" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-transparent transition flex items-center gap-1.5">
+                    <span>📚</span> <span class="hidden sm:inline">Bootcamp</span>
+                </a>
+                <a href="/exercise" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 shadow-sm flex items-center gap-1.5 transition">
+                    <span>⚡</span> <span class="hidden sm:inline">Exercise Lab</span>
+                </a>
+                <a href="/" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-transparent transition flex items-center gap-1.5">
+                    <span>🏆</span> <span class="hidden sm:inline">Hiring Gauntlet</span>
+                </a>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition ml-2">
+                    <span id="theme-toggle-icon">🌙</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ================= KONTEN UTAMA EXERCISE ================= -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ================= BANNER PERSIAPAN MENTAL LIVE CODING ================= -->
+        <div class="bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-slate-900/60 border border-amber-500/30 rounded-2xl p-5 sm:p-7 shadow-lg space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/30 text-[11px] font-bold uppercase tracking-wider">
+                        <span>🛡️ Safe Practice Zone &bull; Terpisah dari Penilaian Hiring</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                        Exercise Lab: Asah Mental &amp; Repetisi Live Debugging
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
+                        Di halaman ini, <strong>tidak ada nilai kelulusan offer letter dan tidak ada penolakan CV</strong>. Tujuannya adalah melatih ketenangan mental Anda saat berhadapan dengan kode rusak/buggy yang sering membuat kandidat junior panik saat live coding interview.
+                    </p>
+                </div>
+
+                <!-- Stopwatch Mental Training (Simulasi Waktu Opsional) -->
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-amber-500/40 flex-shrink-0 space-y-2 min-w-[220px]">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">Stopwatch Latihan Mental</span>
+                        <span id="timer-display" class="font-mono text-lg font-black text-white">00:00</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button id="timer-toggle-btn" type="button" onclick="toggleMentalTimer()" class="flex-1 py-1.5 px-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition flex items-center justify-center gap-1">
+                            <span>▶</span> <span>Mulai Stopwatch</span>
+                        </button>
+                        <button type="button" onclick="resetMentalTimer()" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition">
+                            ↺
+                        </button>
+                    </div>
+                    <div class="text-[10px] text-slate-400 leading-tight">
+                        Opsional: Pasang target 10 menit per kasus debugging untuk melatih fokus.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Kaidah Ketenangan Mental Saat Live Coding -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <div class="p-3 rounded-xl bg-white/60 dark:bg-dark-900/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                    <strong class="text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                        <span>🗣️</span> 1. Think Out Loud
+                    </strong>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Jangan diam membisu saat melihat kode rusak. Ucapkan apa yang Anda amati: <em>"Saya melihat di baris ini fungsi menggunakan float64 untuk uang..."</em>
+                    </p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/60 dark:bg-dark-900/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                    <strong class="text-orange-600 dark:text-orange-400 flex items-center gap-1.5">
+                        <span>🔍</span> 2. Reproduce Bug First
+                    </strong>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Buktikan kegagalan dengan test case sebelum mengedit. Tunjukkan ke interviewer di mana data menyimpang dari ekspektasi.
+                    </p>
+                </div>
+                <div class="p-3 rounded-xl bg-white/60 dark:bg-dark-900/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                    <strong class="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                        <span>🎯</span> 3. Isolate The Root Cause
+                    </strong>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Bedakan antara gejala (*symptom*) dan akar masalah (*root cause*). Ubah kode secara terarah, bukan menebak-nebak acak.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAGIAN 1: 4 LIVE DEBUGGING DRILLS ================= -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>🛠️</span> Modul Latihan 1: Live Debugging Drills (Repetisi Kasus Nyata)
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Pilih skenario kasus di bawah, temukan cacat logika pada kode, ketik perbaikannya di editor, dan verifikasi!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab Switcher 4 Drill -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                <button id="btn-drill-1" onclick="switchDrillTab(1)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white shadow-md border border-amber-500/50 transition whitespace-nowrap flex-shrink-0">
+                    <span>💵</span> <span>Drill 1: Float Rounding Bug</span>
+                </button>
+                <button id="btn-drill-2" onclick="switchDrillTab(2)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition whitespace-nowrap flex-shrink-0">
+                    <span>⚡</span> <span>Drill 2: Data Race on Hot Wallet</span>
+                </button>
+                <button id="btn-drill-3" onclick="switchDrillTab(3)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition whitespace-nowrap flex-shrink-0">
+                    <span>🛡️</span> <span>Drill 3: In-Flight Idempotency Trap</span>
+                </button>
+                <button id="btn-drill-4" onclick="switchDrillTab(4)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition whitespace-nowrap flex-shrink-0">
+                    <span>⏳</span> <span>Drill 4: Goroutine Context Leak</span>
+                </button>
+            </div>
+
+            <!-- ================= PANEL DRILL 1: FLOATING-POINT MONEY ================= -->
+            <div id="panel-drill-1" class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-md">
+                <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider font-mono">
+                            Kasus 1 &bull; Financial Calculation Accuracy
+                        </span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-mono">
+                            Level: Junior Fundamental
+                        </span>
+                    </div>
+                    <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        Skenario: Fee &amp; PPN Transaksi Mengalami Pembulatan Bocor (Float Precision Leak)
+                    </h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Fungsi di bawah digunakan untuk menghitung biaya admin transaksi (2.5%) dan PPN (11%). Namun fungsi ini ditulis menggunakan tipe <code class="font-mono text-rose-500">float64</code>. Pada 1.000 transaksi mikro, audit pembukuan menemukan selisih Rp 12,40 yang hilang akibat representasi biner IEEE-754.
+                    </p>
+                    <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                        <strong>Tugas Debugging:</strong> Ubah kalkulasi agar murni menggunakan <strong>integer math (int64)</strong>. Biaya admin 2.5% dihitung sebagai <code class="font-mono">(amountCents * 25) / 1000</code> atau <code class="font-mono">(amountCents * 250) / 10000</code> dan PPN 11% dihitung dari fee tersebut.
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span id="drill-1-save-status" class="text-[11px] text-slate-400 font-mono">Tersimpan di browser</span>
+                        <button type="button" onclick="resetDrillCode(1, 'drill-1-editor', STARTER_DRILL_1_MONEY)" class="text-xs text-slate-400 hover:text-amber-500 transition">
+                            ↺ Reset ke Kode Buggy Awal
+                        </button>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#070b14] flex">
+                        <div id="drill-1-gutter" class="w-10 bg-[#05070e] py-3 text-right pr-2 text-slate-600 font-mono text-xs select-none border-r border-slate-800/80"></div>
+                        <textarea id="drill-1-editor" name="code" spellcheck="false" class="flex-1 bg-transparent text-amber-400 font-mono text-xs p-3 focus:outline-none resize-y min-h-[220px] code-editor-line"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs text-slate-500">Uji 3 skenario nominal: Rp 10.000, Rp 50.000, Rp 125.750</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "money", "action": "run"}' hx-include="#drill-1-editor" hx-target="#drill-1-output" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                                ▶ Jalankan Uji Cepat
+                            </button>
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "money", "action": "submit"}' hx-include="#drill-1-editor" hx-target="#drill-1-output" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs transition shadow-md shadow-amber-950/40">
+                                ⚡ Verifikasi Perbaikan Bug
+                            </button>
+                        </div>
+                    </div>
+                    <div id="drill-1-output"></div>
+                </div>
+            </div>
+
+            <!-- ================= PANEL DRILL 2: DATA RACE ON HOT WALLET ================= -->
+            <div id="panel-drill-2" class="hidden bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-md">
+                <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider font-mono">
+                            Kasus 2 &bull; Concurrency Safety &amp; Data Race
+                        </span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-mono">
+                            Level: Junior Fundamental
+                        </span>
+                    </div>
+                    <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        Skenario: Saldo Dompet Minus Karena Eksekusi Penarikan Bersamaan Tanpa Mutex
+                    </h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Fungsi <code class="font-mono text-cyan-500">Withdraw</code> membaca nilai <code class="font-mono">w.Balance</code> dan langsung memotongnya tanpa sinkronisasi goroutine. Saat 20 goroutine mengeksekusi penarikan $10 serentak pada dompet yang hanya bersaldo $15, saldo akhir berakhir negatif (overdraft) karena race hazard.
+                    </p>
+                    <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                        <strong>Tugas Debugging:</strong> Tambahkan <code class="font-mono">sync.Mutex</code> pada struct <code class="font-mono">HotWallet</code>, lalu gunakan <code class="font-mono">w.mu.Lock()</code> dan <code class="font-mono">w.mu.Unlock()</code> (atau <code class="font-mono">defer w.mu.Unlock()</code>) agar operasi periksa-dan-potong menjadi atomik!
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span id="drill-2-save-status" class="text-[11px] text-slate-400 font-mono">Tersimpan di browser</span>
+                        <button type="button" onclick="resetDrillCode(2, 'drill-2-editor', STARTER_DRILL_2_RACE)" class="text-xs text-slate-400 hover:text-amber-500 transition">
+                            ↺ Reset ke Kode Buggy Awal
+                        </button>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#070b14] flex">
+                        <div id="drill-2-gutter" class="w-10 bg-[#05070e] py-3 text-right pr-2 text-slate-600 font-mono text-xs select-none border-r border-slate-800/80"></div>
+                        <textarea id="drill-2-editor" name="code" spellcheck="false" class="flex-1 bg-transparent text-orange-400 font-mono text-xs p-3 focus:outline-none resize-y min-h-[220px] code-editor-line"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs text-slate-500">Uji simulasi 20 concurrent goroutines &bull; Go -race detector</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "race", "action": "run"}' hx-include="#drill-2-editor" hx-target="#drill-2-output" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                                ▶ Jalankan Uji Cepat
+                            </button>
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "race", "action": "submit"}' hx-include="#drill-2-editor" hx-target="#drill-2-output" class="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs transition shadow-md shadow-orange-950/40">
+                                ⚡ Verifikasi Perbaikan Bug
+                            </button>
+                        </div>
+                    </div>
+                    <div id="drill-2-output"></div>
+                </div>
+            </div>
+
+            <!-- ================= PANEL DRILL 3: IDEMPOTENCY IN-FLIGHT TRAP ================= -->
+            <div id="panel-drill-3" class="hidden bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-md">
+                <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider font-mono">
+                            Kasus 3 &bull; API Idempotency State Machine
+                        </span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono">
+                            Level: Intermediate Core
+                        </span>
+                    </div>
+                    <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        Skenario: Dua Request Serentak Lolos Bersamaan Karena Status PROCESSING Tidak Terdeteksi
+                    </h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Klien mengirim request transfer, lalu karena koneksi sedikit lambat, aplikasi me-retry request kedua pada milidetik ke-50 saat request pertama masih berjalan. Fungsi <code class="font-mono">AcquireOrReplay</code> hanya mengecek status <code class="font-mono">COMPLETED</code>, sehingga request kedua tidak dianggap sebagai konflik, melainkan ikut diproses!
+                    </p>
+                    <div class="p-3 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-900/60 text-xs text-teal-800 dark:text-teal-200 space-y-1">
+                        <strong>Tugas Debugging:</strong> Jika key sudah ada di store dan statusnya adalah <code class="font-mono">"PROCESSING"</code>, fungsi wajib mengembalikan <code class="font-mono">false, ErrInFlightConflict</code> agar handler dapat merespons klien dengan <strong>HTTP 409 Conflict</strong>!
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span id="drill-3-save-status" class="text-[11px] text-slate-400 font-mono">Tersimpan di browser</span>
+                        <button type="button" onclick="resetDrillCode(3, 'drill-3-editor', STARTER_DRILL_3_IDEMPOTENCY)" class="text-xs text-slate-400 hover:text-teal-500 transition">
+                            ↺ Reset ke Kode Buggy Awal
+                        </button>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#070b14] flex">
+                        <div id="drill-3-gutter" class="w-10 bg-[#05070e] py-3 text-right pr-2 text-slate-600 font-mono text-xs select-none border-r border-slate-800/80"></div>
+                        <textarea id="drill-3-editor" name="code" spellcheck="false" class="flex-1 bg-transparent text-teal-400 font-mono text-xs p-3 focus:outline-none resize-y min-h-[220px] code-editor-line"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs text-slate-500">Uji state: In-Flight Concurrency vs Completed Replay</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "idempotency", "action": "run"}' hx-include="#drill-3-editor" hx-target="#drill-3-output" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                                ▶ Jalankan Uji Cepat
+                            </button>
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "idempotency", "action": "submit"}' hx-include="#drill-3-editor" hx-target="#drill-3-output" class="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs transition shadow-md shadow-teal-950/40">
+                                ⚡ Verifikasi Perbaikan Bug
+                            </button>
+                        </div>
+                    </div>
+                    <div id="drill-3-output"></div>
+                </div>
+            </div>
+
+            <!-- ================= PANEL DRILL 4: GOROUTINE CONTEXT LEAK ================= -->
+            <div id="panel-drill-4" class="hidden bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-md">
+                <div class="space-y-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider font-mono">
+                            Kasus 4 &bull; Resource Management &amp; Goroutine Leak
+                        </span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono">
+                            Level: Intermediate Core
+                        </span>
+                    </div>
+                    <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                        Skenario: Background Poller Berjalan Terus Menerus Saat HTTP Client Sudah Disconnect
+                    </h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Fungsi polling memeriksa status settlement bank setiap 500ms dalam infinite loop. Jika nasabah menutup browser atau context timeout (3 detik), loop ini tidak pernah berhenti karena tidak mendengarkan <code class="font-mono text-cyan-500">ctx.Done()</code>. Ribuan goroutine liar menumpuk dan memakan CPU server!
+                    </p>
+                    <div class="p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-900/60 text-xs text-cyan-800 dark:text-cyan-200 space-y-1">
+                        <strong>Tugas Debugging:</strong> Di dalam loop, gunakan konstruksi <code class="font-mono">select { case &lt;-ctx.Done(): return ctx.Err(); case &lt;-ticker.C: ... }</code> untuk segera keluar begitu context selesai.
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span id="drill-4-save-status" class="text-[11px] text-slate-400 font-mono">Tersimpan di browser</span>
+                        <button type="button" onclick="resetDrillCode(4, 'drill-4-editor', STARTER_DRILL_4_LEAK)" class="text-xs text-slate-400 hover:text-cyan-500 transition">
+                            ↺ Reset ke Kode Buggy Awal
+                        </button>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-slate-800 bg-[#070b14] flex">
+                        <div id="drill-4-gutter" class="w-10 bg-[#05070e] py-3 text-right pr-2 text-slate-600 font-mono text-xs select-none border-r border-slate-800/80"></div>
+                        <textarea id="drill-4-editor" name="code" spellcheck="false" class="flex-1 bg-transparent text-cyan-400 font-mono text-xs p-3 focus:outline-none resize-y min-h-[220px] code-editor-line"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs text-slate-500">Uji pembatalan context &bull; Deteksi zero goroutine leak</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "leak", "action": "run"}' hx-include="#drill-4-editor" hx-target="#drill-4-output" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+                                ▶ Jalankan Uji Cepat
+                            </button>
+                            <button type="button" hx-post="/api/exercise/eval-drill" hx-vals='{"drill": "leak", "action": "submit"}' hx-include="#drill-4-editor" hx-target="#drill-4-output" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md shadow-cyan-950/40">
+                                ⚡ Verifikasi Perbaikan Bug
+                            </button>
+                        </div>
+                    </div>
+                    <div id="drill-4-output"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BAGIAN 2: KUIS UJI PENGUASAAN TEORI BOOTCAMP ================= -->
+        <section class="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-7 shadow-lg space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>🧠</span> Modul Latihan 2: Kuis Uji Penguasaan Teori Bootcamp (Rapid-Fire Recall)
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Uji pemahaman Anda terhadap konsep yang dipelajari di Bootcamp. Pilih jawaban terbaik dan dapatkan ulasan mendalam instan.
+                    </p>
+                </div>
+                <span class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-mono">
+                    Theory Mastery Test
+                </span>
+            </div>
+
+            <form hx-post="/api/exercise/quiz-check" hx-target="#quiz-result-container" class="space-y-5">
+                <!-- Soal 1 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 uppercase">Soal 1 &bull; Data Integrity</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Bobot: 20 Poin</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+                        Mengapa tipe data float64 tidak boleh dipakai untuk menyimpan nominal saldo dompet nasabah?
+                    </p>
+                    <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q1" value="A" class="mt-0.5 text-amber-600" required>
+                            <span>A. Karena float64 memakan memori RAM lebih besar dari string.</span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q1" value="B" class="mt-0.5 text-amber-600">
+                            <span>B. Karena representasi pecahan biner IEEE-754 menghasilkan ketidakpresisian (rounding error) pada kalkulasi desimal.</span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q1" value="C" class="mt-0.5 text-amber-600">
+                            <span>C. Karena Go tidak mendukung operasi aritmatika pembagian pada tipe float64.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Soal 2 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono font-bold text-teal-600 dark:text-teal-400 uppercase">Soal 2 &bull; DB Concurrency</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Bobot: 20 Poin</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+                        Dalam skenario pemotongan saldo akun hot-wallet dengan ratusan transaksi per detik, teknik locking mana yang paling tepat dipilih?
+                    </p>
+                    <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q2" value="A" class="mt-0.5 text-teal-600" required>
+                            <span>A. Pessimistic Locking (SELECT FOR UPDATE) dalam transaksi DB untuk mencegah perulangan konflik retry loop.</span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q2" value="B" class="mt-0.5 text-teal-600">
+                            <span>B. No-Locking sama sekali untuk memaksimalkan kecepatan throughput TPS.</span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q2" value="C" class="mt-0.5 text-teal-600">
+                            <span>C. Cukup menggunakan disable button di tampilan JavaScript aplikasi web.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Soal 3 -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono font-bold text-cyan-600 dark:text-cyan-400 uppercase">Soal 3 &bull; Distributed Retries</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Bobot: 20 Poin</span>
+                    </div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">
+                        Apa kode status HTTP yang paling tepat dikembalikan jika klien mengirim retry dengan Idempotency Key yang masih berstatus "PROCESSING"?
+                    </p>
+                    <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q3" value="A" class="mt-0.5 text-cyan-600" required>
+                            <span>A. HTTP 200 OK dengan body kosong.</span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q3" value="B" class="mt-0.5 text-cyan-600">
+                            <span>B. HTTP 500 Internal Server Error untuk memaksa klien mengulang dari awal.</span>
+                        </label>
+                        <label class="flex items-start gap-2 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-900 cursor-pointer">
+                            <input type="radio" name="q3" value="C" class="mt-0.5 text-cyan-600">
+                            <span>C. HTTP 409 Conflict (In-Flight Conflict) dengan header Retry-After.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-xs text-slate-500">Jawaban akan dievaluasi dengan ulasan teknis industri</span>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md shadow-emerald-950/40">
+                        📝 Periksa Jawaban Kuis Teori
+                    </button>
+                </div>
+            </form>
+
+            <div id="quiz-result-container"></div>
+        </section>
+
+        <!-- Tombol Lanjut ke Hiring Gauntlet -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span>🏆</span> Siap Menghadapi Ujian Seleksi Nyata?
+                </h4>
+                <p class="text-xs text-slate-400 mt-1">
+                    Setelah melatih mental dan menguasai teknik debugging di lab ini, buktikan kompetensi Anda di alur seleksi resmi 5 Tahap sampai mendapatkan Surat Penawaran Kerja (Offer Letter)!
+                </p>
+            </div>
+            <a href="/" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md shadow-emerald-950/40 flex items-center gap-1.5 whitespace-nowrap">
+                <span>🏆 Masuk ke Ujian Hiring Gauntlet</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#070b14] py-4 text-center text-xs text-slate-500 transition-colors duration-200">
+        Fintech Hiring Gauntlet &bull; Exercise Lab: Mental Live Coding Drills &bull; Go 1.27
+    </footer>
+</body>
+</html>
