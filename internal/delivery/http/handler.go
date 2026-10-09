@@ -473,6 +473,7 @@ func (h *Handler) RunScenario04(w http.ResponseWriter, r *http.Request) {
 		h.markStagePassed(4, "Scale Architect & Rate Limiter")
 	}
 
+	w.Header().Set("HX-Trigger", "refreshWallets")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	statusBadge := `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">KUOTA AMAN &bull; ZERO OVERSELLING</span>`
@@ -525,39 +526,115 @@ func (h *Handler) RunScenario04(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(html))
 }
 
-// GetGamificationStatus mengembalikan status kelulusan 4 tahap wawancara kandidat.
+// GetGamificationStatus mengembalikan status kelulusan 6 tahap alur kandidat (0 Bootcamp s/d 5 Offer).
 func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) {
 	h.gamifyMu.RLock()
+	s0 := h.stagePassed[0]
 	s1 := h.stagePassed[1]
 	s2 := h.stagePassed[2]
 	s3 := h.stagePassed[3]
 	s4 := h.stagePassed[4]
+	s5 := s1 && s2 && s3 && s4
 	h.gamifyMu.RUnlock()
 
-	passedCount := 0
-	if s1 { passedCount++ }
-	if s2 { passedCount++ }
-	if s3 { passedCount++ }
-	if s4 { passedCount++ }
+	totalXP := 0
+	if s0 { totalXP += 150 }
+	if s1 { totalXP += 250 }
+	if s2 { totalXP += 250 }
+	if s3 { totalXP += 250 }
+	if s4 { totalXP += 250 }
+	if s5 { totalXP += 100 }
 
-	totalXP := passedCount * 250
-	progressPct := passedCount * 25
+	maxXP := 1250
 
-	levelTitle := "Tahap 1: Live Coding DSA (Two Sum Target Match)"
-	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Sedang Diuji (In Review)</span>`
-	if passedCount == 1 {
-		levelTitle = "Tahap 2: System Design Idempotency Defense"
-	} else if passedCount == 2 {
-		levelTitle = "Tahap 3: Take-Home Payment API Review"
-	} else if passedCount == 3 {
-		levelTitle = "Tahap 4: Production War Room Rate Limiter"
-	} else if passedCount == 4 {
+	levelTitle := "Tahap 0: Bootcamp Teori & Lab Persiapan"
+	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Persiapan Teori</span>`
+	if s5 {
 		levelTitle = "🏆 LULUS SEMUA TAHAP - SURAT PENAWARAN RESMI TERBIT!"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">OFFER EXTENDED (STRONG HIRE) 🎉</span>`
+	} else if s4 {
+		levelTitle = "Tahap 5: Peninjauan Tawaran Kerja (Offer Letter)"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">Siap Review Penawaran</span>`
+	} else if s3 {
+		levelTitle = "Tahap 4: Production War Room (Flash Sale Rate Limiter)"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40">Tahap Akhir Evaluasi</span>`
+	} else if s2 {
+		levelTitle = "Tahap 3: Take-Home Payment API Review"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/40">Ujian Praktik</span>`
+	} else if s1 {
+		levelTitle = "Tahap 2: System Design Idempotency Defense"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Arsitektur Terbuka</span>`
+	} else if s0 {
+		levelTitle = "Tahap 1: Live Coding DSA (Two Sum Target Match)"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Bootcamp Lulus ✓</span>`
+	}
+
+	coreStepsCompleted := 0
+	if s1 { coreStepsCompleted++ }
+	if s2 { coreStepsCompleted++ }
+	if s3 { coreStepsCompleted++ }
+	if s4 { coreStepsCompleted++ }
+	if s5 { coreStepsCompleted++ }
+	progressPct := coreStepsCompleted * 20
+
+	steps := []struct {
+		idx       int
+		icon      string
+		name      string
+		sub       string
+		passed    bool
+		isCurrent bool
+	}{
+		{0, "📚", "Bootcamp", "Teori & Lab", s0, !s0},
+		{1, "💻", "Tahap 1", "Live Coding", s1, s0 && !s1},
+		{2, "🏛️", "Tahap 2", "System Design", s2, s1 && !s2},
+		{3, "📦", "Tahap 3", "Take-Home", s3, s2 && !s3},
+		{4, "🔥", "Tahap 4", "War Room", s4, s3 && !s4},
+		{5, "🏆", "Tahap 5", "Offer Letter", s5, s4 && !s5},
+	}
+
+	var stepperItems strings.Builder
+	for i, step := range steps {
+		circleClass := ""
+		iconDisplay := step.icon
+		statusPill := ""
+
+		if step.passed {
+			circleClass = "bg-emerald-600 text-white shadow-md shadow-emerald-950/20 ring-4 ring-emerald-500/20 border border-emerald-400 scale-105"
+			iconDisplay = "✓"
+			statusPill = `<span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">Lulus</span>`
+		} else if step.isCurrent {
+			circleClass = "bg-gradient-to-tr from-teal-600 to-cyan-500 text-white shadow-md ring-4 ring-cyan-500/30 animate-pulse border border-cyan-400 scale-110"
+			statusPill = `<span class="text-[9px] font-bold text-cyan-600 dark:text-cyan-400">Aktif ●</span>`
+		} else {
+			circleClass = "bg-slate-100 dark:bg-dark-850 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 ring-2 ring-slate-200/60 dark:ring-slate-800"
+			statusPill = `<span class="text-[9px] text-slate-400 dark:text-slate-500">Terkunci</span>`
+		}
+
+		stepperItems.WriteString(fmt.Sprintf(`
+            <button type="button" onclick="switchScenario(%d)" class="group flex flex-col items-center flex-1 cursor-pointer transition transform hover:scale-105 focus:outline-none min-w-[70px]">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all %s">
+                    %s
+                </div>
+                <div class="text-center mt-1.5">
+                    <div class="text-[10px] sm:text-[11px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition leading-tight">%s</div>
+                    <div class="text-[9px] text-slate-500 dark:text-slate-400 hidden md:block">%s</div>
+                    <div class="mt-0.5">%s</div>
+                </div>
+            </button>`, step.idx, circleClass, iconDisplay, step.name, step.sub, statusPill))
+
+		if i < len(steps)-1 {
+			connectorColor := "bg-slate-200 dark:bg-slate-800"
+			if step.passed {
+				connectorColor = "bg-gradient-to-r from-emerald-500 to-teal-500"
+			}
+			stepperItems.WriteString(fmt.Sprintf(`
+            <div class="hidden sm:block flex-1 h-0.5 mt-4 mx-1.5 %s"></div>`, connectorColor))
+		}
 	}
 
 	html := fmt.Sprintf(`
-    <div id="gamification-hud" class="rounded-2xl bg-white dark:bg-gradient-to-r dark:from-dark-900 dark:via-[#101932] dark:to-dark-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm transition-colors duration-200">
+    <div id="gamification-hud" class="rounded-2xl bg-white dark:bg-gradient-to-r dark:from-dark-900 dark:via-[#101932] dark:to-dark-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm transition-colors duration-200 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-cyan-500 flex items-center justify-center text-xl sm:text-2xl shadow-md flex-shrink-0">
@@ -572,26 +649,48 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
                 </div>
             </div>
 
-            <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80 pt-2 sm:pt-0">
+            <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80 pt-2 sm:pt-0">
                 <div class="sm:text-right">
                     <div class="text-[11px] text-slate-500 dark:text-slate-400">Total Pengalaman (XP)</div>
-                    <div class="text-lg sm:text-xl font-mono font-extrabold text-slate-900 dark:text-white">%d / 1.000 XP</div>
+                    <div class="text-lg sm:text-xl font-mono font-extrabold text-slate-900 dark:text-white">%d / %d XP</div>
                 </div>
                 %s
             </div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80">
-            <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-1.5 font-medium">
-                <span>Alur Wawancara: %d dari 4 Misi Selesai</span>
-                <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">%d%% Menuju Penawaran Kerja (Hiring)</span>
+        <!-- Hiring Journey Stepper Bar (Tahap 0 s/d Tahap 5) -->
+        <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-2 font-medium">
+                <span class="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
+                    <span>🗺️</span> <span>Hiring Journey Stepper (%d dari 5 Misi Wawancara Tuntas)</span>
+                </span>
+                <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">%d%% Menuju Tawaran Kerja</span>
             </div>
-            <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-200 dark:border-slate-800">
-                <div class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-2.5 rounded-full transition-all duration-700" style="width: %d%%"></div>
+
+            <div class="overflow-x-auto no-scrollbar py-1">
+                <div class="flex items-start justify-between min-w-[560px] sm:min-w-0">
+                    %s
+                </div>
+            </div>
+
+            <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-200 dark:border-slate-800 mt-3">
+                <div class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-2 rounded-full transition-all duration-700" style="width: %d%%"></div>
             </div>
         </div>
-    </div>`, levelTitle, totalXP, statusBadge, passedCount, progressPct, progressPct)
+
+        <script>
+            if (typeof updateNavTabBadges === 'function') {
+                updateNavTabBadges({
+                    0: %t,
+                    1: %t,
+                    2: %t,
+                    3: %t,
+                    4: %t,
+                    5: %t
+                });
+            }
+        </script>
+    </div>`, levelTitle, totalXP, maxXP, statusBadge, coreStepsCompleted, progressPct, stepperItems.String(), progressPct, s0, s1, s2, s3, s4, s5)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(html))
@@ -603,7 +702,7 @@ func (h *Handler) ResetGamification(w http.ResponseWriter, r *http.Request) {
 	h.stagePassed = make(map[int]bool)
 	h.gamifyMu.Unlock()
 
-	h.hub.Broadcast("🔄 Progres gamifikasi wawancara telah di-reset kembali ke Tahap 1.")
+	h.hub.Broadcast("🔄 Progres gamifikasi wawancara telah di-reset kembali ke Tahap 0.")
 	h.GetGamificationStatus(w, r)
 }
 
@@ -679,6 +778,9 @@ func (h *Handler) EvalBootcampLiveCode(w http.ResponseWriter, r *http.Request) {
 	if !hasMap {
 		complexityBadge = "O(N^2) Nested Loop (Suboptimal)"
 	}
+
+	h.markStagePassed(0, "Bootcamp DSA Lab Certified")
+	w.Header().Set("HX-Trigger", "refreshWallets")
 
 	html := fmt.Sprintf(`
     <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 text-xs space-y-3 font-mono shadow-sm">
@@ -798,6 +900,9 @@ func (h *Handler) EvalBootcampSystemDesignCode(w http.ResponseWriter, r *http.Re
 		_, _ = w.Write([]byte(html))
 		return
 	}
+
+	h.markStagePassed(0, "Bootcamp System Design Lab Certified")
+	w.Header().Set("HX-Trigger", "refreshWallets")
 
 	html := `
     <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 text-xs space-y-3 font-mono shadow-sm">

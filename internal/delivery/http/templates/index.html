@@ -86,6 +86,22 @@
             }
         }
 
+        // ================= PROGRESS BADGES SINKRONISASI PADA TAB NAVIGASI =================
+        function updateNavTabBadges(statusMap) {
+            for (let t = 0; t <= 5; t++) {
+                const badge = document.getElementById(`tab-badge-${t}`);
+                if (!badge) continue;
+                if (statusMap && statusMap[t]) {
+                    badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-0.5 ml-1";
+                    badge.innerHTML = "✓ Lulus";
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.className = "hidden";
+                    badge.innerHTML = "";
+                }
+            }
+        }
+
         // Filter Topik Teori di Tahap 0
         function filterTheory(topic) {
             const cards = document.querySelectorAll('.theory-card');
@@ -596,23 +612,29 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
         <!-- ================= NAVIGASI 6 TAHAP (MOBILE-FIRST SCROLLABLE TABS) ================= -->
         <section class="bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-1.5 sm:p-2 rounded-2xl shadow-sm">
             <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 sm:pb-0">
-                <button id="tab-scenario-0" onclick="switchScenario(0)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-md shadow-emerald-950/40 border border-emerald-500/50 transition-all scale-[1.02] whitespace-nowrap flex-shrink-0">
-                    <span>📚</span> Bootcamp: Teori & Lab
+                <button id="tab-scenario-0" onclick="switchScenario(0)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-md shadow-emerald-950/40 border border-emerald-500/50 transition-all scale-[1.02] whitespace-nowrap flex-shrink-0">
+                    <span>📚</span> <span>Bootcamp: Teori & Lab</span>
+                    <span id="tab-badge-0" class="hidden"></span>
                 </button>
-                <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>💻</span> Tahap 1: Live Coding
+                <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
+                    <span>💻</span> <span>Tahap 1: Live Coding</span>
+                    <span id="tab-badge-1" class="hidden"></span>
                 </button>
-                <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>🏛️</span> Tahap 2: System Design
+                <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
+                    <span>🏛️</span> <span>Tahap 2: System Design</span>
+                    <span id="tab-badge-2" class="hidden"></span>
                 </button>
-                <button id="tab-scenario-3" onclick="switchScenario(3)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>📦</span> Tahap 3: Take-Home Test
+                <button id="tab-scenario-3" onclick="switchScenario(3)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
+                    <span>📦</span> <span>Tahap 3: Take-Home Test</span>
+                    <span id="tab-badge-3" class="hidden"></span>
                 </button>
-                <button id="tab-scenario-4" onclick="switchScenario(4)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>🔥</span> Tahap 4: War Room
+                <button id="tab-scenario-4" onclick="switchScenario(4)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
+                    <span>🔥</span> <span>Tahap 4: War Room</span>
+                    <span id="tab-badge-4" class="hidden"></span>
                 </button>
-                <button id="tab-scenario-5" onclick="switchScenario(5)" class="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-amber-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-dark-850 border border-amber-300 dark:border-amber-500/30 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>🏆</span> Tahap 5: Offer Letter
+                <button id="tab-scenario-5" onclick="switchScenario(5)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-amber-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-dark-850 border border-amber-300 dark:border-amber-500/30 transition-all whitespace-nowrap flex-shrink-0">
+                    <span>🏆</span> <span>Tahap 5: Offer Letter</span>
+                    <span id="tab-badge-5" class="hidden"></span>
                 </button>
                 <button hx-post="/api/gamification/reset" hx-target="#gamification-hud-container" class="text-xs text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-3 py-1.5 transition ml-auto whitespace-nowrap">
                     Reset Game
