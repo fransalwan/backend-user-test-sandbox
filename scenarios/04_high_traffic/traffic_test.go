@@ -30,3 +30,4 @@ func TestTokenBucket_PreventsOverselling(t *testing.T) {
 		t.Errorf("diharapkan ada request yang terkena rate limit 429")
 	}
 }
+

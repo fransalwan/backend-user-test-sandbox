@@ -25,9 +25,9 @@
             }
         }
 
-        // Tab Switcher 5 Tahap Wawancara
+        // Tab Switcher 6 Tahap (0: Bootcamp Teori & Persiapan, 1-4: Ujian Teknis, 5: Keputusan Hiring)
         function switchScenario(tab) {
-            const tabs = [1, 2, 3, 4, 5];
+            const tabs = [0, 1, 2, 3, 4, 5];
             tabs.forEach(t => {
                 const tabBtn = document.getElementById(`tab-scenario-${t}`);
                 const view = document.getElementById(`scenario-${t}-view`);
@@ -36,11 +36,34 @@
                         tabBtn.className = "flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/40 transition-all scale-[1.02]";
                         view.classList.remove('hidden');
                     } else {
-                        tabBtn.className = "flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all";
+                        if (t === 5) {
+                            tabBtn.className = "flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-amber-400 hover:text-amber-300 hover:bg-dark-850 border border-amber-500/30 transition-all";
+                        } else {
+                            tabBtn.className = "flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all";
+                        }
                         view.classList.add('hidden');
                     }
                 }
             });
+        }
+
+        // Filter Topik Teori di Tahap 0
+        function filterTheory(topic) {
+            const cards = document.querySelectorAll('.theory-card');
+            cards.forEach(card => {
+                if (topic === 'all' || card.dataset.topic === topic) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            document.querySelectorAll('.theory-nav-btn').forEach(btn => {
+                btn.className = "theory-nav-btn px-3 py-1.5 text-xs rounded-xl font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition";
+            });
+            const activeBtn = document.getElementById(`theory-btn-${topic}`);
+            if (activeBtn) {
+                activeBtn.className = "theory-nav-btn px-3 py-1.5 text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-800/80 transition";
+            }
         }
 
         // Generator UUID Kunci Idempotensi
@@ -120,9 +143,12 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="toggleGuideModal()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-300 border border-emerald-500/30 transition shadow-sm hover:scale-[1.02]">
-                    <span>📖</span> Panduan & Teori
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="switchScenario(0)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 text-xs font-semibold text-cyan-300 border border-cyan-700/50 transition shadow-sm hover:scale-[1.02]">
+                    <span>📚</span> Bootcamp Teori
+                </button>
+                <button onclick="toggleGuideModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-300 border border-emerald-500/30 transition shadow-sm hover:scale-[1.02]">
+                    <span>📖</span> Panduan Game
                 </button>
                 <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -213,10 +239,13 @@
             </div>
         </section>
 
-        <!-- ================= NAVIGASI 5 TAHAP ALUR WAWANCARA (TAB HIRING) ================= -->
+        <!-- ================= NAVIGASI 6 TAHAP ALUR WAWANCARA (BOOTCAMP & HIRING) ================= -->
         <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-dark-900 border border-slate-800 p-2.5 rounded-2xl shadow-sm">
             <div class="flex flex-wrap items-center gap-2">
-                <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/40 transition-all scale-[1.02]">
+                <button id="tab-scenario-0" onclick="switchScenario(0)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/40 transition-all scale-[1.02]">
+                    <span>📚</span> Bootcamp: Teori & Persiapan
+                </button>
+                <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
                     <span>🔒</span> Tahap 1: Live Coding (Race)
                 </button>
                 <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
@@ -242,9 +271,287 @@
             
             <!-- Kolom Kiri: Panel Kontrol Skenario Aktif (7 Kolom) -->
             <div class="lg:col-span-7 space-y-6">
-                
+
+                <!-- ================= TAHAP 0: BOOTCAMP TEORI & PERSIAPAN TEKNIS ================= -->
+                <div id="scenario-0-view" class="bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                    <div class="border-b border-slate-800 pb-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40">Tahap 0 &bull; Learning Preparation & Bootcamp Teori</span>
+                            <span class="text-xs font-mono text-emerald-300 font-semibold">Kurikulum 100% Relevan Ujian</span>
+                        </div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
+                            <span>📚</span> Buku Saku & Teori Fundamental Backend Fintech
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Pelajari konsep arsitektur, alasan teknis di balik setiap solusi, dan jebakan interview yang sering ditanyakan sebelum memulai live test. Klik topik untuk fokus membaca:
+                        </p>
+                    </div>
+
+                    <!-- Sub-Navigasi Topik Teori Cepat -->
+                    <div class="flex flex-wrap items-center gap-1.5 border-b border-slate-800/80 pb-3">
+                        <button id="theory-btn-all" onclick="filterTheory('all')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-800/80 transition">
+                            🌟 Semua Modul
+                        </button>
+                        <button id="theory-btn-core" onclick="filterTheory('core')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition">
+                            💰 Invarian Uang & Ledger
+                        </button>
+                        <button id="theory-btn-race" onclick="filterTheory('race')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition">
+                            🔒 Concurrency & Lock (Tahap 1)
+                        </button>
+                        <button id="theory-btn-idem" onclick="filterTheory('idem')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition">
+                            🛡️ Idempotensi (Tahap 2)
+                        </button>
+                        <button id="theory-btn-saga" onclick="filterTheory('saga')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition">
+                            🔄 Distributed Saga (Tahap 3)
+                        </button>
+                        <button id="theory-btn-traffic" onclick="filterTheory('traffic')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition">
+                            ⚡ Flash Sale (Tahap 4)
+                        </button>
+                        <button id="theory-btn-qa" onclick="filterTheory('qa')" class="theory-nav-btn px-2.5 py-1 text-xs rounded-lg font-medium text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition">
+                            💡 Tanya Jawab Interview
+                        </button>
+                    </div>
+
+                    <!-- DAFTAR KARTU TEORI -->
+                    <div class="space-y-4">
+                        
+                        <!-- 1. INVARIAN UANG & DOUBLE-ENTRY LEDGER -->
+                        <div class="theory-card rounded-xl bg-slate-950/80 border border-slate-800/90 p-5 space-y-3" data-topic="core">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                                <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>💰</span> Modul 0 &bull; Hukum Utama Rekayasa Finansial
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono">Zero-Tolerance Rule</span>
+                            </div>
+                            
+                            <h3 class="text-sm font-bold text-white">1. Mengapa Dilarang Keras Menggunakan Float/Double untuk Uang?</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Format bilangan floating-point (standar IEEE 754) menggunakan aproksimasi biner base-2 yang tidak bisa merepresentasikan pecahan desimal basis 10 secara presisi.
+                            </p>
+                            <div class="p-3 rounded-lg bg-dark-950 border border-slate-800/90 font-mono text-[11px] text-rose-300 space-y-1">
+                                <div class="text-slate-500">// Contoh Bug Akurasi Float di Go:</div>
+                                <div>var a float64 = 0.1</div>
+                                <div>var b float64 = 0.2</div>
+                                <div>fmt.Println(a + b) <span class="text-amber-400">// Hasil: 0.30000000000000004 (Bocor 0.0000000000000004!)</span></div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-xs text-emerald-200 space-y-1">
+                                <strong class="text-emerald-300 block">✅ Standar Industri Perbankan & Fintech:</strong>
+                                Simpan nilai moneter dalam satuan terkecil (sen / cents) sebagai <code class="font-mono font-bold text-white">int64</code> di Go dan <code class="font-mono font-bold text-white">BIGINT</code> di SQL. Contoh: <code class="font-mono text-emerald-300">$1.000,00</code> direpresentasikan murni sebagai angka bulat <code class="font-mono text-emerald-300">100000</code> sen.
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white pt-2">2. Prinsip Double-Entry Bookkeeping (Pembukuan Berpasangan)</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Jangan pernah hanya mengupdate saldo secara naif (<code class="font-mono text-slate-400">UPDATE wallets SET balance = balance - 100</code>). Tanpa riwayat mutasi, sistem gagal lolos audit keuangan. Di sistem enterprise, saldo adalah akumulasi (sum) dari seluruh baris mutasi di tabel <code class="font-mono text-emerald-400">ledger_entries</code>:
+                            </p>
+                            <ul class="text-xs text-slate-300 list-disc list-inside space-y-1 pl-1">
+                                <li><strong>Immutable (Append-Only):</strong> Baris ledger dilarang di-UPDATE atau di-DELETE.</li>
+                                <li><strong>Zero-Sum Balance:</strong> Setiap pengeluaran (<code class="text-rose-400 font-mono">DEBIT</code>) harus seimbang dengan penerimaan (<code class="text-emerald-400 font-mono">CREDIT</code>) di sisi lawan (misal rekening tujuan atau akun kas penampung).</li>
+                            </ul>
+                        </div>
+
+                        <!-- 2. CONCURRENCY & LOCK STRATEGIES (TAHAP 1) -->
+                        <div class="theory-card rounded-xl bg-slate-950/80 border border-slate-800/90 p-5 space-y-3" data-topic="race">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                                <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>🔒</span> Modul 1 &bull; Concurrency & Locking Strategies
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-mono">Ujian Tahap 1</span>
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white">Anatomi Bencana: Lost Update & Overdraft Race Condition</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Bayangkan saldo Alice tersisa <strong>$25</strong>. Dua goroutine berjalan konkuren dan masing-masing mencoba menarik <strong>$25</strong>:
+                            </p>
+                            <div class="p-3 rounded-lg bg-dark-950 border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1">
+                                <div>Goroutine A: Baca saldo ($25) &ge; $25 &rarr; VALID (lanjut proses)</div>
+                                <div>Goroutine B: Baca saldo ($25) &ge; $25 &rarr; VALID (karena A belum selesai tulis!)</div>
+                                <div>Goroutine A: Potong $25 &rarr; Tulis saldo $0</div>
+                                <div>Goroutine B: Potong $25 &rarr; Tulis saldo <span class="text-rose-400 font-bold">-$25 (OVERDRAFT / SALDO MINUS!)</span></div>
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white pt-1">Komparasi Solusi Penguncian:</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                    <strong class="text-emerald-400 block">Pessimistic Locking</strong>
+                                    <code class="text-[10px] font-mono text-slate-400 block">SELECT FOR UPDATE</code>
+                                    <p class="text-[11px] text-slate-300">Mengunci baris DB eksklusif. Transaksi lain antre menunggu commit. Cocok untuk transaksi berfrekuensi tulis tinggi (hot wallet).</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                    <strong class="text-cyan-400 block">Optimistic (CAS)</strong>
+                                    <code class="text-[10px] font-mono text-slate-400 block">WHERE version = ?</code>
+                                    <p class="text-[11px] text-slate-300">Tanpa lock di awal. Cek nomor versi saat update. Jika versi sudah berubah, retry. Cocok untuk sistem read-heavy / low-contention.</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                    <strong class="text-teal-400 block">Redis Lock</strong>
+                                    <code class="text-[10px] font-mono text-slate-400 block">SET key val NX PX TTL</code>
+                                    <p class="text-[11px] text-slate-300">Lock terdistribusi di memori sebelum menyentuh DB RDBMS. Melindungi cluster microservice independen.</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex justify-end">
+                                <button onclick="switchScenario(1)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-md shadow-emerald-950/40">
+                                    <span>👉</span> Langsung Uji Teori di Tahap 1 (Live Coding Race)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. IDEMPOTENCY ENGINE (TAHAP 2) -->
+                        <div class="theory-card rounded-xl bg-slate-950/80 border border-slate-800/90 p-5 space-y-3" data-topic="idem">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                                <span class="text-xs font-bold text-teal-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>🛡️</span> Modul 2 &bull; Idempotency Engine & Anti Double-Spending
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20 font-mono">Ujian Tahap 2</span>
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white">Anatomi Bencana: Badai Retry Jaringan (Network Retry Storm)</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Sinyal koneksi internet mobile tidak pernah 100% andal. Ketika klien mengirim instruksi transfer $50, server sukses mendebet saldo. Namun sebelum HTTP 200 tiba di HP nasabah, koneksi terputus (*timeout*). Klien otomatis me-retry 5 kali. Tanpa idempotensi, nasabah terdebet <strong>$250</strong>!
+                            </p>
+
+                            <h3 class="text-sm font-bold text-white pt-1">4 Pilar Engine Idempotensi Standar Stripe:</h3>
+                            <div class="space-y-2 text-xs text-slate-300">
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 flex items-start gap-2">
+                                    <span class="font-bold text-teal-400 font-mono">1.</span>
+                                    <div><strong>Idempotency-Key (UUIDv4):</strong> Dikirim oleh klien via HTTP header unik per transaksi bisnis.</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 flex items-start gap-2">
+                                    <span class="font-bold text-teal-400 font-mono">2.</span>
+                                    <div><strong>Payload Hashing (SHA-256):</strong> Hash dari method, path, dan JSON request body. Jika key sama dipakai dengan nominal berbeda (tampering), tolak dengan <code class="text-rose-400 font-mono font-bold">HTTP 422 Unprocessable Entity</code>.</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 flex items-start gap-2">
+                                    <span class="font-bold text-teal-400 font-mono">3.</span>
+                                    <div><strong>In-Flight Distributed Lock:</strong> Saat transaksi pertama sedang berjalan (<code class="text-amber-400 font-mono">IN_PROGRESS</code>), request duplikat konkuren langsung dicegat dengan <code class="text-amber-300 font-mono font-bold">HTTP 409 Conflict</code>.</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 flex items-start gap-2">
+                                    <span class="font-bold text-teal-400 font-mono">4.</span>
+                                    <div><strong>Response Caching (<code class="text-emerald-400 font-mono">COMPLETED</code>):</strong> Setelah transaksi pertama sukses, respons disimpan. Retry berikutnya menerima respons tersimpan seketika tanpa memotong saldo ulang!</div>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex justify-end">
+                                <button onclick="switchScenario(2)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition shadow-md shadow-teal-950/40">
+                                    <span>👉</span> Langsung Uji Teori di Tahap 2 (Idempotency Defense)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 4. DISTRIBUTED TRANSACTIONS, SAGA & OUTBOX (TAHAP 3) -->
+                        <div class="theory-card rounded-xl bg-slate-950/80 border border-slate-800/90 p-5 space-y-3" data-topic="saga">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                                <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>🔄</span> Modul 3 &bull; Distributed Saga & Transactional Outbox
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">Ujian Tahap 3</span>
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white">Anatomi Bencana: The Dual-Write Hazard</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Ketika nasabah menarik dana ke rekening Bank BCA, aplikasi harus melakukan 2 hal: (1) potong saldo database lokal, dan (2) panggil API HTTP Bank BCA.
+                            </p>
+                            <div class="p-3 rounded-lg bg-rose-950/30 border border-rose-800/50 text-xs text-rose-200 space-y-1">
+                                <strong class="text-rose-300 block">⚠️ Mengapa Dilarang Memanggil API Luar di dalam SQL Transaction?</strong>
+                                Jika pemanggilan API Bank ditaruh di dalam <code class="font-mono text-rose-300">BEGIN ... COMMIT</code>, DB connection pool tersandera menunggu latensi jaringan pihak ketiga. Dan jika bank sukses mentransfer uang tapi server lokal crash sebelum Commit, uang kas bank keluar namun saldo dompet di aplikasi tidak berkurang (Kebocoran Finansial Fatal!).
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white pt-1">Arsitektur Solusi: Outbox Pattern & Saga Compensation</h3>
+                            <ul class="text-xs text-slate-300 space-y-2">
+                                <li class="p-2.5 rounded-lg bg-dark-900 border border-slate-800">
+                                    <strong class="text-cyan-300 block">1. Transactional Outbox:</strong>
+                                    Simpan perubahan saldo dan catatan event ke tabel <code class="font-mono text-emerald-400">outbox_events</code> dalam <strong>SATU transaksi ACID lokal</strong>. Background relay worker membaca outbox secara asinkron dan mengirim pesan dengan jaminan <em>At-Least-Once Delivery</em>.
+                                </li>
+                                <li class="p-2.5 rounded-lg bg-dark-900 border border-slate-800">
+                                    <strong class="text-cyan-300 block">2. Compensating Transaction (Auto-Refund):</strong>
+                                    Jika API Bank mitra mengembalikan HTTP 500 atau 504 Timeout, Saga Orchestrator secara otomatis memicu transaksi penyeimbang: mengkreditkan kembali saldo nasabah dan mencatat <code class="font-mono text-amber-300">REFUND_DISBURSEMENT_FAILED</code> di audit ledger.
+                                </li>
+                            </ul>
+
+                            <div class="pt-2 flex justify-end">
+                                <button onclick="switchScenario(3)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shadow-md shadow-cyan-950/40">
+                                    <span>👉</span> Langsung Uji Teori di Tahap 3 (Saga & Outbox Test)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 5. FLASH SALE & RATE LIMITER (TAHAP 4) -->
+                        <div class="theory-card rounded-xl bg-slate-950/80 border border-slate-800/90 p-5 space-y-3" data-topic="traffic">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                                <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>⚡</span> Modul 4 &bull; High Traffic & Flash Sale Isolation
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-mono">Ujian Tahap 4</span>
+                            </div>
+
+                            <h3 class="text-sm font-bold text-white">Anatomi Bencana: The Thundering Herd & Overselling</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Saat Flash Sale diskon 99% dibuka tengah malam, 10.000 user menekan tombol serentak memperebutkan 50 voucher. Jika semua request menembus database SQL:
+                            </p>
+                            <ul class="text-xs text-rose-300 list-disc list-inside space-y-1 pl-1">
+                                <li>Connection pool database habis seketika (<code class="font-mono">max_connections reached</code>).</li>
+                                <li>Race condition menyebabkan stok voucher terjual melebihi kuota (<strong class="text-rose-400">Overselling</strong>).</li>
+                            </ul>
+
+                            <h3 class="text-sm font-bold text-white pt-1">Arsitektur Pertahanan 3 Lapis (Defense-in-Depth):</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                    <strong class="text-amber-400 block">Lapis 1: Token Bucket</strong>
+                                    <p class="text-[11px] text-slate-300">Rate limiter membatasi burst (misal 50 req) dan menolak kelebihan traffic di pintu masuk dengan <code class="text-amber-300 font-mono">HTTP 429 Too Many Requests</code>.</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                    <strong class="text-emerald-400 block">Lapis 2: Redis DECRBY</strong>
+                                    <p class="text-[11px] text-slate-300">Stok dipotong atomic di memory dalam 0.5 ms. Jika hasil &lt; 0, tolak seketika tanpa query RDBMS sedikitpun!</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                    <strong class="text-cyan-400 block">Lapis 3: Worker Queue</strong>
+                                    <p class="text-[11px] text-slate-300">Hanya kuota yang sukses merebut slot di Redis yang dialirkan ke antrean worker untuk ditulis ke PostgreSQL secara bertahap.</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex justify-end">
+                                <button onclick="switchScenario(4)" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition shadow-md shadow-amber-950/40">
+                                    <span>👉</span> Langsung Uji Teori di Tahap 4 (Flash Sale Rate Limiter)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 6. TANYA JAWAB WAWANCARA (QA CHEATSHEET) -->
+                        <div class="theory-card rounded-xl bg-slate-950/80 border border-slate-800/90 p-5 space-y-3" data-topic="qa">
+                            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                                <span class="text-xs font-bold text-purple-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>💡</span> Modul 5 &bull; Tanya Jawab Wawancara Level Principal
+                                </span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 font-mono">Interview Cheatsheet</span>
+                            </div>
+
+                            <div class="space-y-3 text-xs">
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1.5">
+                                    <strong class="text-white block font-semibold text-xs">Q1: Kapan memilih Pessimistic Locking dibanding Optimistic Locking?</strong>
+                                    <p class="text-slate-300 text-[11px] leading-relaxed">
+                                        <strong>Jawaban Senior:</strong> Pilih <em>Pessimistic Lock</em> ketika konflik tulis sangat sering terjadi pada satu entitas (seperti hot wallet saldo terbatas). Jika memakai optimistic CAS di hot wallet, puluhan goroutine akan terus-menerus gagal versi dan boros CPU melakukan retry. Sebaliknya, pilih <em>Optimistic Lock</em> jika sistem bersifat read-heavy dengan tingkat konflik rendah (misal pembaruan profil user atau katalog belanja).
+                                    </p>
+                                </div>
+
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1.5">
+                                    <strong class="text-white block font-semibold text-xs">Q2: Bagaimana menjamin Exactly-Once Semantics saat mengirim pembayaran?</strong>
+                                    <p class="text-slate-300 text-[11px] leading-relaxed">
+                                        <strong>Jawaban Senior:</strong> Secara fisik jaringan (Two-Generals Problem), Exactly-Once murni pada layer transport adalah mustahil karena koneksi bisa putus kapan saja. Di fintech, Exactly-Once dijamin melalui kombinasi <strong>At-Least-Once Delivery</strong> (menggunakan Transactional Outbox + Message Broker retries) digabungkan dengan <strong>Idempotent Consumer</strong> (tabel idempotensi & deduplication key) di sisi penerima.
+                                    </p>
+                                </div>
+
+                                <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1.5">
+                                    <strong class="text-white block font-semibold text-xs">Q3: Bagaimana jika node Redis yang memegang distributed lock mati?</strong>
+                                    <p class="text-slate-300 text-[11px] leading-relaxed">
+                                        <strong>Jawaban Senior:</strong> Gunakan TTL otomatis pada key lock agar tidak terjadi permanent deadlock, terapkan <em>Watchdog heartbeat</em> untuk memperpanjang lock selama pemrosesan aktif, dan wajib sertakan <strong>Fencing Token</strong> (nomor versi inkremental yang divalidasi di database) sehingga jika lock lama kedaluwarsa sebelum pekerja selesai, transaksi lamanya akan ditolak oleh DB.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 <!-- ================= TAHAP 1: LIVE CODING CONCURRENCY ================= -->
-                <div id="scenario-1-view" class="bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <div id="scenario-1-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
                             <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/40">Tahap 1 &bull; Live Coding Test</span>

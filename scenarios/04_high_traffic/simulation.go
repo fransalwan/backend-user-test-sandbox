@@ -170,3 +170,4 @@ func (s *Simulator) Run(ctx context.Context, cfg SimulationConfig, publish Event
 		DurationMs:        duration,
 	}
 }
+
