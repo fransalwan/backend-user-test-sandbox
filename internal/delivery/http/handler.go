@@ -75,57 +75,57 @@ func (h *Handler) GetWallets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	balanceDollars := float64(balance) / 100.0
-	statusColor := "text-white"
+	statusColor := "text-slate-900 dark:text-white"
 	anomalyBadge := ""
 	if balance < 0 {
-		statusColor = "text-rose-400 font-bold"
-		anomalyBadge = `<span class="ml-2 px-1.5 py-0.5 text-[10px] rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">OVERDRAFT!</span>`
+		statusColor = "text-rose-600 dark:text-rose-400 font-bold"
+		anomalyBadge = `<span class="ml-2 px-1.5 py-0.5 text-[10px] rounded bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/40">OVERDRAFT!</span>`
 	}
 
 	html := fmt.Sprintf(`
-    <div id="wallet-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="rounded-xl bg-gradient-to-b from-[#0f172a] to-[#0b1120] border border-slate-800 p-5 shadow-md">
+    <div id="wallet-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm">
             <div class="flex justify-between items-start">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 font-mono">wallet-alice-001</span>
-                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Rekening Utama</span>
+                        <span class="text-xs text-slate-500 font-mono">wallet-alice-001</span>
+                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-medium">Rekening Utama</span>
                     </div>
-                    <div class="text-base font-bold text-white mt-1 flex items-center">
+                    <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-1 flex items-center">
                         Alice (Hot Wallet Target) %s
                     </div>
                 </div>
-                <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
                     Versi: %d
                 </span>
             </div>
-            <div class="mt-5 flex items-baseline justify-between border-t border-slate-800/60 pt-3">
-                <span class="text-xs text-slate-400 font-medium">Saldo Tersedia</span>
+            <div class="mt-4 flex items-baseline justify-between border-t border-slate-100 dark:border-slate-800/60 pt-3">
+                <span class="text-xs text-slate-500 font-medium">Saldo Tersedia</span>
                 <div class="text-right">
-                    <span class="text-3xl font-mono font-extrabold %s tracking-tight">$%0.2f</span>
-                    <div class="text-[11px] text-slate-500 font-mono mt-0.5">%d sen (int64)</div>
+                    <span class="text-2xl sm:text-3xl font-mono font-extrabold %s tracking-tight">$%0.2f</span>
+                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">%d sen (int64)</div>
                 </div>
             </div>
         </div>
 
-        <div class="rounded-xl bg-gradient-to-b from-[#0f172a] to-[#0b1120] border border-slate-800 p-5 shadow-md">
+        <div class="rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm">
             <div class="flex justify-between items-start">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs text-slate-400 font-mono">wallet-bob-002</span>
-                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-medium">Rekening Penerima</span>
+                        <span class="text-xs text-slate-500 font-mono">wallet-bob-002</span>
+                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-medium">Rekening Penerima</span>
                     </div>
-                    <div class="text-base font-bold text-white mt-1">Bob (Rekening Tujuan)</div>
+                    <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-1">Bob (Rekening Tujuan)</div>
                 </div>
-                <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
+                <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                     Versi: 1
                 </span>
             </div>
-            <div class="mt-5 flex items-baseline justify-between border-t border-slate-800/60 pt-3">
-                <span class="text-xs text-slate-400 font-medium">Saldo Tersedia</span>
+            <div class="mt-4 flex items-baseline justify-between border-t border-slate-100 dark:border-slate-800/60 pt-3">
+                <span class="text-xs text-slate-500 font-medium">Saldo Tersedia</span>
                 <div class="text-right">
-                    <span class="text-3xl font-mono font-extrabold text-white tracking-tight">$250.00</span>
-                    <div class="text-[11px] text-slate-500 font-mono mt-0.5">25.000 sen (int64)</div>
+                    <span class="text-2xl sm:text-3xl font-mono font-extrabold text-slate-900 dark:text-white tracking-tight">$250.00</span>
+                    <div class="text-[11px] text-slate-400 font-mono mt-0.5">25.000 sen (int64)</div>
                 </div>
             </div>
         </div>
@@ -557,37 +557,37 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 	}
 
 	html := fmt.Sprintf(`
-    <div id="gamification-hud" class="rounded-2xl bg-gradient-to-r from-dark-900 via-[#101932] to-dark-900 border border-slate-800 p-5 shadow-lg">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div id="gamification-hud" class="rounded-2xl bg-white dark:bg-gradient-to-r dark:from-dark-900 dark:via-[#101932] dark:to-dark-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm transition-colors duration-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-cyan-500 flex items-center justify-center text-2xl shadow-md">
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-cyan-500 flex items-center justify-center text-xl sm:text-2xl shadow-md flex-shrink-0">
                     👨‍💻
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-white">Kandidat: Frans Alwan</span>
-                        <span class="text-xs text-slate-400 font-mono">&bull; Target: Principal Backend Engineer</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Kandidat: Frans Alwan</span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">&bull; Target: Principal Backend Engineer</span>
                     </div>
-                    <div class="text-xs font-semibold text-emerald-400 mt-0.5">%s</div>
+                    <div class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">%s</div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <div class="text-xs text-slate-400">Total Pengalaman (XP)</div>
-                    <div class="text-xl font-mono font-extrabold text-white">%d / 1.000 XP</div>
+            <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80 pt-2 sm:pt-0">
+                <div class="sm:text-right">
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Total Pengalaman (XP)</div>
+                    <div class="text-lg sm:text-xl font-mono font-extrabold text-slate-900 dark:text-white">%d / 1.000 XP</div>
                 </div>
                 %s
             </div>
         </div>
 
         <!-- Progress Bar -->
-        <div class="mt-4 pt-3 border-t border-slate-800/80">
-            <div class="flex justify-between text-[11px] text-slate-400 mb-1.5 font-medium">
+        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="flex justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-1.5 font-medium">
                 <span>Alur Wawancara: %d dari 4 Misi Selesai</span>
-                <span class="font-mono text-emerald-400">%d%% Menuju Penawaran Kerja (Hiring)</span>
+                <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">%d%% Menuju Penawaran Kerja (Hiring)</span>
             </div>
-            <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+            <div class="w-full bg-slate-100 dark:bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-200 dark:border-slate-800">
                 <div class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-2.5 rounded-full transition-all duration-700" style="width: %d%%"></div>
             </div>
         </div>
