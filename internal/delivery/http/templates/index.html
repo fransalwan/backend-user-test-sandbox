@@ -738,7 +738,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
 
             @page {
                 size: A4 portrait;
-                margin: 8mm 12mm 8mm 12mm;
+                margin: 8mm 10mm 8mm 10mm;
             }
 
             html, body {
@@ -790,27 +790,37 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
-                max-height: 275mm !important;
+                height: 272mm !important;
+                max-height: 272mm !important;
                 overflow: hidden !important;
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
             }
 
             /* LEMBAR 2: Tepat 1 Lembar A4 Kedua */
             .offer-page-2 {
+                page-break-before: auto !important;
+                break-before: auto !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
-                max-height: 275mm !important;
+                height: 272mm !important;
+                max-height: 272mm !important;
                 overflow: hidden !important;
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
             }
 
             /* SKALASI HURUF DINAMIS & PENGATURAN SPASI CETAK KOMPAK */
             .offer-page {
-                font-size: 8.5pt !important;
+                font-size: 8pt !important;
                 line-height: 1.25 !important;
                 background: #ffffff !important;
                 color: #0f172a !important;
@@ -822,41 +832,41 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
 
             /* Kompresi Spacing Vertikal */
             .offer-page.space-y-4 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 5px !important;
-            }
-            .offer-page .space-y-4 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 4px !important;
             }
-            .offer-page .space-y-3 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 3px !important;
+            .offer-page .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 3.5px !important;
             }
-            .offer-page .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+            .offer-page .space-y-3 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 2.5px !important;
             }
-            .offer-page .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+            .offer-page .space-y-2 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 2px !important;
             }
+            .offer-page .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 1.5px !important;
+            }
             .offer-page .space-y-12 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 12px !important;
+                margin-top: 10px !important;
             }
 
             /* Kop Surat Compact */
             .offer-page h1 {
-                font-size: 11pt !important;
+                font-size: 10.5pt !important;
                 line-height: 1.15 !important;
                 margin: 0 !important;
             }
             .offer-page .w-12.h-12,
             .offer-page .print\:w-11 {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 11pt !important;
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 10pt !important;
                 border-radius: 6px !important;
             }
 
             /* Headings Seksi (I, II, III, IV, V) */
             .offer-page .font-bold.uppercase {
-                font-size: 8pt !important;
+                font-size: 7.8pt !important;
                 letter-spacing: 0.04em !important;
                 padding-bottom: 2px !important;
                 margin-bottom: 2px !important;
@@ -864,15 +874,15 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
 
             /* Paragraf & Text */
             .offer-page p {
-                font-size: 8pt !important;
-                line-height: 1.3 !important;
+                font-size: 7.8pt !important;
+                line-height: 1.26 !important;
                 margin-bottom: 2px !important;
             }
 
             /* Box Card Ketentuan (Bagian I) */
             .offer-page .p-2.rounded-lg,
             .offer-page .print\:p-1\.5 {
-                padding: 2.5px 5px !important;
+                padding: 2px 4.5px !important;
                 border-radius: 4px !important;
             }
             .offer-page .p-2.rounded-lg span {
@@ -881,22 +891,22 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
 
             /* Tabel Remunerasi (Bagian II) */
             .offer-page table {
-                font-size: 7.5pt !important;
+                font-size: 7.2pt !important;
                 width: 100% !important;
             }
             .offer-page table th,
             .offer-page table td {
-                padding: 2px 4px !important;
+                padding: 1.8px 3.5px !important;
                 line-height: 1.2 !important;
             }
 
             /* Scorecard 4 Card (Bagian III) */
             .offer-page .grid-cols-4 .p-2,
             .offer-page .grid-cols-4 .print\:p-1\.5 {
-                padding: 2.5px !important;
+                padding: 2px !important;
             }
             .offer-page .grid-cols-4 .font-black {
-                font-size: 8.5pt !important;
+                font-size: 8pt !important;
             }
 
             /* Tanda Tangan & Stempel (Bagian V) */
@@ -907,31 +917,31 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
             }
             .offer-page .w-20.h-20,
             .offer-page .print\:w-16 {
-                width: 44px !important;
-                height: 44px !important;
+                width: 40px !important;
+                height: 40px !important;
                 margin-top: 1px !important;
                 margin-bottom: 1px !important;
                 border-width: 1.5px !important;
             }
             .offer-page .w-20.h-20 div,
             .offer-page .print\:text-\[6\.5px\] {
-                font-size: 5pt !important;
-                line-height: 1.1 !important;
+                font-size: 4.8pt !important;
+                line-height: 1.05 !important;
             }
 
             /* Disclaimer Box */
             .offer-page .p-2\.5.rounded-lg,
             .offer-page .print\:p-1\.5 {
-                padding: 3px 5px !important;
-                font-size: 6.8pt !important;
-                line-height: 1.25 !important;
+                padding: 2.5px 4.5px !important;
+                font-size: 6.5pt !important;
+                line-height: 1.2 !important;
             }
 
             /* Footer */
             .offer-page .border-t.border-slate-200 {
                 padding-top: 2px !important;
-                margin-top: 3px !important;
-                font-size: 6.8pt !important;
+                margin-top: 2px !important;
+                font-size: 6.5pt !important;
             }
         }
     </style>
@@ -1507,6 +1517,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                         </div>
                     </div>
                 </div>
+                </div>
 
                 <!-- Tombol Navigasi Lanjut ke Ujian -->
                 <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1524,6 +1535,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                 </div>
 
             </div>
+            <!-- /scenario-0-view -->
 
             <!-- ========================================================================= -->
             <!-- ================= TAHAP 1: LIVE CODING LEETCODE (DEDICATED FULL VIEW) === -->
