@@ -133,3 +133,4 @@ Lakukan persiapan ini 1 jam sebelum jadwal wawancara dimulai:
 - [ ] Buka terminal dan pastikan `docker compose up -d` sudah siap jalan jika interviewer meminta demo lokal.
 - [ ] Baca kembali ringkasan jawaban verbal di atas untuk melancarkan artikulasi.
 - [ ] Ingat aturan emas: **Jujur jika tidak tahu**, lalu jelaskan bagaimana cara Anda mencari solusinya (*"Saya belum pernah mengonfigurasi fitur X secara mendalam di production, tapi berdasarkan dokumentasinya cara kerjanya adalah Y..."*).
+
