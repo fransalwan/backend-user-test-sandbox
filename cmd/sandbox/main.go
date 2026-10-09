@@ -25,6 +25,8 @@ func main() {
 	mux.HandleFunc("/api/scenarios/01/run", handler.RunScenario01)
 	mux.HandleFunc("/api/scenarios/02/run", handler.RunScenario02)
 	mux.HandleFunc("/api/scenarios/02/clear", handler.ClearIdempotencyRecords)
+	mux.HandleFunc("/api/scenarios/03/run", handler.RunScenario03)
+	mux.HandleFunc("/api/scenarios/03/clear", handler.ClearScenario03)
 
 	port := ":8080"
 	fmt.Printf("Dashboard aktif di http://localhost%s\n", port)

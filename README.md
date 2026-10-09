@@ -77,9 +77,13 @@ backend-user-test-sandbox/
   3. **In-Flight Conflict (HTTP 409 ⛔)**: Mencegah collision saat request sebelumnya masih berstatus `PROCESSING`.
   4. **Verifikasi Hash Payload (HTTP 422 🛑)**: Menggagalkan upaya manipulasi parameter pada kunci idempotensi yang sama.
 
-### 🎯 Scenario 03: Distributed Transactions & Eventual Consistency (`scenarios/03_distributed`)
-- **Fintech Problem**: Coordinating money movement with external third-party payment gateways without 2PC.
-- **Key Concepts**: Transactional Outbox pattern, Saga Orchestration, compensating transactions (automated refunds), and message deduplication.
+### ✅ Scenario 03: Distributed Transactions & Outbox Pattern (`scenarios/03_distributed`)
+- **Fintech Problem**: Bahaya Dual-Write saat penarikan dana ke Bank Mitra / Payment Gateway pihak ketiga.
+- **Interactive Demonstrations**:
+  1. **Dual-Write Naif (Bahaya Uang Lenyap ⚠️)**: Membuktikan bagaimana kegagalan API Bank menghilangkan uang nasabah jika tanpa rollback kompensasi.
+  2. **Saga dengan Kompensasi (Auto-Refund ↩️)**: Otomatis memicu *Compensating Transaction* mengembalikan saldo nasabah utuh saat API Bank error 5xx/timeout.
+  3. **Saga Happy Path (Sukses Tuntas 🚀)**: Mutasi saldo atomik bersamaan dengan pencatatan event ke tabel Outbox, hingga outbox event berstatus `PUBLISHED`.
+
 
 ### 🎯 Scenario 04: High Traffic & Flash Sales (`scenarios/04_high_traffic`)
 - **Fintech Problem**: Extreme traffic spikes (e.g., 10,000 requests/sec competing for 100 limited vouchers/cashbacks).

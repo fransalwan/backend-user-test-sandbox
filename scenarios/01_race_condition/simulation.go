@@ -95,6 +95,15 @@ func (s *Simulator) Deduct(amount int64) bool {
 	return true
 }
 
+// Credit menambah saldo secara aman (digunakan untuk Compensating Refund di Saga).
+func (s *Simulator) Credit(amount int64) {
+	s.wallet.mu.Lock()
+	defer s.wallet.mu.Unlock()
+	s.wallet.Balance += amount
+	s.wallet.Version++
+}
+
+
 
 // Run executes the concurrent simulation based on selected strategy
 func (s *Simulator) Run(ctx context.Context, cfg SimulationConfig, publish EventPublisher) SimulationResult {

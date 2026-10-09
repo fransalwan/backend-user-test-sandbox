@@ -9,6 +9,7 @@ import (
 
 	racecondition "github.com/fransalwan/backend-user-test-sandbox/scenarios/01_race_condition"
 	"github.com/fransalwan/backend-user-test-sandbox/scenarios/02_idempotency"
+	"github.com/fransalwan/backend-user-test-sandbox/scenarios/03_distributed"
 )
 
 //go:embed templates/*
@@ -20,6 +21,7 @@ type Handler struct {
 	hub            *SSEHub
 	raceSim        *racecondition.Simulator
 	idempotencySim *idempotency.Simulator
+	sagaSim        *distributed.Simulator
 }
 
 // NewHandler menginisialisasi delivery handler beserta simulator dan SSE Hub.
@@ -31,6 +33,7 @@ func NewHandler() (*Handler, error) {
 
 	raceSim := racecondition.NewSimulator(100000) // Saldo awal $1,000.00 (100.000 cents)
 	idemSim := idempotency.NewSimulator()
+	sagaSim := distributed.NewSimulator()
 	hub := NewSSEHub()
 
 	return &Handler{
@@ -38,6 +41,7 @@ func NewHandler() (*Handler, error) {
 		hub:            hub,
 		raceSim:        raceSim,
 		idempotencySim: idemSim,
+		sagaSim:        sagaSim,
 	}, nil
 }
 
@@ -307,6 +311,113 @@ func (h *Handler) RunScenario02(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) ClearIdempotencyRecords(w http.ResponseWriter, r *http.Request) {
 	h.idempotencySim.Reset()
 	h.hub.Broadcast("🧹 Penyimpanan kunci idempotensi berhasil dibersihkan.")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status":"cleared"}`))
+}
+
+// RunScenario03 mengeksekusi simulasi Skenario 3 (Transactional Outbox & Saga Pattern).
+func (h *Handler) RunScenario03(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	mode := distributed.SimulationMode(r.FormValue("mode"))
+	bankTarget := r.FormValue("bank_target")
+	if bankTarget == "" {
+		bankTarget = "Bank BCA"
+	}
+	amountDollars, _ := strconv.ParseInt(r.FormValue("amount"), 10, 64)
+	if amountDollars <= 0 {
+		amountDollars = 100
+	}
+	amountCents := amountDollars * 100
+
+	injectFailure := (mode != distributed.ModeSagaSuccessPath)
+	failureType := r.FormValue("failure_type")
+	if failureType == "" {
+		failureType = "500_INTERNAL_SERVER_ERROR"
+	}
+
+	cfg := distributed.SimulationConfig{
+		Mode:          mode,
+		AmountCents:   amountCents,
+		BankTarget:    bankTarget,
+		InjectFailure: injectFailure,
+		FailureType:   failureType,
+	}
+
+	result := h.sagaSim.Run(r.Context(), cfg, h.raceSim, func(msg string) {
+		h.hub.Broadcast(msg)
+	})
+
+	w.Header().Set("HX-Trigger", "refreshWallets")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	statusBadge := ""
+	alertBox := ""
+
+	if result.HasFinancialLoss {
+		statusBadge = `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">BENCANA DUAL-WRITE: UANG LENYAP! 💸</span>`
+		alertBox = fmt.Sprintf(`
+        <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs">
+            <strong>🚨 Kerugian Finansial Terjadi (Data Loss):</strong> Saldo nasabah sudah terpotong di DB lokal, tetapi panggilan ke Bank Eksternal gagal (%s). Karena tidak menerapkan Saga / Kompensasi, saldo sebesar <strong>$%0.2f</strong> hilang tanpa terkirim ke rekening bank tujuan!
+        </div>`, cfg.FailureType, float64(result.AmountCents)/100)
+	} else if result.CompensationRan {
+		statusBadge = `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-sky-500/20 text-sky-400 border border-sky-500/30">SAGA COMPENSATED &bull; AUTO-REFUND SUKSES ↩️</span>`
+		alertBox = fmt.Sprintf(`
+        <div class="p-3 rounded-lg bg-sky-950/60 border border-sky-800 text-sky-200 text-xs">
+            <strong>🛡️ Pemulihan Saga Berhasil:</strong> Bank Eksternal mengalami gangguan (%s). Saga Orchestrator segera memicu <strong>Compensating Transaction</strong> yang mengembalikan saldo <strong>$%0.2f</strong> utuh ke dompet nasabah. Tidak ada uang yang hilang!
+        </div>`, cfg.FailureType, float64(result.CompensatedAmount)/100)
+	} else {
+		statusBadge = `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">SAGA SELESAI &bull; DANA TERKIRIM 🚀</span>`
+		alertBox = fmt.Sprintf(`
+        <div class="p-3 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs">
+            <strong>✅ Alur Saga Tuntas:</strong> Saldo dipotong atomik bersamaan dengan pencatatan event ke tabel Outbox, API %s sukses memproses pencairan <strong>$%0.2f</strong>, dan status outbox event diperbarui menjadi <strong>PUBLISHED</strong>.
+        </div>`, cfg.BankTarget, float64(result.AmountCents)/100)
+	}
+
+	html := fmt.Sprintf(`
+    <div class="space-y-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-white uppercase tracking-wider">Hasil Uji Saga & Outbox (%s)</span>
+                %s
+            </div>
+            <span class="text-xs text-slate-400 font-mono">ID: %s &bull; %d ms</span>
+        </div>
+
+        %s
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-500">Status Akhir</div>
+                <div class="text-xs font-bold text-white font-mono break-all">%s</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-500">Penarikan Diajukan</div>
+                <div class="text-sm font-bold text-white font-mono">$%0.2f</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-500">Saldo Akhir Nasabah</div>
+                <div class="text-sm font-bold text-emerald-400 font-mono">$%0.2f</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-500">Kompensasi Auto-Refund</div>
+                <div class="text-sm font-bold text-sky-400 font-mono">$%0.2f</div>
+            </div>
+        </div>
+    </div>
+    `, result.Mode, statusBadge, result.TransactionID, result.DurationMs, alertBox,
+		result.FinalStatus, float64(result.AmountCents)/100, float64(result.FinalBalance)/100, float64(result.CompensatedAmount)/100)
+
+	_, _ = w.Write([]byte(html))
+}
+
+// ClearScenario03 membersihkan riwayat outbox events.
+func (h *Handler) ClearScenario03(w http.ResponseWriter, r *http.Request) {
+	h.sagaSim.ClearOutbox()
+	h.hub.Broadcast("🧹 Penyimpanan tabel outbox events berhasil dibersihkan.")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"status":"cleared"}`))
 }
