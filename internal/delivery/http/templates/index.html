@@ -500,6 +500,19 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
             if (modal) modal.classList.toggle('hidden');
         }
 
+        // Toggle Flashcard Jawaban Interview
+        function toggleFlashcard(id, btn) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('hidden');
+                if (!el.classList.contains('hidden')) {
+                    btn.innerHTML = '<span>✕</span> <span>Tutup Kunci Jawaban</span>';
+                } else {
+                    btn.innerHTML = '<span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>';
+                }
+            }
+        }
+
         // Sisipkan snippet ke editor
         function insertSnippet(editorId, gutterId, snippet) {
             const editor = document.getElementById(editorId);
@@ -1271,6 +1284,106 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                         </div>
                     </div>
 
+                <!-- ================= SIMULATOR WAWANCARA TEKNIS (INTERACTIVE FLASHCARDS) ================= -->
+                <div class="rounded-2xl bg-gradient-to-b from-slate-50 to-white dark:from-[#0b1324] dark:to-dark-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 space-y-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3 gap-2">
+                        <div>
+                            <span class="text-xs font-bold text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                <span>🗣️</span> Simulator Wawancara Verbal &bull; 5 Pertanyaan Wajib Junior Backend
+                            </span>
+                            <p class="text-[11px] text-slate-500 mt-0.5">Latih artikulasi verbal Anda sebelum menghadapi Lead Architect &amp; Hiring Manager.</p>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 px-2.5 py-1 rounded-md border border-cyan-200 dark:border-cyan-800/60 w-fit">
+                            Active Recall Mode
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Flashcard 1 -->
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">DSA &amp; Floating-Point</span>
+                                <span class="text-[10px] text-slate-400">Pertanyaan #1</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                                "Mengapa nominal saldo uang dilarang keras disimpan menggunakan tipe Float / Double?"
+                            </h4>
+                            <button type="button" onclick="toggleFlashcard('fc-ans-1', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                                <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                            </button>
+                            <div id="fc-ans-1" class="hidden p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                                <strong>Poin Jawaban Verbal:</strong> Representasi IEEE-754 menyimpan pecahan dalam biner pangkat 2, bukan desimal 10 (contoh: <code class="font-mono">0.1 + 0.2 = 0.30000000000000004</code>). Di perbankan, selalu simpan uang sebagai <strong>int64 dalam satuan sen</strong> atau <code class="font-mono">NUMERIC(18, 4)</code> di SQL.
+                            </div>
+                        </div>
+
+                        <!-- Flashcard 2 -->
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300">Database ACID</span>
+                                <span class="text-[10px] text-slate-400">Pertanyaan #2</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                                "Kapan kita memakai Pessimistic Locking (SELECT FOR UPDATE) vs Optimistic Locking?"
+                            </h4>
+                            <button type="button" onclick="toggleFlashcard('fc-ans-2', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                                <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                            </button>
+                            <div id="fc-ans-2" class="hidden p-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed">
+                                <strong>Poin Jawaban Verbal:</strong> <strong>Pessimistic</strong> mengunci baris DB secara eksklusif selama transaksi aktif, cocok saat persaingan tinggi dan risiko saldo minus fatal (pemotongan dompet). <strong>Optimistic</strong> (cek version) cocok saat tabrakan jarang terjadi (update profil).
+                            </div>
+                        </div>
+
+                        <!-- Flashcard 3 -->
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300">API Idempotency</span>
+                                <span class="text-[10px] text-slate-400">Pertanyaan #3</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                                "Bagaimana siklus Idempotency Key membedakan HTTP 409 Conflict vs HTTP 422 Unprocessable?"
+                            </h4>
+                            <button type="button" onclick="toggleFlashcard('fc-ans-3', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                                <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                            </button>
+                            <div id="fc-ans-3" class="hidden p-2.5 rounded-lg bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800/60 text-[11px] text-teal-900 dark:text-teal-200 leading-relaxed">
+                                <strong>Poin Jawaban Verbal:</strong> Jika request pertama masih <code class="font-mono text-amber-500">PROCESSING</code> dan request kedua datang dengan kunci sama, tolak dengan <strong>HTTP 409 Conflict</strong> (in-flight collision). Jika request pertama sudah <code class="font-mono text-emerald-500">COMPLETED</code> tetapi klien mengirim parameter berbeda dengan kunci sama, tolak dengan <strong>HTTP 422 Unprocessable Entity</strong> (payload tampering).
+                            </div>
+                        </div>
+
+                        <!-- Flashcard 4 -->
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">Go Runtime</span>
+                                <span class="text-[10px] text-slate-400">Pertanyaan #4</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                                "Mengapa Go menggunakan explicit error handling (if err != nil) alih-alih try-catch exception?"
+                            </h4>
+                            <button type="button" onclick="toggleFlashcard('fc-ans-4', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                                <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                            </button>
+                            <div id="fc-ans-4" class="hidden p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed">
+                                <strong>Poin Jawaban Verbal:</strong> Di Go, error adalah first-class values biasa. Ini mencegah aliran kontrol melompat tak terduga ke blok exception tersembunyi, dan memaksa developer secara eksplisit menangani kegagalan di setiap langkah sehingga mencegah <em>silent failure</em>.
+                            </div>
+                        </div>
+
+                        <!-- Flashcard 5 (Full Width) -->
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-850 border border-slate-200 dark:border-slate-800 space-y-2 md:col-span-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300">Clean Architecture</span>
+                                <span class="text-[10px] text-slate-400">Pertanyaan #5</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                                "Mengapa Delivery Handler TIDAK BOLEH memanggil database SQL secara langsung?"
+                            </h4>
+                            <button type="button" onclick="toggleFlashcard('fc-ans-5', this)" class="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1">
+                                <span>💡</span> <span>Buka Kunci Jawaban Tech Lead</span>
+                            </button>
+                            <div id="fc-ans-5" class="hidden p-2.5 rounded-lg bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 text-[11px] text-purple-900 dark:text-purple-200 leading-relaxed">
+                                <strong>Poin Jawaban Verbal:</strong> Sesuai prinsip <em>Separation of Concerns</em>, Handler hanya bertanggung jawab atas parsing HTTP dan response encoding. Jika Handler langsung query SQL, kita tidak bisa menguji logika bisnis tanpa menyalakan database (unit test terhambat), dan kita tidak bisa mengganti database atau protokol (misal: migrasi ke gRPC) tanpa merusak handler.
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tombol Navigasi Lanjut ke Ujian -->
@@ -1718,6 +1831,9 @@ func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string 
                             <button id="copy-boilerplate-btn" type="button" onclick="copyBoilerplateStructure()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-dark-850 hover:bg-slate-100 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition shadow-sm active:scale-95">
                                 <span>📋</span> <span>Folder Boilerplate</span>
                             </button>
+                            <a href="/api/docs/postman" download="fintech_api.postman_collection.json" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/60 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-800 text-[11px] font-semibold transition shadow-sm active:scale-95">
+                                <span>📮</span> <span>Unduh Postman Collection</span>
+                            </a>
                         </div>
                     </div>
 

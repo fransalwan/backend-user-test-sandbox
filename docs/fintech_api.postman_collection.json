@@ -1,0 +1,224 @@
+{
+	"info": {
+		"_postman_id": "7b8e2194-e0c1-4cb3-9fa7-2f6cf9d84123",
+		"name": "Fintech Core Banking & Transfer Sandbox API",
+		"description": "Koleksi request resmi untuk menguji endpoint transaksi finansial, idempotensi, dan rate limiter pada Fintech Junior Assessment Sandbox.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health & Readiness Probe",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/healthz",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"healthz"
+					]
+				},
+				"description": "Memeriksa status liveness dan readiness server HTTP."
+			},
+			"response": []
+		},
+		{
+			"name": "Assessment Status Pipeline",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/gamification/status",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"gamification",
+						"status"
+					]
+				},
+				"description": "Mengambil progres evaluasi kompetensi 5 tahapan kandidat."
+			},
+			"response": []
+		},
+		{
+			"name": "Live Coding DSA - Submit Deduplication Solution",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "code",
+							"value": "package main\n\nfunc FindDuplicateTransactions(transactions []Transaction) []string {\n\tseen := make(map[string]int64)\n\tduplicates := []string{}\n\tfor _, tx := range transactions {\n\t\thash := tx.HashKey()\n\t\tif prevTime, exists := seen[hash]; exists {\n\t\t\tif tx.Timestamp-prevTime <= 60 {\n\t\t\t\tduplicates = append(duplicates, tx.ID)\n\t\t\t}\n\t\t}\n\t\tseen[hash] = tx.Timestamp\n\t}\n\treturn duplicates\n}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/scenarios/01/run-code",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"scenarios",
+						"01",
+						"run-code"
+					]
+				},
+				"description": "Evaluasi otomatis kompleksitas waktu O(N) Hash Map untuk deteksi transaksi finansial duplikat."
+			},
+			"response": []
+		},
+		{
+			"name": "System Design - Architecture Trade-Off Defense",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "storage_choice",
+							"value": "redis_atomic",
+							"type": "text"
+						},
+						{
+							"key": "ledger_choice",
+							"value": "double_entry",
+							"type": "text"
+						},
+						{
+							"key": "failure_choice",
+							"value": "circuit_breaker",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/scenarios/02/validate",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"scenarios",
+						"02",
+						"validate"
+					]
+				},
+				"description": "Validasi keputusan teknis desain sistem core banking di hadapan Lead Architect."
+			},
+			"response": []
+		},
+		{
+			"name": "Take-Home Test - Submit Repository",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "repo_url",
+							"value": "https://github.com/fransalwan/payment-service",
+							"type": "text"
+						},
+						{
+							"key": "notes",
+							"value": "Clean Architecture dengan PostgreSQL SELECT FOR UPDATE, Docker Compose, dan table-driven tests.",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/scenarios/03/submit-repo",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"scenarios",
+						"03",
+						"submit-repo"
+					]
+				},
+				"description": "Mengirimkan repositori take-home test untuk validasi bot CI dan komite hiring."
+			},
+			"response": []
+		},
+		{
+			"name": "War Room - Run Flash Sale Rate Limiter",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "strategy",
+							"value": "token_bucket",
+							"type": "text"
+						},
+						{
+							"key": "total_requests",
+							"value": "250",
+							"type": "text"
+						},
+						{
+							"key": "stock_quota",
+							"value": "50",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/api/scenarios/04/run",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"scenarios",
+						"04",
+						"run"
+					]
+				},
+				"description": "Menjalankan mitigasi lonjakan traffic flash sale (40 RPS) untuk melindungi database dari thundering herd."
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

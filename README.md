@@ -1,5 +1,8 @@
 # 🏛️ Fintech Junior Backend Assessment Sandbox
 
+[![Go CI](https://github.com/fransalwan/backend-user-test-sandbox/actions/workflows/ci.yml/badge.svg)](https://github.com/fransalwan/backend-user-test-sandbox/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/fransalwan/backend-user-test-sandbox)](https://goreportcard.com/report/github.com/fransalwan/backend-user-test-sandbox)
+
 > **A Production-Grade Technical Interview Sandbox & Competency Pipeline tailored for Junior & Entry-Level Backend Engineers (Fintech & Core Banking Track).**
 
 ---
@@ -20,6 +23,8 @@ Sandbox ini dirancang khusus untuk memvalidasi dan melatih kompetensi rekayasa p
 
 ```text
 backend-user-test-sandbox/
+├── .github/
+│   └── workflows/              # GitHub Actions CI automated testing pipeline
 ├── cmd/
 │   └── sandbox/                # Application entrypoint & HTTP server
 ├── internal/
@@ -40,7 +45,9 @@ backend-user-test-sandbox/
 │   ├── 000001_init_schema.up.sql    # DDL Wallets, Transactions, & Ledger
 │   └── 000001_init_schema.down.sql  # Clean rollback script
 ├── docs/
-│   └── interview_qa.md         # Panduan tanya-jawab wawancara teknis backend entry-level
+│   ├── candidate_action_guide.md       # Panduan aksi kandidat di luar app (CV, take-home, verbal interview)
+│   ├── fintech_api.postman_collection.json # Koleksi Postman resmi siap impor
+│   └── interview_qa.md                 # Panduan tanya-jawab wawancara teknis backend entry-level
 ├── docker-compose.yml          # Local container stack: PostgreSQL 16 & Redis 7
 ├── Makefile                    # Perintah otomatisasi lint, test, dan run
 ├── go.mod
@@ -139,18 +146,17 @@ ok      github.com/your-username/backend-user-test-sandbox/internal/delivery/htt
 
 ---
 
-## 💼 Panduan Wawancara Teknis (Interview Q&A)
+## 💼 Panduan Wawancara & Aksi Nyata Kandidat di Luar Sandbox
 
-Tersedia dokumen panduan tanya-jawab mendalam untuk persiapan wawancara teknis di:
-👉 **[`docs/interview_qa.md`](file:///c:/Users/Admin/Desktop/portfolio-opensource/backend-user-test-sandbox/docs/interview_qa.md)**
-
-Topik esensial yang dibahas mencakup:
-1. Alasan mutlak larangan `float64` untuk nominal uang dan representasi `int64` sen.
-2. Perbedaan *Pessimistic Row-Level Lock* (`SELECT FOR UPDATE`) vs *Optimistic Lock* (`version` check).
-3. Siklus *Idempotency Key* (`HTTP 409 Conflict` vs `HTTP 422 Unprocessable Entity`).
-4. Perilaku *Slices vs Arrays* di Go dan filosofi *Explicit Error Handling* (`if err != nil`).
-5. Batas tanggung jawab Clean Architecture (*Handler*, *Usecase/Service*, *Repository*).
-6. Algoritma *Token Bucket* vs *Leaky Bucket* dalam menangani *Thundering Herd*.
+Tersedia dua panduan komprehensif bagi kandidat:
+1. 👉 **[`docs/candidate_action_guide.md`](file:///c:/Users/Admin/Desktop/portfolio-opensource/backend-user-test-sandbox/docs/candidate_action_guide.md)**:
+   - Template penulisan resume/CV standar ATS untuk memamerkan proyek ini.
+   - SOP menghadapi tugas *Take-Home Test* nyata dari perusahaan (memanfaatkan boilerplate, docker, dan skema SQL dari sandbox ini).
+   - Skrip latihan verbal untuk menjawab pertanyaan wawancara teknis secara lancar.
+2. 👉 **[`docs/interview_qa.md`](file:///c:/Users/Admin/Desktop/portfolio-opensource/backend-user-test-sandbox/docs/interview_qa.md)**:
+   - Pendalaman teknis: Kenapa dilarang `float64`, Row Lock vs Optimistic Lock, HTTP 409 vs 422, Filosofi `if err != nil`, dan Token Bucket Rate Limiting.
+3. 👉 **[`docs/fintech_api.postman_collection.json`](file:///c:/Users/Admin/Desktop/portfolio-opensource/backend-user-test-sandbox/docs/fintech_api.postman_collection.json)**:
+   - Koleksi Postman resmi siap impor (atau unduh langsung via tombol di web dashboard).
 
 ---
 

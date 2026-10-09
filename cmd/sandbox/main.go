@@ -35,6 +35,7 @@ func main() {
 	mux.HandleFunc("/api/bootcamp/eval-systemdesign", handler.EvalBootcampSystemDesignCode)
 	mux.HandleFunc("/api/gamification/status", handler.GetGamificationStatus)
 	mux.HandleFunc("/api/gamification/reset", handler.ResetGamification)
+	mux.HandleFunc("/api/docs/postman", handler.DownloadPostmanCollection)
 
 	port := ":8080"
 	fmt.Printf("Dashboard aktif di http://localhost%s\n", port)

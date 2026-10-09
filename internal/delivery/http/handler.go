@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -1277,4 +1278,32 @@ func (h *Handler) SubmitScenario03Repo(w http.ResponseWriter, r *http.Request) {
     </div>`, repoURL, repoURL, branch)
 
 	_, _ = w.Write([]byte(html))
+}
+
+// DownloadPostmanCollection menyajikan file JSON koleksi Postman resmi untuk diunduh langsung dari browser.
+func (h *Handler) DownloadPostmanCollection(w http.ResponseWriter, r *http.Request) {
+	candidates := []string{
+		"docs/fintech_api.postman_collection.json",
+		"../../docs/fintech_api.postman_collection.json",
+		"../../../docs/fintech_api.postman_collection.json",
+	}
+
+	var data []byte
+	var err error
+	for _, path := range candidates {
+		data, err = os.ReadFile(path)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		http.Error(w, "File koleksi Postman tidak ditemukan", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Disposition", "attachment; filename=\"fintech_api.postman_collection.json\"")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
 }

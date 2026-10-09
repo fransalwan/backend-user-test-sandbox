@@ -150,6 +150,13 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			containsBody:   "APPROVED",
 		},
+		{
+			name:           "Download Postman Collection JSON",
+			method:         "GET",
+			url:            "/api/docs/postman",
+			expectedStatus: http.StatusOK,
+			containsBody:   "Fintech Core Banking & Transfer Sandbox API",
+		},
 	}
 
 	for _, tt := range tests {
@@ -173,6 +180,8 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 				handler.DefendScenario02(w, req)
 			case "/api/scenarios/03/submit-repo":
 				handler.SubmitScenario03Repo(w, req)
+			case "/api/docs/postman":
+				handler.DownloadPostmanCollection(w, req)
 			}
 
 			resp := w.Result()
