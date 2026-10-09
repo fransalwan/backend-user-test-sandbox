@@ -77,86 +77,222 @@
             }
         }
 
-        // Template Code Editor Tahap 1 (LeetCode / CodeWars Style)
-        function loadCodeTemplate(strategy) {
-            const editor = document.getElementById('live-code-editor');
-            const hiddenInput = document.getElementById('selected-strategy-input');
-            if (hiddenInput) hiddenInput.value = strategy;
+        // Skeleton Starter Code Tahap 1
+        const STARTER_CODE_SKELETON = `package main
 
-            if (strategy === 'mutex') {
-                editor.value = `// Solusi 1: Mutex Synchronized Lock (Thread-Safe ✅)
-package main
+import (
+    "errors"
+    "sync"
+)
 
-import "sync"
+var ErrInsufficientFunds = errors.New("insufficient funds")
 
+// SharedWallet merepresentasikan dompet bersama dengan saldo dalam satuan sen (int64).
 type SharedWallet struct {
-    balance int64 // cents
-    mu      sync.Mutex
+    balance int64 // saldo dalam sen (int64)
+    // TODO: Tambahkan field sinkronisasi jika diperlukan
 }
 
+// DeductWallet memotong saldo dompet sejumlah amount (dalam sen).
+// Kembalikan ErrInsufficientFunds jika saldo tidak cukup.
+// Wajib aman dieksekusi secara serentak oleh 50 goroutine (Zero Overdraft)!
 func (w *SharedWallet) DeductWallet(amount int64) error {
-    w.mu.Lock()
-    defer w.mu.Unlock()
+    // TODO: Ketik implementasi kode Anda di sini
+    // Petunjuk: Buka tombol Hint jika membutuhkan panduan sintaks
 
-    if w.balance < amount {
-        return ErrInsufficientFunds
-    }
-    w.balance -= amount
     return nil
 }`;
-            } else if (strategy === 'pessimistic') {
-                editor.value = `// Solusi 2: Pessimistic SELECT FOR UPDATE (RDBMS Row Lock 🔒)
-package main
 
-import "context"
-
-func DeductPessimistic(ctx context.Context, tx *sql.Tx, walletID string, amount int64) error {
-    var balance int64
-    // Mengunci baris dompet eksklusif di level database
-    row := tx.QueryRowContext(ctx, "SELECT balance FROM wallets WHERE id = $1 FOR UPDATE", walletID)
-    if err := row.Scan(&balance); err != nil {
-        return err
-    }
-    if balance < amount {
-        return ErrInsufficientFunds
-    }
-    _, err := tx.ExecContext(ctx, "UPDATE wallets SET balance = balance - $1 WHERE id = $2", amount, walletID)
-    return err
-}`;
-            } else if (strategy === 'cas') {
-                editor.value = `// Solusi 3: Optimistic Concurrency Control (Atomic CAS 🔄)
-package main
-
-import "context"
-
-func DeductOptimistic(ctx context.Context, db *sql.DB, walletID string, amount int64) error {
-    for attempt := 0; attempt < 5; attempt++ {
-        var balance int64
-        var version int
-        _ = db.QueryRow("SELECT balance, version FROM wallets WHERE id = $1", walletID).Scan(&balance, &version)
-        if balance < amount {
-            return ErrInsufficientFunds
+        // Reset Kode ke Skeleton Awal
+        function resetLiveCode() {
+            const editor = document.getElementById('live-code-editor');
+            if (editor) {
+                editor.value = STARTER_CODE_SKELETON;
+                editor.focus();
+            }
         }
-        res, _ := db.Exec("UPDATE wallets SET balance = balance - $1, version = version + 1 WHERE id = $2 AND version = $3", amount, walletID, version)
-        if rows, _ := res.RowsAffected(); rows > 0 {
-            return nil // Sukses CAS!
+
+        // Toggle Progressive Hints Tahap 1
+        function toggleHint(hintNum) {
+            const el = document.getElementById(`hint-box-${hintNum}`);
+            const btn = document.getElementById(`hint-btn-${hintNum}`);
+            if (el) {
+                if (el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    if (btn) btn.classList.add('bg-amber-950/80', 'text-amber-300', 'border-amber-500/50');
+                } else {
+                    el.classList.add('hidden');
+                    if (btn) btn.classList.remove('bg-amber-950/80', 'text-amber-300', 'border-amber-500/50');
+                }
+            }
         }
-    }
-    return ErrConflictRetryExhausted
-}`;
+
+        // ================= VISUALIZER 1: FLOAT TRAP CALCULATOR =================
+        function runFloatCalculator() {
+            const valA = parseFloat(document.getElementById('float-input-a').value) || 0.1;
+            const valB = parseFloat(document.getElementById('float-input-b').value) || 0.2;
+            
+            // Perhitungan Float Standar IEEE 754
+            const floatSum = valA + valB;
+            
+            // Perhitungan int64 Cents (Basis Bilangan Bulat)
+            const centsA = Math.round(valA * 100);
+            const centsB = Math.round(valB * 100);
+            const centsSum = centsA + centsB;
+            const properSum = (centsSum / 100).toFixed(2);
+
+            const resultFloatEl = document.getElementById('calc-float-result');
+            const resultCentsEl = document.getElementById('calc-cents-result');
+            const resultDiffEl = document.getElementById('calc-diff-result');
+            const resultScaleEl = document.getElementById('calc-scale-result');
+
+            if (resultFloatEl) resultFloatEl.innerText = floatSum.toString();
+            if (resultCentsEl) resultCentsEl.innerText = `$${properSum} (${centsSum} sen int64)`;
+            
+            const diff = Math.abs(floatSum - (centsSum / 100));
+            if (resultDiffEl) {
+                if (diff > 0.0000000000000001) {
+                    resultDiffEl.innerHTML = `<span class="text-rose-400 font-bold">Terjadi Penyimpangan: ${diff.toExponential(4)}!</span>`;
+                } else {
+                    resultDiffEl.innerHTML = `<span class="text-emerald-400 font-bold">Akurat pada angka ini. Coba 0.1 + 0.2!</span>`;
+                }
+            }
+            if (resultScaleEl) {
+                const leakPerMillion = (diff * 1000000).toFixed(4);
+                resultScaleEl.innerText = `$${leakPerMillion} per 1.000.000 transaksi`;
+            }
+        }
+
+        // ================= VISUALIZER 2: DOUBLE-ENTRY T-ACCOUNT =================
+        const ledgerTransactions = [
+            { desc: "Alice Transfer ke Bob $50.00", debitAcc: "Bob (Aset Kas)", creditAcc: "Alice (Aset Kas)", amount: 5000 },
+            { desc: "Alice Topup dari Bank $100.00", debitAcc: "Alice (Aset Kas)", creditAcc: "BCA Escrow Clearing", amount: 10000 },
+            { desc: "Bob Bayar Merchant $25.00", debitAcc: "Merchant QRIS", creditAcc: "Bob (Aset Kas)", amount: 2500 }
+        ];
+
+        function applyLedgerScenario(idx) {
+            const tx = ledgerTransactions[idx];
+            if (!tx) return;
+            
+            const tableBody = document.getElementById('taccount-tbody');
+            if (!tableBody) return;
+
+            const row = `
+                <tr class="border-b border-slate-800 text-[11px] font-mono animate-fadeIn">
+                    <td class="py-2 text-slate-300">${tx.desc}</td>
+                    <td class="py-2 text-emerald-400 font-bold">+${tx.debitAcc} ($${(tx.amount/100).toFixed(2)})</td>
+                    <td class="py-2 text-rose-400 font-bold">-${tx.creditAcc} ($${(tx.amount/100).toFixed(2)})</td>
+                    <td class="py-2 text-center text-emerald-400 font-bold">0.00 (Balanced ✓)</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        }
+
+        function resetTAccount() {
+            const tableBody = document.getElementById('taccount-tbody');
+            if (tableBody) tableBody.innerHTML = '';
+        }
+
+        // ================= VISUALIZER 3: RACE TIMELINE SIMULATOR =================
+        let isTimelineRunning = false;
+        function runRaceAnimation(withLock) {
+            if (isTimelineRunning) return;
+            isTimelineRunning = true;
+
+            const stepEl = document.getElementById('race-anim-status');
+            const aState = document.getElementById('race-agent-a-state');
+            const bState = document.getElementById('race-agent-b-state');
+            const dbBal = document.getElementById('race-db-balance');
+
+            if (!stepEl || !aState || !bState || !dbBal) {
+                isTimelineRunning = false;
+                return;
+            }
+
+            // Inisialisasi Saldo $100
+            dbBal.innerText = "$100.00";
+            stepEl.innerText = withLock ? "▶ Simulasi dimulai DENGAN Mutex Lock..." : "▶ Simulasi dimulai TANPA Lock (Naive)...";
+
+            setTimeout(() => {
+                aState.innerText = withLock ? "1. Memperoleh Mutex Lock 🔒" : "1. Membaca saldo: $100.00";
+                bState.innerText = withLock ? "1. Antre menunggu lock terbuka ⏳" : "1. Membaca saldo: $100.00";
+                stepEl.innerText = withLock ? "T1: Goroutine A memegang lock, Goroutine B diblokir aman." : "T1: Goroutine A & B membaca saldo $100 secara bersamaan!";
+            }, 700);
+
+            setTimeout(() => {
+                if (withLock) {
+                    aState.innerText = "2. Kurangi $50 -> Tulis $50.00 & Unlock 🔓";
+                    dbBal.innerText = "$50.00";
+                    stepEl.innerText = "T2: Goroutine A selesai menulis $50.00 dan melepas lock.";
+                } else {
+                    aState.innerText = "2. Hitung 100 - 50 = $50.00";
+                    bState.innerText = "2. Hitung 100 - 50 = $50.00";
+                    stepEl.innerText = "T2: Kedua goroutine menghitung saldo baru secara paralel.";
+                }
+            }, 1600);
+
+            setTimeout(() => {
+                if (withLock) {
+                    bState.innerText = "2. Memperoleh lock, baca $50, kurangi $50 -> Tulis $0.00";
+                    dbBal.innerText = "$0.00";
+                    stepEl.innerText = "T3: Goroutine B membaca saldo terbaru ($50.00) dan menuliskannya ke $0.00 (Konsisten ✅)";
+                } else {
+                    aState.innerText = "3. Menulis $50.00 ke DB";
+                    bState.innerText = "3. Menulis $50.00 ke DB (Overwrites A!)";
+                    dbBal.innerText = "$50.00";
+                    stepEl.innerText = "T3: BENCANA FINANSIAL! Uang $50 milik B hilang (Lost Update! Saldo seharusnya $0, tapi tetap $50) 🚨";
+                }
+                isTimelineRunning = false;
+            }, 2700);
+        }
+
+        // ================= READINESS QUIZ CHECKER =================
+        const quizAnswers = {
+            q1: { correct: 2, exp: "Tepat! Tipe int64 (satuan sen / basis terkecil) menjamin presisi absolut tanpa float rounding error (IEEE 754)." },
+            q2: { correct: 1, exp: "Benar! sync.Mutex atau SELECT FOR UPDATE memastikan hanya 1 proses yang memodifikasi saldo pada satu jendela waktu." },
+            q3: { correct: 3, exp: "Tepat! Network call di dalam SQL Tx menyandera DB connection pool dan berisiko kebocoran jika transaksi DB gagal setelah uang transfer bank keluar." },
+            q4: { correct: 1, exp: "Sempurna! Fencing token atau hash request payload menjamin idempotensi request duplikat ditolak tanpa mutasi ganda." }
+        };
+        let quizCorrectCount = 0;
+        const answeredQuestions = {};
+
+        function answerQuiz(qKey, chosenOption) {
+            const data = quizAnswers[qKey];
+            if (!data) return;
+
+            const feedbackEl = document.getElementById(`quiz-feedback-${qKey}`);
+            const options = document.querySelectorAll(`.quiz-opt-${qKey}`);
+
+            options.forEach(opt => {
+                opt.classList.remove('bg-emerald-950', 'border-emerald-500', 'bg-rose-950', 'border-rose-500');
+            });
+
+            const chosenBtn = document.getElementById(`quiz-opt-${qKey}-${chosenOption}`);
+            if (chosenOption === data.correct) {
+                if (chosenBtn) chosenBtn.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-300');
+                if (feedbackEl) {
+                    feedbackEl.innerHTML = `<span class="text-emerald-400 font-bold">✓ BENAR!</span> ${data.exp}`;
+                    feedbackEl.className = "p-2.5 rounded-lg bg-emerald-950/50 border border-emerald-800/80 text-xs text-emerald-200 mt-2";
+                }
+                if (!answeredQuestions[qKey]) {
+                    answeredQuestions[qKey] = true;
+                    quizCorrectCount++;
+                }
             } else {
-                editor.value = `// Solusi 4: Naive Read-Modify-Write (Rentan Overdraft ⚠️)
-package main
+                if (chosenBtn) chosenBtn.classList.add('bg-rose-950/80', 'border-rose-500', 'text-rose-300');
+                if (feedbackEl) {
+                    feedbackEl.innerHTML = `<span class="text-rose-400 font-bold">✗ KURANG TEPAT!</span> Coba renungkan kembali prinsip fundamental finansial atau baca modul teori di atas.`;
+                    feedbackEl.className = "p-2.5 rounded-lg bg-rose-950/50 border border-rose-800/80 text-xs text-rose-200 mt-2";
+                }
+            }
 
-func (w *SharedWallet) DeductNaive(amount int64) error {
-    // BUGGY: Membaca tanpa lock, 50 goroutines membaca saldo yang sama
-    if w.balance >= amount {
-        time.Sleep(10 * time.Millisecond) // Simulasi latensi DB
-        w.balance -= amount // Lost Update & Overdraft!
-        return nil
-    }
-    return ErrInsufficientFunds
-}`;
+            const badgeEl = document.getElementById('quiz-readiness-badge');
+            if (badgeEl) {
+                if (quizCorrectCount === 4) {
+                    badgeEl.innerHTML = `<span class="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold text-xs animate-bounce">🎖️ SKOR 4/4: ANDA SIAP UNTUK LIVE CODING TAHAP 1!</span>`;
+                } else {
+                    badgeEl.innerHTML = `<span class="text-slate-400 text-xs">Skor Kuis: ${quizCorrectCount}/4 Terjawab Benar</span>`;
+                }
             }
         }
 
@@ -646,6 +782,238 @@ func (w *SharedWallet) DeductNaive(amount int64) error {
                             </div>
                         </div>
 
+                        <!-- ================= 7. LABORATORIUM INTERAKTIF & VISUALIZER HANDS-ON ================= -->
+                        <div class="rounded-xl bg-gradient-to-br from-slate-950 via-[#0a1224] to-slate-950 border border-cyan-800/60 p-5 space-y-5" data-topic="core">
+                            <div class="flex items-center justify-between border-b border-cyan-800/40 pb-2.5">
+                                <span class="text-xs font-bold text-cyan-400 flex items-center gap-1.5 uppercase tracking-wide">
+                                    <span>🔬</span> Laboratorium Interaktif &bull; Simulasi Visual Entry-Level
+                                </span>
+                                <span class="text-[10px] px-2.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">Interactive Tools</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Uji pemahaman Anda secara langsung sebelum menulis kode! Cobalah 3 simulator interaktif berikut untuk merasakan langsung anomali teknis yang dihadapi insinyur fintech:
+                            </p>
+
+                            <!-- WIDGET 1: FLOAT TRAP CALCULATOR -->
+                            <div class="p-4 rounded-xl bg-dark-900 border border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                                        <span>🧮</span> Visualizer 1: Kalkulator Jebakan Float (IEEE 754 vs int64)
+                                    </h4>
+                                    <span class="text-[10px] font-mono text-slate-400">Live Precision Diff</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                    <div>
+                                        <label class="text-[11px] text-slate-400 block mb-1">Nominal A (Desimal)</label>
+                                        <input type="number" id="float-input-a" step="0.01" value="0.10" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-white text-xs focus:border-amber-400 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="text-[11px] text-slate-400 block mb-1">Nominal B (Desimal)</label>
+                                        <input type="number" id="float-input-b" step="0.01" value="0.20" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 font-mono text-white text-xs focus:border-amber-400 outline-none">
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="runFloatCalculator()" class="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-sm">
+                                        Hitung Perbandingan Presisi
+                                    </button>
+                                    <span class="text-[11px] text-slate-400">Coba ubah angka atau biarkan 0.1 + 0.2</span>
+                                </div>
+                                <div class="p-3 rounded-lg bg-slate-950 border border-slate-800/80 font-mono text-[11px] space-y-1.5">
+                                    <div class="flex justify-between">
+                                        <span class="text-rose-400">Hasil Float IEEE-754:</span>
+                                        <span id="calc-float-result" class="text-rose-300 font-bold">0.30000000000000004</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-emerald-400">Hasil int64 (Satuan Sen):</span>
+                                        <span id="calc-cents-result" class="text-emerald-300 font-bold">$0.30 (30 sen int64)</span>
+                                    </div>
+                                    <div class="flex justify-between border-t border-slate-800 pt-1">
+                                        <span class="text-slate-400">Status Error Presisi:</span>
+                                        <span id="calc-diff-result" class="text-rose-400 font-bold">Terjadi Penyimpangan: 5.5511e-17!</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Akumulasi Kerugian:</span>
+                                        <span id="calc-scale-result" class="text-amber-400 font-bold">$0.0001 per 1.000.000 transaksi</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET 2: DOUBLE-ENTRY T-ACCOUNT -->
+                            <div class="p-4 rounded-xl bg-dark-900 border border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-teal-300 flex items-center gap-1.5">
+                                        <span>⚖️</span> Visualizer 2: Double-Entry T-Account Ledger (Zero-Sum Invariant)
+                                    </h4>
+                                    <span class="text-[10px] font-mono text-emerald-400">Sum(Debit) - Sum(Credit) == 0</span>
+                                </div>
+                                <p class="text-[11px] text-slate-300">
+                                    Klik tombol transaksi di bawah untuk melihat bagaimana setiap mutasi finansial wajib berpasangan seimbang:
+                                </p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="applyLedgerScenario(0)" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                                        + Alice Bayar Bob $50.00
+                                    </button>
+                                    <button type="button" onclick="applyLedgerScenario(1)" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                                        + Topup Bank $100.00
+                                    </button>
+                                    <button type="button" onclick="applyLedgerScenario(2)" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                                        + Bob Bayar QRIS $25.00
+                                    </button>
+                                    <button type="button" onclick="resetTAccount()" class="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-300 text-xs border border-rose-800/60 transition">
+                                        Bersihkan Tabel
+                                    </button>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr class="border-b border-slate-800 text-[10px] uppercase font-mono text-slate-400">
+                                                <th class="py-1.5">Deskripsi Transaksi</th>
+                                                <th class="py-1.5">DEBIT (+)</th>
+                                                <th class="py-1.5">KREDIT (-)</th>
+                                                <th class="py-1.5 text-center">Status Audit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="taccount-tbody" class="divide-y divide-slate-800/40">
+                                            <tr class="border-b border-slate-800 text-[11px] font-mono">
+                                                <td class="py-2 text-slate-300">Saldo Awal Modal Sistem</td>
+                                                <td class="py-2 text-emerald-400 font-bold">+Kas Bank Escrow ($1,250.00)</td>
+                                                <td class="py-2 text-rose-400 font-bold">-Kewajiban Dompet Nasabah ($1,250.00)</td>
+                                                <td class="py-2 text-center text-emerald-400 font-bold">0.00 (Balanced ✓)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- WIDGET 3: RACE TIMELINE SIMULATOR -->
+                            <div class="p-4 rounded-xl bg-dark-900 border border-slate-800 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                                        <span>⏱️</span> Visualizer 3: Concurrency Race Timeline (Goroutine A vs Goroutine B)
+                                    </h4>
+                                    <span class="text-[10px] font-mono text-cyan-400">Live Concurrency Animation</span>
+                                </div>
+                                <p class="text-[11px] text-slate-300">
+                                    Saksikan bagaimana dua goroutine yang memotong $50 dari saldo $100 secara paralel menghasilkan anomali jika tanpa lock vs konsisten dengan lock:
+                                </p>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="runRaceAnimation(false)" class="px-3.5 py-1.5 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 font-bold text-xs border border-rose-800/80 transition">
+                                        ▶ Jalankan TANPA Lock (Lihat Bug)
+                                    </button>
+                                    <button type="button" onclick="runRaceAnimation(true)" class="px-3.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-bold text-xs border border-emerald-800/80 transition">
+                                        ▶ Jalankan DENGAN Mutex Lock (Aman)
+                                    </button>
+                                </div>
+                                <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
+                                    <div class="text-[11px] font-mono text-cyan-300 font-bold" id="race-anim-status">
+                                        Status: Siap dijalankan. Klik salah satu tombol di atas.
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center font-mono text-xs">
+                                        <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 space-y-1">
+                                            <span class="text-[10px] text-slate-400">Goroutine A (Deduct $50)</span>
+                                            <div id="race-agent-a-state" class="text-[11px] text-amber-300">Idle</div>
+                                        </div>
+                                        <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 space-y-1">
+                                            <span class="text-[10px] text-slate-400">Goroutine B (Deduct $50)</span>
+                                            <div id="race-agent-b-state" class="text-[11px] text-amber-300">Idle</div>
+                                        </div>
+                                        <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800 space-y-1">
+                                            <span class="text-[10px] text-slate-400">Saldo Rekening di DB</span>
+                                            <div id="race-db-balance" class="text-sm font-extrabold text-white">$100.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- ================= 8. KUIS KESIAPAN UJIAN (ENTRY-LEVEL READINESS QUIZ) ================= -->
+                        <div class="rounded-xl bg-slate-950/90 border border-emerald-800/60 p-5 space-y-4" data-topic="qa">
+                            <div class="flex items-center justify-between border-b border-emerald-800/40 pb-2.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide">
+                                        🎓 Kuis Kesiapan Ujian &bull; Entry-Level Backend Gauntlet
+                                    </span>
+                                </div>
+                                <div id="quiz-readiness-badge">
+                                    <span class="text-slate-400 text-xs">Skor Kuis: 0/4 Terjawab Benar</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Jawab 4 pertanyaan fundamental berikut untuk memastikan kesiapan logika teknis Anda sebelum menempuh Live Coding Tahap 1:
+                            </p>
+
+                            <div class="space-y-4 text-xs">
+                                <!-- SOAL 1 -->
+                                <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-2">
+                                    <strong class="text-white block font-semibold">1. Mengapa tipe data float64 dilarang keras untuk menyimpan saldo uang di backend fintech?</strong>
+                                    <div class="space-y-1.5">
+                                        <button id="quiz-opt-q1-1" onclick="answerQuiz('q1', 1)" class="quiz-opt-q1 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            A. Karena float64 memakan memori lebih besar daripada string.
+                                        </button>
+                                        <button id="quiz-opt-q1-2" onclick="answerQuiz('q1', 2)" class="quiz-opt-q1 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            B. Karena representasi biner IEEE 754 menimbulkan penyimpangan pembulatan desimal yang merugikan pembukuan audit.
+                                        </button>
+                                        <button id="quiz-opt-q1-3" onclick="answerQuiz('q1', 3)" class="quiz-opt-q1 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            C. Karena database SQL tidak mendukung tipe data floating point.
+                                        </button>
+                                    </div>
+                                    <div id="quiz-feedback-q1" class="hidden"></div>
+                                </div>
+
+                                <!-- SOAL 2 -->
+                                <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-2">
+                                    <strong class="text-white block font-semibold">2. Apa penyebab utama terjadinya Financial Overdraft saat 50 goroutine menarik saldo dari dompet yang sama?</strong>
+                                    <div class="space-y-1.5">
+                                        <button id="quiz-opt-q2-1" onclick="answerQuiz('q2', 1)" class="quiz-opt-q2 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            A. Race condition membaca (Read) dan memodifikasi (Write) saldo secara paralel tanpa penguncian memori (Lost Update).
+                                        </button>
+                                        <button id="quiz-opt-q2-2" onclick="answerQuiz('q2', 2)" class="quiz-opt-q2 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            B. Karena garbage collector Go terlambat membersihkan memori.
+                                        </button>
+                                        <button id="quiz-opt-q2-3" onclick="answerQuiz('q2', 3)" class="quiz-opt-q2 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            C. Karena tipe data int64 tidak mampu menampung angka di atas 10.000 sen.
+                                        </button>
+                                    </div>
+                                    <div id="quiz-feedback-q2" class="hidden"></div>
+                                </div>
+
+                                <!-- SOAL 3 -->
+                                <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-2">
+                                    <strong class="text-white block font-semibold">3. Mengapa HTTP request ke API Bank dilarang ditaruh di dalam transaksi database SQL (BEGIN ... COMMIT)?</strong>
+                                    <div class="space-y-1.5">
+                                        <button id="quiz-opt-q3-1" onclick="answerQuiz('q3', 1)" class="quiz-opt-q3 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            A. Karena compiler Go akan menolak kompilasi package net/http bersama database/sql.
+                                        </button>
+                                        <button id="quiz-opt-q3-2" onclick="answerQuiz('q3', 2)" class="quiz-opt-q3 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            B. Karena HTTP request otomatis mereset transaksi database ke keadaan awal.
+                                        </button>
+                                        <button id="quiz-opt-q3-3" onclick="answerQuiz('q3', 3)" class="quiz-opt-q3 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            C. Karena menyandera koneksi DB saat jaringan lambat dan jika server crash setelah bank mentransfer uang, uang bank keluar tapi saldo DB tidak berkurang.
+                                        </button>
+                                    </div>
+                                    <div id="quiz-feedback-q3" class="hidden"></div>
+                                </div>
+
+                                <!-- SOAL 4 -->
+                                <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-2">
+                                    <strong class="text-white block font-semibold">4. Bagaimana cara memastikan request transfer uang dengan Idempotency-Key yang sama tidak dieksekusi 2 kali saat koneksi timeout?</strong>
+                                    <div class="space-y-1.5">
+                                        <button id="quiz-opt-q4-1" onclick="answerQuiz('q4', 1)" class="quiz-opt-q4 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            A. Simpan status transaksi ('IN_PROGRESS' / 'SUCCESS') bersama hash payload ke tabel database dengan constraint UNIQUE pada key tersebut.
+                                        </button>
+                                        <button id="quiz-opt-q4-2" onclick="answerQuiz('q4', 2)" class="quiz-opt-q4 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            B. Mengabaikan request kedua dan selalu mengembalikan HTTP 200 tanpa mengecek database.
+                                        </button>
+                                        <button id="quiz-opt-q4-3" onclick="answerQuiz('q4', 3)" class="quiz-opt-q4 w-full text-left p-2 rounded-lg bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 transition">
+                                            C. Menutup port aplikasi selama 5 detik setiap kali ada request pembayaran.
+                                        </button>
+                                    </div>
+                                    <div id="quiz-feedback-q4" class="hidden"></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -669,78 +1037,126 @@ func (w *SharedWallet) DeductNaive(amount int64) error {
 
                     <!-- Deskripsi Masalah & Constraints -->
                     <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 space-y-2">
-                        <div class="font-semibold text-emerald-300 flex items-center gap-1.5">
-                            <span>📋</span> Constraints & Spesifikasi Ujian:
+                        <div class="font-semibold text-emerald-300 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5">
+                                <span>📋</span> Constraints & Spesifikasi Ujian:
+                            </span>
+                            <span class="text-[11px] text-amber-300 font-mono font-normal">Ketik kode manual &bull; Tanpa contekan instan</span>
                         </div>
                         <ul class="text-[11px] text-slate-400 list-disc list-inside space-y-0.5 font-mono">
                             <li><code class="text-white">amount > 0</code> (nominal penarikan dalam sen / int64)</li>
-                            <li><code class="text-white">wallet.Balance >= 0</code> (Invarian Moneter: DILARANG MINUS / OVERDRAFT!)</li>
+                            <li><code class="text-white">wallet.balance >= 0</code> (Invarian Moneter: DILARANG MINUS / OVERDRAFT!)</li>
                             <li>Wajib mengembalikan <code class="text-rose-400">ErrInsufficientFunds</code> jika saldo tidak mencukupi.</li>
                             <li>Uji Stres (Test Case 3): 50 goroutine menarik $25 serentak dari saldo $1.000 &rarr; Saldo akhir tepat $0.</li>
                         </ul>
                     </div>
 
-                    <!-- In-Browser Code Editor -->
-                    <div class="rounded-xl border border-slate-800 bg-[#070b14] overflow-hidden shadow-2xl">
-                        <!-- Topbar Editor -->
-                        <div class="flex flex-wrap items-center justify-between px-4 py-2.5 bg-dark-950 border-b border-slate-800/80 gap-2">
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-                                <span class="ml-2 font-mono font-bold text-slate-300">solution.go</span>
+                    <!-- Progressive Hints Bar (Petunjuk Bertahap untuk Entry-Level) -->
+                    <div class="space-y-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-slate-400">Butuh Bantuan?</span>
+                                <button type="button" id="hint-btn-1" onclick="toggleHint(1)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                                    💡 Hint 1: Konseptual
+                                </button>
+                                <button type="button" id="hint-btn-2" onclick="toggleHint(2)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                                    💡 Hint 2: Tipe Data & Mutex
+                                </button>
+                                <button type="button" id="hint-btn-3" onclick="toggleHint(3)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+                                    💡 Hint 3: Sintaks Go (Lock & Defer)
+                                </button>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <label class="text-[11px] text-slate-400 font-medium">Muat Template:</label>
-                                <select id="code-template-select" onchange="loadCodeTemplate(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white font-mono focus:outline-none focus:border-emerald-500">
-                                    <option value="mutex">1. Mutex Sync Lock (Thread-Safe ✅)</option>
-                                    <option value="pessimistic">2. Pessimistic (FOR UPDATE 🔒)</option>
-                                    <option value="cas">3. Atomic CAS (Compare-And-Swap 🔄)</option>
-                                    <option value="naive">4. Naive Read-Modify-Write (Buggy Overdraft ⚠️)</option>
-                                </select>
-                            </div>
+                            <button type="button" onclick="resetLiveCode()" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center gap-1">
+                                <span>↺</span> Reset ke Skeleton
+                            </button>
                         </div>
 
-                        <!-- Code Editor Area -->
-                        <textarea id="live-code-editor" class="w-full h-48 bg-[#070b14] p-4 text-xs font-mono text-emerald-400 leading-relaxed focus:outline-none resize-none select-text border-0" spellcheck="false">// Solusi 1: Mutex Synchronized Lock (Thread-Safe ✅)
-package main
+                        <!-- Kotak Hint 1 -->
+                        <div id="hint-box-1" class="hidden p-3 rounded-xl bg-amber-950/40 border border-amber-800/60 text-xs text-amber-200 space-y-1 animate-fadeIn">
+                            <strong class="text-amber-300 block font-semibold">💡 Hint 1: Memahami Masalah Race Condition (Lost Update)</strong>
+                            <p class="text-[11px] leading-relaxed text-amber-100/90">
+                                Operasi pengecekan saldo <code>if w.balance < amount</code> dan pemotongan saldo <code>w.balance -= amount</code> adalah dua langkah terpisah. Jika 50 goroutine membaca saldo pada detik yang sama, semuanya akan melihat saldo mencukupi dan semuanya akan memotong saldo! Anda harus memastikan <strong>hanya satu goroutine</strong> yang boleh membaca dan memotong saldo pada satu waktu.
+                            </p>
+                        </div>
 
-import "sync"
+                        <!-- Kotak Hint 2 -->
+                        <div id="hint-box-2" class="hidden p-3 rounded-xl bg-amber-950/40 border border-amber-800/60 text-xs text-amber-200 space-y-1 animate-fadeIn">
+                            <strong class="text-amber-300 block font-semibold">💡 Hint 2: Menambahkan Pengunci Mutex ke Struct</strong>
+                            <p class="text-[11px] leading-relaxed text-amber-100/90">
+                                Go menyediakan primitif sinkronisasi memori bawaan yaitu <code>sync.Mutex</code>. Tambahkan field <code>mu sync.Mutex</code> ke dalam deklarasi <code>type SharedWallet struct</code> agar dompet memiliki kunci pengaman sendiri.
+                            </p>
+                        </div>
 
-type SharedWallet struct {
-    balance int64 // cents
-    mu      sync.Mutex
-}
-
-func (w *SharedWallet) DeductWallet(amount int64) error {
-    w.mu.Lock()
-    defer w.mu.Unlock()
-
-    if w.balance < amount {
-        return ErrInsufficientFunds
-    }
-    w.balance -= amount
-    return nil
-}</textarea>
+                        <!-- Kotak Hint 3 -->
+                        <div id="hint-box-3" class="hidden p-3 rounded-xl bg-amber-950/40 border border-amber-800/60 text-xs text-amber-200 space-y-1 animate-fadeIn">
+                            <strong class="text-amber-300 block font-semibold">💡 Hint 3: Pola Penulisan Lock & Defer Unlock</strong>
+                            <p class="text-[11px] leading-relaxed text-amber-100/90">
+                                Di awal fungsi <code>DeductWallet</code>, ketik <code>w.mu.Lock()</code>. Tepat di baris berikutnya, ketik <code>defer w.mu.Unlock()</code>. Menggunakan <code>defer</code> menjamin lock akan selalu dilepaskan meskipun fungsi Anda me-return error <code>ErrInsufficientFunds</code> di tengah jalan!
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <form hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                        <input type="hidden" id="selected-strategy-input" name="code_strategy" value="mutex">
-                        <div class="flex items-center gap-2">
-                            <button type="submit" name="action" value="run" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700 active:scale-95">
-                                <span>▶</span> Run Test Cases
-                            </button>
-                            <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
-                                <span>⚡</span> Submit Solution (+250 XP)
-                            </button>
+                    <!-- In-Browser Code Editor & Live Form -->
+                    <form hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="space-y-3">
+                        <div class="rounded-xl border border-slate-800 bg-[#070b14] overflow-hidden shadow-2xl">
+                            <!-- Topbar Editor -->
+                            <div class="flex items-center justify-between px-4 py-2.5 bg-dark-950 border-b border-slate-800/80">
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                                    <span class="ml-2 font-mono font-bold text-slate-300">solution.go</span>
+                                    <span class="text-[10px] text-slate-500 font-mono">(Ketik manual sintaks Go Anda)</span>
+                                </div>
+                                <div class="text-[11px] font-mono text-emerald-400">
+                                    // Solusi harus thread-safe
+                                </div>
+                            </div>
+
+                            <!-- Code Editor Area (Textarea yang diketik manual) -->
+                            <textarea id="live-code-editor" name="code_content" class="w-full h-56 bg-[#070b14] p-4 text-xs font-mono text-emerald-400 leading-relaxed focus:outline-none resize-none select-text border-0 font-medium" spellcheck="false">package main
+
+import (
+    "errors"
+    "sync"
+)
+
+var ErrInsufficientFunds = errors.New("insufficient funds")
+
+// SharedWallet merepresentasikan dompet bersama dengan saldo dalam satuan sen (int64).
+type SharedWallet struct {
+    balance int64 // saldo dalam sen (int64)
+    // TODO: Tambahkan field sinkronisasi jika diperlukan
+}
+
+// DeductWallet memotong saldo dompet sejumlah amount (dalam sen).
+// Kembalikan ErrInsufficientFunds jika saldo tidak cukup.
+// Wajib aman dieksekusi secara serentak oleh 50 goroutine (Zero Overdraft)!
+func (w *SharedWallet) DeductWallet(amount int64) error {
+    // TODO: Ketik implementasi kode Anda di sini
+    // Petunjuk: Buka tombol Hint jika membutuhkan panduan sintaks
+
+    return nil
+}</textarea>
                         </div>
-                        <span class="text-[11px] text-slate-400 font-mono">Test Case 3: 50 Goroutines Stress Test</span>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                            <div class="flex items-center gap-2">
+                                <button type="submit" name="action" value="run" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700 active:scale-95 shadow-sm">
+                                    <span>▶</span> Run Test Cases
+                                </button>
+                                <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
+                                    <span>⚡</span> Submit Solution (+250 XP)
+                                </button>
+                            </div>
+                            <span class="text-[11px] text-slate-400 font-mono">Test Case 3: 50 Goroutines Concurrency Stress</span>
+                        </div>
                     </form>
 
                     <!-- Terminal Output Panel -->
                     <div id="leetcode-output-panel" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih kode solusi di atas, lalu klik "Run Test Cases" atau "Submit Solution" untuk penilaian instan.
+                        Ketik implementasi thread-safe Anda di editor di atas, lalu klik "Run Test Cases" atau "Submit Solution" untuk penilaian instan.
                     </div>
                 </div>
 
