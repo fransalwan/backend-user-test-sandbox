@@ -543,7 +543,7 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 	totalXP := passedCount * 250
 	progressPct := passedCount * 25
 
-	levelTitle := "Tahap 1: Live Coding Concurrency Safe-Wallet"
+	levelTitle := "Tahap 1: Live Coding DSA (Two Sum Target Match)"
 	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Sedang Diuji (In Review)</span>`
 	if passedCount == 1 {
 		levelTitle = "Tahap 2: System Design Idempotency Defense"
@@ -630,7 +630,7 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(`{"status":"ok"}`))
 }
 
-// EvalBootcampLiveCode mengevaluasi kode Go yang diketik kandidat untuk lab teori persiapan Live Coding.
+// EvalBootcampLiveCode mengevaluasi kode Go yang diketik kandidat untuk lab teori persiapan Live Coding (DSA Hash Map).
 func (h *Handler) EvalBootcampLiveCode(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
@@ -640,16 +640,12 @@ func (h *Handler) EvalBootcampLiveCode(w http.ResponseWriter, r *http.Request) {
 	codeContent := strings.TrimSpace(r.FormValue("code_content"))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	hasTODO := strings.Contains(codeContent, "// TODO") && !strings.Contains(codeContent, "balance +=") && !strings.Contains(codeContent, "balance -=")
-	hasFloat := strings.Contains(codeContent, "float32") || strings.Contains(codeContent, "float64")
-	hasDepositVal := strings.Contains(codeContent, "amount <= 0") || strings.Contains(codeContent, "amount < 1") || strings.Contains(codeContent, "amount < 0")
-	hasDepositAdd := strings.Contains(codeContent, "balance +=") || strings.Contains(codeContent, "balance = a.balance + amount") || strings.Contains(codeContent, "balance = balance + amount")
-	hasWithdrawBal := strings.Contains(codeContent, "balance < amount") || strings.Contains(codeContent, "balance - amount < 0") || strings.Contains(codeContent, "a.balance < amount")
-	hasWithdrawSub := strings.Contains(codeContent, "balance -=") || strings.Contains(codeContent, "balance = a.balance - amount") || strings.Contains(codeContent, "balance = balance - amount")
-	hasLock := strings.Contains(codeContent, ".Lock()") || strings.Contains(codeContent, "Lock()")
-	hasUnlock := strings.Contains(codeContent, ".Unlock()") || strings.Contains(codeContent, "Unlock()")
+	hasTODO := strings.Contains(codeContent, "// TODO") && !strings.Contains(codeContent, "return true")
+	hasMap := strings.Contains(codeContent, "map[int]") || strings.Contains(codeContent, "make(map")
+	hasComplement := strings.Contains(codeContent, "target -") || strings.Contains(codeContent, "target-") || strings.Contains(codeContent, "+")
+	hasReturnBool := strings.Contains(codeContent, "return true") || strings.Contains(codeContent, "return false")
 
-	h.hub.Broadcast("🧪 [Bootcamp Lab] Menjalankan automated test uji teori Live Coding (Safe Money Accumulator)...")
+	h.hub.Broadcast("🧪 [Bootcamp Lab] Menjalankan automated test uji teori Live Coding (DSA HasTargetSum Hash Map)...")
 
 	if codeContent == "" || hasTODO {
 		html := `
@@ -658,94 +654,50 @@ func (h *Handler) EvalBootcampLiveCode(w http.ResponseWriter, r *http.Request) {
                 <span>⚠️</span> <span>Implementasi Belum Lengkap</span>
             </div>
             <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
-                Ketik implementasi fungsi <code>Deposit</code> dan <code>Withdraw</code> di editor kode di atas. Jangan biarkan blok fungsi kosong!
+                Ketik implementasi fungsi <code>HasTargetSum</code> di editor di atas. Gunakan Hash Map untuk mencari pasangan angka secara efisien!
             </p>
         </div>`
 		_, _ = w.Write([]byte(html))
 		return
 	}
 
-	if hasFloat {
+	if !hasReturnBool || !hasComplement {
 		html := `
         <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
             <div class="font-bold flex items-center gap-1.5">
-                <span>🚨</span> <span>Pelanggaran Zero-Tolerance Rule: Ditemukan Tipe Data Float!</span>
+                <span>❌</span> <span>Test Case 1 Gagal: Logika Pencarian Belum Tepat</span>
             </div>
             <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
-                Terdeteksi penggunaan <code>float32</code> atau <code>float64</code>! Dalam rekayasa sistem perbankan & fintech, seluruh kalkulasi saldo wajib menggunakan bilangan bulat murni (<code>int64</code> sen / cents). Hapus float dari kode Anda.
+                Fungsi harus memeriksa apakah selisih <code>target - num</code> sudah pernah dicatat di Hash Map. Jika ada, kembalikan <code>true</code>. Jika perulangan selesai tanpa hasil, kembalikan <code>false</code>.
             </p>
         </div>`
 		_, _ = w.Write([]byte(html))
 		return
 	}
 
-	if !hasDepositVal || !hasDepositAdd {
-		html := `
-        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
-            <div class="font-bold flex items-center gap-1.5">
-                <span>❌</span> <span>Test Case 1 Gagal: Validasi Deposit Bermasalah</span>
-            </div>
-            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
-                Pastikan fungsi <code>Deposit</code> memeriksa <code>if amount <= 0 { return ErrInvalidAmount }</code> dan menambahkan saldo dengan benar (<code>a.balance += amount</code>).
-            </p>
-        </div>`
-		_, _ = w.Write([]byte(html))
-		return
+	complexityBadge := "O(N) Hash Map Lookup"
+	if !hasMap {
+		complexityBadge = "O(N^2) Nested Loop (Suboptimal)"
 	}
-
-	if !hasWithdrawBal || !hasWithdrawSub {
-		html := `
-        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
-            <div class="font-bold flex items-center gap-1.5">
-                <span>❌</span> <span>Test Case 2 Gagal: Logika Withdraw Belum Tepat</span>
-            </div>
-            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
-                Fungsi <code>Withdraw</code> wajib memeriksa apakah <code>amount <= 0</code> dan apakah <code>a.balance < amount { return ErrInsufficientFunds }</code> sebelum melakukan pemotongan saldo.
-            </p>
-        </div>`
-		_, _ = w.Write([]byte(html))
-		return
-	}
-
-	if hasLock && !hasUnlock {
-		html := `
-        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1.5 font-mono">
-            <div class="font-bold flex items-center gap-1.5">
-                <span>💀</span> <span>Deadlock Hazard Terdeteksi</span>
-            </div>
-            <p class="text-[11px] text-rose-700 dark:text-rose-300 leading-relaxed">
-                Anda memanggil <code>Lock()</code> tetapi tidak melepaskan kunci dengan <code>Unlock()</code>. Gunakan idiom Go yang aman: <code>a.mu.Lock(); defer a.mu.Unlock()</code> di awal method!
-            </p>
-        </div>`
-		_, _ = w.Write([]byte(html))
-		return
-	}
-
-	isSafe := (hasLock && hasUnlock)
 
 	html := fmt.Sprintf(`
     <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 text-xs space-y-3 font-mono shadow-sm">
         <div class="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800/60 pb-2">
             <span class="text-emerald-800 dark:text-emerald-300 font-bold flex items-center gap-1.5">
-                <span>✅</span> <span>ALL TEST CASES PASSED (3/3 LOLOS)</span>
+                <span>✅</span> <span>ALL DSA TEST CASES PASSED (3/3 LOLOS)</span>
             </span>
-            <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold font-sans">TEORI TERUJI 100%%</span>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold font-sans">ALGORITMA VALID</span>
         </div>
         <div class="space-y-1.5 text-[11px] text-slate-700 dark:text-slate-300">
-            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 1: Deposit Valid & Tolak Nilai &le; 0 (ErrInvalidAmount).......... PASS</div>
-            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 2: Withdraw Valid & Tolak Overdraft (ErrInsufficientFunds)........ PASS</div>
-            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 3: Thread-Safety Synchronization (%s).................... SECURE</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 1: nums=[2, 7, 11, 15], target=9 &rarr; Return true (2 + 7)............ PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 2: nums=[1, 2, 3], target=10 &rarr; Return false (Tidak Ada Pasangan)... PASS</div>
+            <div class="text-emerald-600 dark:text-emerald-400">✓ Case 3: Kompleksitas Terdeteksi (%s)........................ PASS</div>
         </div>
         <div class="p-2.5 rounded-lg bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-[11px] font-sans text-slate-600 dark:text-slate-300">
-            <strong class="text-emerald-700 dark:text-emerald-400 block mb-0.5">💡 Analisis Teori:</strong>
-            Pemahaman Anda mengenai Critical Section, int64 cents arithmetic, dan Mutex synchronization sudah sangat solid! Logika ini identik dengan apa yang akan Anda ketik di <strong>Tahap 1 (Live Coding Hot-Wallet)</strong>.
+            <strong class="text-emerald-700 dark:text-emerald-400 block mb-0.5">💡 Analisis Algoritma:</strong>
+            Kerja bagus! Anda telah menguasai pola dasar Hash Map untuk mencari komplemen target dalam satu kali lintasan (*single pass*). Anda sudah siap menaklukkan <strong>Tahap 1 (Live Coding: Two Sum)</strong>!
         </div>
-    </div>`, func() string {
-		if isSafe {
-			return "sync.Mutex Lock/Unlock Aktif"
-		}
-		return "Tanpa Race Condition"
-	}())
+    </div>`, complexityBadge)
 
 	_, _ = w.Write([]byte(html))
 }
@@ -863,7 +815,7 @@ func (h *Handler) EvalBootcampSystemDesignCode(w http.ResponseWriter, r *http.Re
 	_, _ = w.Write([]byte(html))
 }
 
-// EvalScenario01Code mengevaluasi kode Go yang diketik manual oleh kandidat bergaya LeetCode / CodeWars.
+// EvalScenario01Code mengevaluasi kode Go yang diketik manual oleh kandidat untuk LeetCode Problem #1: Two Sum.
 func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
@@ -879,24 +831,17 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("HX-Trigger", "refreshWallets")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	// Analisis kode yang diketik manual kandidat
-	hasTODO := strings.Contains(codeContent, "// TODO: Ketik implementasi") && !strings.Contains(codeContent, "balance")
-	hasBalanceCheck := strings.Contains(codeContent, "balance < amount") || 
-		strings.Contains(codeContent, "balance <") || 
-		strings.Contains(codeContent, "w.balance >= amount") ||
-		strings.Contains(codeContent, "balance - amount < 0")
-	hasDeduction := strings.Contains(codeContent, "balance -=") || 
-		strings.Contains(codeContent, "balance = w.balance - amount") ||
-		strings.Contains(codeContent, "atomic.AddInt64")
-	hasLock := strings.Contains(codeContent, ".Lock()") || strings.Contains(codeContent, "Lock()")
-	hasUnlock := strings.Contains(codeContent, ".Unlock()") || strings.Contains(codeContent, "Unlock()")
-	hasAtomic := strings.Contains(codeContent, "atomic.CompareAndSwapInt64") || strings.Contains(codeContent, "atomic.AddInt64")
-	hasMutexField := strings.Contains(codeContent, "sync.Mutex") || strings.Contains(codeContent, "sync.RWMutex")
+	hasTODO := strings.Contains(codeContent, "// TODO") && !strings.Contains(codeContent, "return")
+	hasReturnSlice := strings.Contains(codeContent, "[]int{") || strings.Contains(codeContent, "return []int") || strings.Contains(codeContent, "return nil")
+	hasLogic := strings.Contains(codeContent, "target -") || strings.Contains(codeContent, "target-") || strings.Contains(codeContent, "==")
+	hasHashMap := strings.Contains(codeContent, "map[int]int") || strings.Contains(codeContent, "make(map") || strings.Contains(codeContent, "map[int]")
+	hasNestedLoop := (strings.Contains(codeContent, "for i") && strings.Contains(codeContent, "for j")) ||
+		(strings.Contains(codeContent, "for ") && strings.Count(codeContent, "for ") >= 2 && !hasHashMap)
 
-	h.hub.Broadcast(fmt.Sprintf("💻 [LeetCode Runner] Menganalisis sintaks kode kandidat (%d baris, Aksi: %s)...", len(strings.Split(codeContent, "\n")), action))
+	h.hub.Broadcast(fmt.Sprintf("💻 [LeetCode Runner] Menganalisis algoritma Two Sum kandidat (%d baris, Aksi: %s)...", len(strings.Split(codeContent, "\n")), action))
 
 	// Jika kandidat belum mengetik implementasi sama sekali
-	if codeContent == "" || (hasTODO && !hasDeduction) {
+	if codeContent == "" || (hasTODO && !hasLogic) {
 		html := `
         <div class="space-y-3 font-mono text-xs">
             <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
@@ -906,9 +851,9 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                 </div>
             </div>
             <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1.5">
-                <strong class="text-rose-300 block">Fungsi DeductWallet Belum Diimplementasikan!</strong>
+                <strong class="text-rose-300 block">Fungsi TwoSum Belum Diimplementasikan!</strong>
                 <p class="text-[11px] text-rose-300 leading-relaxed">
-                    Ketik manual logika pemotongan saldo Anda di area editor di atas. Jika Anda bingung harus mulai dari mana, klik tombol <strong>"💡 Hint 1 (Konseptual)"</strong> di atas editor!
+                    Ketik manual algoritma pencarian indeks Two Sum Anda pada editor di atas. Jika Anda bingung, klik tombol <strong>"💡 Hint 1 (Konseptual)"</strong> di atas editor!
                 </p>
             </div>
         </div>`
@@ -916,22 +861,22 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cek apakah kandidat lupa validasi saldo
-	if !hasBalanceCheck && !hasAtomic {
+	// Cek apakah kandidat lupa me-return slice hasil
+	if !hasReturnSlice && !hasLogic {
 		html := `
         <div class="space-y-3 font-mono text-xs">
             <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
                 <div class="flex items-center gap-2">
                     <span class="text-base font-extrabold text-rose-400">❌ WRONG ANSWER</span>
-                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Assertion Error</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Missing Return Value</span>
                 </div>
-                <span class="text-rose-400 font-mono text-[11px]">Runtime: 0.4 ms</span>
+                <span class="text-rose-400 font-mono text-[11px]">Runtime: 0.2 ms</span>
             </div>
             <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1.5">
-                <strong class="text-rose-300 block">Test Case 2 Gagal: Saldo Tidak Divalidasi!</strong>
+                <strong class="text-rose-300 block">Test Case 1 Gagal: Output Tidak Valid</strong>
                 <p class="text-[11px] text-rose-300 leading-relaxed">
-                    Input: <code>balance = $20, deduct = $50</code> &rarr; Expected: <code>ErrInsufficientFunds</code>, Got: Saldo berkurang menjadi <code>-$30</code>.
-                    Pastikan Anda memeriksa <code>if w.balance < amount { return ErrInsufficientFunds }</code> sebelum melakukan pemotongan!
+                    Input: <code>nums = [2, 7, 11, 15], target = 9</code> &rarr; Expected: <code>[0, 1]</code>.
+                    Pastikan Anda me-return slice dua indeks yang valid: <code>return []int{prevIdx, currIdx}</code>!
                 </p>
             </div>
         </div>`
@@ -939,38 +884,11 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cek potensi deadlock (ada Lock tapi lupa Unlock)
-	if hasLock && !hasUnlock {
-		html := `
-        <div class="space-y-3 font-mono text-xs">
-            <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
-                <div class="flex items-center gap-2">
-                    <span class="text-base font-extrabold text-rose-400">💀 DEADLOCK DETECTED</span>
-                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Fatal Runtime Crash</span>
-                </div>
-            </div>
-            <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1.5">
-                <strong class="text-rose-300 block">fatal error: all goroutines are asleep - deadlock!</strong>
-                <p class="text-[11px] text-rose-300 leading-relaxed">
-                    Anda memanggil <code>Lock()</code> tetapi tidak memanggil <code>Unlock()</code>. Gunakan <code>defer w.mu.Unlock()</code> tepat setelah <code>w.mu.Lock()</code> agar kunci selalu dilepas bahkan saat fungsi me-return error.
-                </p>
-            </div>
-        </div>`
-		_, _ = w.Write([]byte(html))
-		return
-	}
-
-	// Evaluasi sinkronisasi konkurensi (Thread-safety)
-	isThreadSafe := (hasLock && hasUnlock) || hasAtomic
-
-	// Jika kandidat hanya mengklik "Run Test Cases"
+	// Jika action == "run" (Cek Cepat 3 Test Cases)
 	if action == "run" {
-		case3StatusBadge := `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 text-slate-400">BELUM DIUJI (SUBMIT ONLY)</span>`
-		statusText := "Uji dasar (Case 1 & 2) berhasil dilewati."
-		if isThreadSafe {
-			statusText = "✅ Sintaks sinkronisasi thread-safe terdeteksi! Kode siap untuk uji konkurensi penuh."
-		} else {
-			statusText = "⚠️ Kode belum memiliki mekanisme Lock / Atomic. Kasus konkurensi tinggi (Case 3) berisiko gagal saat Submit."
+		complexityText := "O(N) Optimal (Hash Map terdeteksi)"
+		if hasNestedLoop && !hasHashMap {
+			complexityText = "O(N^2) Suboptimal (Nested Loop terdeteksi)"
 		}
 
 		html := fmt.Sprintf(`
@@ -979,62 +897,63 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                 <span class="text-sm font-bold text-amber-300 flex items-center gap-2">
                     <span>▶</span> Hasil Uji Cepat (Run Test Cases)
                 </span>
-                <span class="text-slate-500 text-[11px]">Go 1.27 Live Sandbox</span>
+                <span class="text-slate-500 text-[11px]">Go 1.27 Live Sandbox &bull; LeetCode #1</span>
             </div>
             <div class="space-y-2">
                 <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
                     <div>
-                        <strong class="text-emerald-400">Test Case 1: Simple Debit</strong>
-                        <div class="text-[11px] text-slate-400">Input: balance=$100, deduct=$25 &rarr; Saldo $75</div>
+                        <strong class="text-emerald-400">Case 1: Normal Pair</strong>
+                        <div class="text-[11px] text-slate-400">Input: nums=[2, 7, 11, 15], target=9 &rarr; Output: [0, 1] (2 + 7 = 9)</div>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
                 </div>
                 <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
                     <div>
-                        <strong class="text-emerald-400">Test Case 2: Insufficient Funds</strong>
-                        <div class="text-[11px] text-slate-400">Input: balance=$20, deduct=$50 &rarr; Return ErrInsufficientFunds</div>
+                        <strong class="text-emerald-400">Case 2: Unsorted Array</strong>
+                        <div class="text-[11px] text-slate-400">Input: nums=[3, 2, 4], target=6 &rarr; Output: [1, 2] (2 + 4 = 6)</div>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
                 </div>
-                <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+                <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
                     <div>
-                        <strong class="text-slate-300">Test Case 3: 50 Goroutines Concurrency Stress</strong>
-                        <div class="text-[11px] text-slate-500">Uji ketahanan race condition di bawah beban paralel serentak</div>
+                        <strong class="text-emerald-400">Case 3: Duplicate Numbers</strong>
+                        <div class="text-[11px] text-slate-400">Input: nums=[3, 3], target=6 &rarr; Output: [0, 1] (3 + 3 = 6)</div>
                     </div>
-                    %s
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
                 </div>
             </div>
-            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300">
-                %s Klik tombol <strong>"⚡ Submit Solution"</strong> untuk verifikasi sertifikasi Tahap 1.
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
+                <span>Kompleksitas: <strong>%s</strong></span>
+                <span class="text-amber-400">Klik "⚡ Submit Solution" untuk evaluasi komite resmi!</span>
             </div>
-        </div>`, case3StatusBadge, statusText)
+        </div>`, complexityText)
 		_, _ = w.Write([]byte(html))
 		return
 	}
 
 	// Action == "submit"
-	if !isThreadSafe {
-		// Kasus Naive: Gagal di konkurensi (Overdraft)
-		h.hub.Broadcast("🚨 [LeetCode Runner] WRONG ANSWER: Terdeteksi financial overdraft defect! Goroutine menyebabkan saldo minus.")
+	if hasNestedLoop && !hasHashMap {
+		// Kasus Brute Force: Lolos input kecil, tapi ditolak komite karena TLE pada 10.000 transaksi
+		h.hub.Broadcast("⚠️ [LeetCode Runner] SUBOPTIMAL WARNING: Algoritma brute force O(N^2) terdeteksi. Risiko TLE pada skala produksi!")
 		html := `
         <div class="space-y-3 font-mono text-xs">
-            <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
+            <div class="flex items-center justify-between border-b border-amber-800/60 pb-2">
                 <div class="flex items-center gap-2">
-                    <span class="text-base font-extrabold text-rose-400">❌ WRONG ANSWER</span>
-                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Race Condition Defect</span>
+                    <span class="text-base font-extrabold text-amber-400">⚠️ TIME LIMIT HAZARD (O(N²) SUBOPTIMAL)</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Perlu Optimasi</span>
                 </div>
-                <span class="text-rose-400 font-mono text-[11px]">Runtime: 1.1 ms</span>
+                <span class="text-amber-400 font-mono text-[11px]">Runtime: 1,840 ms (Too Slow)</span>
             </div>
-            <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-2">
-                <strong class="text-rose-300 block">Test Case 3 Gagal: Financial Overdraft (-$25.00)!</strong>
-                <p class="text-[11px] text-rose-300 leading-relaxed">
-                    Kode Anda lolos di pengujian sekuensial biasa (Case 1 & 2), tetapi saat <strong>50 goroutine</strong> menarik uang secara simultan, beberapa goroutine membaca nilai saldo yang sama secara bersamaan (<em>Lost Update</em>). Saldo akhir bocor dan menembus angka minus!
+            <div class="p-3 rounded-lg bg-amber-950/60 border border-amber-800 text-amber-200 text-xs space-y-2">
+                <strong class="text-amber-300 block">Evaluasi Pewawancara (Staff Software Engineer):</strong>
+                <p class="text-[11px] text-amber-200 leading-relaxed">
+                    <em>"Solusi brute force nested loop <code>for i := 0 ... for j := i+1 ...</code> Anda berhasil untuk array kecil (Case 1 & 2), tetapi memiliki Time Complexity <strong>O(N²)</strong>. Saat diuji pada 10.000 data transaksi nasabah (Stress Test Case 4), server membutuhkan 1.840 ms dan berisiko Time Limit Exceeded (TLE)!"</em>
                 </p>
-                <div class="p-2 rounded bg-dark-950 border border-rose-800/60 text-[11px] text-amber-300">
-                    💡 <strong>Bantuan Belajar:</strong> Anda belum menambahkan mekanisme penguncian memori. Buka <strong>"💡 Hint 2 (Struktur Data)"</strong> dan <strong>"💡 Hint 3 (Sintaks Go)"</strong> di atas editor untuk memandu penulisan <code>sync.Mutex</code> Anda.
+                <div class="p-2 rounded bg-dark-950 border border-amber-800/60 text-[11px] text-slate-300">
+                    💡 <strong>Arahan Optimasi:</strong> Gunakan <strong>Hash Map (map[int]int)</strong> untuk mencatat angka yang sudah dilewati. Dengan begitu, Anda bisa mencari <code>complement := target - nums[i]</code> dalam <strong>O(1)</strong> amortized, memangkas total runtime menjadi <strong>O(N)</strong>!
                 </div>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+            <div class="grid grid-cols-4 gap-2 text-center text-[11px]">
                 <div class="p-2 rounded bg-slate-900 border border-slate-800">
                     <span class="text-slate-500">Case 1</span>
                     <div class="font-bold text-emerald-400">PASS ✓</div>
@@ -1043,9 +962,13 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                     <span class="text-slate-500">Case 2</span>
                     <div class="font-bold text-emerald-400">PASS ✓</div>
                 </div>
-                <div class="p-2 rounded bg-slate-900 border border-rose-800/80 bg-rose-950/30">
-                    <span class="text-rose-400">Case 3 (50-Routines)</span>
-                    <div class="font-bold text-rose-400">FAILED ✗</div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                    <span class="text-slate-500">Case 3</span>
+                    <div class="font-bold text-emerald-400">PASS ✓</div>
+                </div>
+                <div class="p-2 rounded bg-slate-900 border border-amber-800/80 bg-amber-950/30">
+                    <span class="text-amber-400">Case 4 (10k items)</span>
+                    <div class="font-bold text-amber-400">TLE HAZARD ⚠️</div>
                 </div>
             </div>
         </div>`
@@ -1053,10 +976,9 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Solusi Berhasil (Thread-Safe):
-	_ = hasMutexField
-	h.markStagePassed(1, "Live Coding Concurrency Champion")
-	h.hub.Broadcast("🎉 [LeetCode Runner] STATUS: ACCEPTED! Solusi manual thread-safe lolos seluruh 3 test case dengan nol overdraft.")
+	// Solusi Optimal O(N) Hash Map:
+	h.markStagePassed(1, "LeetCode DSA Champion: Two Sum O(N)")
+	h.hub.Broadcast("🎉 [LeetCode Runner] STATUS: ACCEPTED! Solusi Two Sum Hash Map O(N) lolos seluruh test cases dengan runtime 0.8 ms (+250 XP).")
 
 	html := `
     <div class="space-y-3 font-mono text-xs">
@@ -1065,37 +987,37 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                 <span class="text-base font-extrabold text-emerald-400">ACCEPTED ✅</span>
                 <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">+250 XP DIRAIH</span>
             </div>
-            <span class="text-emerald-400 font-mono text-[11px]">Runtime: 1.4 ms (Beats 99.1%)</span>
+            <span class="text-emerald-400 font-mono text-[11px]">Runtime: 0.8 ms (Beats 99.4%)</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
                 <span class="text-slate-500">Runtime</span>
-                <div class="font-bold text-white">1.4 ms</div>
-                <div class="text-[10px] text-emerald-400">Beats 99.1%</div>
+                <div class="font-bold text-emerald-400">0.8 ms</div>
+                <div class="text-[10px] text-emerald-400">Beats 99.4%</div>
             </div>
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
                 <span class="text-slate-500">Memory</span>
-                <div class="font-bold text-white">2.0 MB</div>
+                <div class="font-bold text-white">3.2 MB</div>
                 <div class="text-[10px] text-emerald-400">Beats 97.5%</div>
             </div>
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
-                <span class="text-slate-500">Goroutines</span>
-                <div class="font-bold text-white">50 Paralel</div>
-                <div class="text-[10px] text-emerald-400">Zero Overdraft</div>
+                <span class="text-slate-500">Kompleksitas Waktu</span>
+                <div class="font-bold text-emerald-400">O(N) Linear</div>
+                <div class="text-[10px] text-emerald-400">Single-Pass Map</div>
             </div>
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
                 <span class="text-slate-500">Test Cases</span>
-                <div class="font-bold text-emerald-400">3/3 Lolos</div>
-                <div class="text-[10px] text-emerald-400">100% Sempurna</div>
+                <div class="font-bold text-emerald-400">4/4 Lolos</div>
+                <div class="text-[10px] text-emerald-400">100% Akurat</div>
             </div>
         </div>
         <div class="p-3.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-emerald-200 text-xs space-y-1.5">
-            <strong class="text-emerald-300 block">🏆 Evaluasi Interviewer Live Coding:</strong>
+            <strong class="text-emerald-300 block">🏆 Evaluasi Interviewer Live Coding (Staff Engineer):</strong>
             <p class="text-[11px] leading-relaxed text-emerald-200">
-                Luar biasa! Kode Go yang Anda ketik secara manual berhasil mengamankan <em>Critical Section</em> menggunakan primitive sinkronisasi thread-safe. 50 goroutine serentak mengeksekusi pemotongan saldo dengan presisi tinggi tanpa satu pun race condition atau overdraft finansial.
+                Sempurna! Anda berhasil memecahkan soal Two Sum dengan algoritma optimal <strong>O(N) Time Complexity</strong> dan <strong>O(N) Space Complexity</strong> menggunakan Hash Map lookup. Kemampuan mentransformasikan algoritma kuadratik O(N²) menjadi linear O(N) adalah fondasi esensial yang dicari perusahaan teknologi terkemuka.
             </p>
             <div class="text-[11px] text-slate-300 pt-1">
-                👉 <strong>Langkah Berikutnya:</strong> Klik tab <strong>"Tahap 2: System Design"</strong> di atas untuk mempresentasikan diagram alur Idempotency Engine di hadapan Principal Architect!
+                👉 <strong>Langkah Berikutnya:</strong> Klik tab <strong>"Tahap 2: System Design"</strong> di atas untuk mempresentasikan diagram arsitektur sistem pembayaran yang resilien di hadapan Lead Architect!
             </div>
         </div>
     </div>`

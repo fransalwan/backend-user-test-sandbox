@@ -105,27 +105,14 @@
             }
         }
 
-        // Skeleton Starter Code Tahap 1
+        // Skeleton Starter Code Tahap 1 (LeetCode #1: Two Sum)
         const STARTER_CODE_SKELETON = `package main
 
-import (
-    "errors"
-    "sync"
-)
-
-var ErrInsufficientFunds = errors.New("insufficient funds")
-
-// SharedWallet merepresentasikan dompet bersama dengan saldo dalam satuan sen (int64).
-type SharedWallet struct {
-    balance int64 // saldo dalam sen (int64)
-    // TODO: Tambahkan field sinkronisasi jika diperlukan
-}
-
-// DeductWallet memotong saldo dompet sejumlah amount (dalam sen).
-// Kembalikan ErrInsufficientFunds jika saldo tidak cukup.
-// Wajib aman dieksekusi secara serentak oleh 50 goroutine (Zero Overdraft)!
-func (w *SharedWallet) DeductWallet(amount int64) error {
-    // TODO: Ketik implementasi kode Anda di sini
+// TwoSum mencari dua indeks dari elemen nums yang jika dijumlahkan menghasilkan target.
+// Asumsikan setiap input tepat memiliki satu solusi, dan elemen yang sama tidak boleh digunakan dua kali.
+// Wajib O(N) Time Complexity menggunakan Hash Map untuk menghindari Time Limit Exceeded (TLE)!
+func TwoSum(nums []int, target int) []int {
+    // TODO: Ketik implementasi kode algoritma Anda di sini
     // Petunjuk: Buka tombol Hint jika membutuhkan panduan sintaks
 
     return nil
@@ -156,35 +143,13 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
         // ================= STARTER CODE SKELETONS UNTUK BOOTCAMP LAB =================
         const BOOTCAMP_STARTER_LIVECODE = `package main
 
-import (
-    "errors"
-    "sync"
-)
-
-var (
-    ErrInvalidAmount     = errors.New("amount must be positive")
-    ErrInsufficientFunds = errors.New("insufficient funds")
-)
-
-// MoneyAccumulator mengelola saldo akun dalam satuan sen (int64) secara thread-safe.
-type MoneyAccumulator struct {
-    mu      sync.Mutex
-    balance int64 // dilarang keras menggunakan float!
-}
-
-// Deposit menambahkan saldo secara aman.
-// Kembalikan ErrInvalidAmount jika amount <= 0.
-func (a *MoneyAccumulator) Deposit(amount int64) error {
-    // TODO: Ketik implementasi deposit Anda di sini
-    return nil
-}
-
-// Withdraw mengurangi saldo secara aman.
-// Kembalikan ErrInvalidAmount jika amount <= 0.
-// Kembalikan ErrInsufficientFunds jika saldo tidak cukup.
-func (a *MoneyAccumulator) Withdraw(amount int64) error {
-    // TODO: Ketik implementasi withdraw Anda di sini
-    return nil
+// HasTargetSum mengecek apakah terdapat pasangan dua angka di dalam nums yang bernilai target.
+// Kembalikan true jika ditemukan, atau false jika tidak ada pasangan yang cocok.
+// Targetkan O(N) Time Complexity dengan Hash Map lookup O(1) amortized.
+func HasTargetSum(nums []int, target int) bool {
+    // TODO: Ketik implementasi fungsi HasTargetSum Anda di sini
+    // Petunjuk: Gunakan map[int]bool untuk mencatat angka yang sudah dilewati
+    return false
 }`;
 
         const BOOTCAMP_STARTER_SYSDESIGN = `package main
@@ -453,7 +418,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                     <button id="btn-track-livecode" type="button" onclick="switchBootcampTrack('livecode')" class="flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md border border-emerald-500/40 transition flex items-center justify-center gap-2 w-full">
                         <span>💻</span>
                         <span>Jalur 1: Persiapan Ujian Live Coding</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-700/60 text-emerald-100 font-mono hidden md:inline">Concurrency & Mutex</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-700/60 text-emerald-100 font-mono hidden md:inline">DSA & Big-O Hash Map</span>
                     </button>
                     <button id="btn-track-sysdesign" type="button" onclick="switchBootcampTrack('sysdesign')" class="flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition flex items-center justify-center gap-2 w-full">
                         <span>🏛️</span>
@@ -467,89 +432,94 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                 <!-- ========================================================================= -->
                 <div id="bootcamp-track-livecode" class="space-y-6">
                     
-                    <!-- KARTU TEORI 1: INVARIAN UANG & INT64 CENTS -->
+                    <!-- KARTU TEORI 1: ANALISIS BIG-O COMPLEXITY -->
                     <div class="rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/90 p-5 space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
                             <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
-                                <span>💰</span> Modul L1 &bull; Hukum Zero-Tolerance Moneter
+                                <span>⚡</span> Modul L1 &bull; Analisis Kompleksitas Algoritma (Big-O Notation)
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 font-mono">IEEE 754 vs int64</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20 font-mono">O(1) vs O(N) vs O(N²)</span>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Mengapa Dilarang Keras Menggunakan Float/Double untuk Uang?</h3>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Mengapa Solusi O(N²) Brute Force Ditolak di Interview Industri?</h3>
                         <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Standar IEEE 754 menggunakan aproksimasi biner (basis 2) yang tidak mampu merepresentasikan pecahan desimal basis 10 (seperti <code>0.1</code> atau <code>0.2</code>) secara presisi mutlak. Akibatnya timbul celah pembulatan (contoh: <code>0.1 + 0.2 = 0.30000000000000004</code>).
+                            Di lingkungan produksi fintech dengan jutaan catatan transaksi, perbedaan kompleksitas waktu antara <strong>O(N)</strong> dan <strong>O(N²)</strong> adalah perbedaan antara sistem yang responsif dalam milidetik atau sistem yang mengalami kelumpuhan (Time Limit Exceeded).
                         </p>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
                             <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300 space-y-1">
-                                <strong class="text-rose-700 dark:text-rose-400 block font-sans">❌ Cara Salah (Float):</strong>
-                                <div>var saldo float64 = 100.00</div>
-                                <div>saldo -= 0.10 // berisiko rounding error akumulatif</div>
+                                <strong class="text-rose-700 dark:text-rose-400 block font-sans">❌ Brute Force Nested Loop O(N²):</strong>
+                                <div>for i := 0; i &lt; n; i++ {</div>
+                                <div>&nbsp;&nbsp;for j := i + 1; j &lt; n; j++ { ... }</div>
+                                <div>} // N = 10.000 &rarr; 100.000.000 iterasi! (TLE)</div>
                             </div>
                             <div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 space-y-1">
-                                <strong class="text-emerald-700 dark:text-emerald-400 block font-sans">✅ Standar Industri (int64 sen):</strong>
-                                <div>var saldoCents int64 = 10000 // $100.00</div>
-                                <div>saldoCents -= 10 // persis 10 sen ($0.10), zero float!</div>
+                                <strong class="text-emerald-700 dark:text-emerald-400 block font-sans">✅ Single-Pass Hash Map O(N):</strong>
+                                <div>seen := make(map[int]bool)</div>
+                                <div>for _, num := range nums {</div>
+                                <div>&nbsp;&nbsp;// Lookup O(1) amortized &rarr; N iterasi saja!</div>
+                                <div>} // N = 10.000 &rarr; hanya 10.000 operasi (&lt; 1 ms)</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KARTU TEORI 2: RACE CONDITION & CRITICAL SECTION -->
+                    <!-- KARTU TEORI 2: HASH MAP & TARGET COMPLEMENT -->
                     <div class="rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/90 p-5 space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
                             <span class="text-xs font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1.5 uppercase tracking-wide">
-                                <span>🔒</span> Modul L2 &bull; Anatomi Race Condition & Lost Update
+                                <span>🎯</span> Modul L2 &bull; Pola Pencarian Target Complement
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20 font-mono">Critical Section</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20 font-mono">Complement Pattern</span>
                         </div>
-                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Apa yang Terjadi Saat 50 Goroutine Menarik Saldo Bersamaan?</h3>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Bagaimana Mengubah Masalah Pasangan Menjadi Pencarian O(1)?</h3>
                         <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                            Ketika dua atau lebih thread mengeksekusi siklus <strong>Read-Modify-Write (RMW)</strong> pada waktu bersamaan tanpa penguncian, terjadi fenomena <strong>Lost Update</strong>:
+                            Alih-alih mencari pasangan secara membabi-buta dengan membandingkan tiap angka satu per satu, gunakan identitas matematika dasar:
                         </p>
-                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-1 text-slate-700 dark:text-slate-300">
-                            <div class="text-slate-400">// Skenario Bencana Lost Update (Saldo Awal: $100):</div>
-                            <div>Goroutine A: Baca saldo = $100 &rarr; Hitung (100 - 50 = $50)</div>
-                            <div>Goroutine B: Baca saldo = $100 &rarr; Hitung (100 - 50 = $50) [BACAAN BASI / STALE!]</div>
-                            <div>Goroutine A: Tulis saldo = $50</div>
-                            <div>Goroutine B: Tulis saldo = $50 &rarr; Menimpa tulisan A! (Saldo akhir $50, nasabah tarik $100 tapi hanya berkurang $50!)</div>
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-1.5 text-slate-700 dark:text-slate-300">
+                            <div class="text-teal-600 dark:text-teal-400 font-bold">// Relasi Matematika:</div>
+                            <div>A + B = Target &nbsp;&harr;&nbsp; B = Target - A &nbsp;(di mana B adalah "Komplemen")</div>
+                            <div class="text-slate-400 pt-1">// Alur Eksekusi Single-Pass:</div>
+                            <div>1. Saat berada di angka A, hitung komplemen yang kita butuhkan: <code>target - A</code></div>
+                            <div>2. Cek ke Hash Map: "Apakah komplemen ini sudah pernah kita temui sebelumnya?"</div>
+                            <div>3. Jika YA &rarr; Pasangan ditemukan! Kembalikan hasil langsung.</div>
+                            <div>4. Jika BELUM &rarr; Simpan A ke dalam Hash Map, lalu lanjutkan ke elemen berikutnya.</div>
                         </div>
                     </div>
 
-                    <!-- KARTU TEORI 3: SINKRONISASI MUTEX VS ATOMIC -->
+                    <!-- KARTU TEORI 3: PRIMITIVE MAP & MEMORY TRADEOFF DI GO -->
                     <div class="rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/90 p-5 space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2.5">
                             <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1.5 uppercase tracking-wide">
-                                <span>⚙️</span> Modul L3 &bull; Primitive Sinkronisasi Go: Kapan Pakai Apa?
+                                <span>🧠</span> Modul L3 &bull; Struktur Data Go: Slice vs Hash Map (map[K]V)
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/20 font-mono">Mutex vs Atomic</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 border border-cyan-500/20 font-mono">Time-Space Trade-off</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs border-collapse">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase font-mono text-slate-400">
-                                        <th class="py-2">Primitive</th>
-                                        <th class="py-2">Mekanisme</th>
-                                        <th class="py-2">Kapan Digunakan</th>
-                                        <th class="py-2">Catatan Kritis</th>
+                                        <th class="py-2">Struktur Data</th>
+                                        <th class="py-2">Waktu Pencarian</th>
+                                        <th class="py-2">Ruang Memori</th>
+                                        <th class="py-2">Idiom Sintaks Go</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-200 dark:divide-slate-800/40 text-slate-700 dark:text-slate-300 text-xs">
                                     <tr>
-                                        <td class="py-2.5 font-mono font-bold text-teal-600 dark:text-teal-400">sync.Mutex</td>
-                                        <td class="py-2.5">Exclusive Mutual Exclusion Lock</td>
-                                        <td class="py-2.5">Operasi multi-step (cek saldo &rarr; kurangi &rarr; catat ledger)</td>
-                                        <td class="py-2.5 text-amber-600 dark:text-amber-400">Wajib <code>defer mu.Unlock()</code></td>
+                                        <td class="py-2.5 font-mono font-bold text-rose-600 dark:text-rose-400">[]int (Slice)</td>
+                                        <td class="py-2.5">O(N) Linear Scan</td>
+                                        <td class="py-2.5">O(1) Auxiliary Space</td>
+                                        <td class="py-2.5"><code>for i, v := range slice</code></td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 font-mono font-bold text-cyan-600 dark:text-cyan-400">sync.RWMutex</td>
-                                        <td class="py-2.5">Multiple Readers, Single Writer</td>
-                                        <td class="py-2.5">Read-heavy data (sering cek saldo, jarang mutasi)</td>
-                                        <td class="py-2.5">Writer lock memblokir semua reader</td>
+                                        <td class="py-2.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">map[int]bool</td>
+                                        <td class="py-2.5">O(1) Amortized Lookup</td>
+                                        <td class="py-2.5">O(N) Auxiliary Space</td>
+                                        <td class="py-2.5"><code>if seen[complement] { ... }</code></td>
                                     </tr>
                                     <tr>
-                                        <td class="py-2.5 font-mono font-bold text-emerald-600 dark:text-emerald-400">sync/atomic</td>
-                                        <td class="py-2.5">Instruksi hardware CPU (CAS)</td>
-                                        <td class="py-2.5">Counter sederhana tanpa logika percabangan</td>
-                                        <td class="py-2.5">Tanpa context switch, ultra-cepat</td>
+                                        <td class="py-2.5 font-mono font-bold text-cyan-600 dark:text-cyan-400">map[int]int</td>
+                                        <td class="py-2.5">O(1) Amortized Lookup</td>
+                                        <td class="py-2.5">O(N) Memetakan Nilai &rarr; Indeks</td>
+                                        <td class="py-2.5"><code>if prevIdx, ok := m[val]; ok</code></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -564,7 +534,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                                     Lab Uji Koding Manual 1 &bull; Live Coding Preparation
                                 </span>
                                 <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-1">
-                                    Tantangan: Implementasikan Thread-Safe Money Accumulator
+                                    Tantangan: Implementasikan HasTargetSum (DSA Hash Map Lookup)
                                 </h4>
                             </div>
                             <div class="flex items-center gap-1.5">
@@ -582,57 +552,39 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
 
                         <!-- Hint Box 1 -->
                         <div id="bootcamp-hint-live-1" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs">
-                            <strong>Petunjuk Konsep:</strong> Pada method <code>Deposit</code> dan <code>Withdraw</code>, amankan mutasi saldo dengan <code>a.mu.Lock()</code> dan <code>defer a.mu.Unlock()</code>. Validasi selalu apakah <code>amount &le; 0</code> kembalikan <code>ErrInvalidAmount</code>, dan untuk withdraw pastikan <code>a.balance &lt; amount</code> kembalikan <code>ErrInsufficientFunds</code>.
+                            <strong>Petunjuk Konsep:</strong> Buat sebuah hash map <code>seen := make(map[int]bool)</code>. Iterasi slice <code>nums</code> menggunakan loop. Untuk setiap angka <code>num</code>, hitung <code>complement := target - num</code>. Periksa apakah komplemen tersebut sudah pernah ada di map (<code>if seen[complement]</code>). Jika ada, kembalikan <code>true</code>. Jika tidak, tandai <code>seen[num] = true</code>. Jika loop selesai tanpa pasangan, kembalikan <code>false</code>.
                         </div>
 
                         <!-- Hint Box 2 -->
                         <div id="bootcamp-hint-live-2" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs font-mono">
-                            <div>a.mu.Lock()</div>
-                            <div>defer a.mu.Unlock()</div>
-                            <div>if amount &lt;= 0 { return ErrInvalidAmount }</div>
-                            <div>if a.balance &lt; amount { return ErrInsufficientFunds }</div>
-                            <div>a.balance -= amount</div>
+                            <div>seen := make(map[int]bool)</div>
+                            <div>for _, num := range nums {</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;complement := target - num</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;if seen[complement] {</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return true</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;seen[num] = true</div>
+                            <div>}</div>
+                            <div>return false</div>
                         </div>
 
                         <!-- Code Editor Form -->
                         <form hx-post="/api/bootcamp/eval-livecode" hx-target="#bootcamp-livecode-result" hx-swap="innerHTML" class="space-y-3">
                             <div class="relative">
-                                <textarea id="bootcamp-livecode-editor" name="code_content" rows="14" spellcheck="false" class="w-full font-mono text-xs p-3.5 rounded-xl bg-slate-900 text-emerald-400 border border-slate-700 focus:outline-none focus:border-emerald-500 leading-relaxed resize-y">package main
+                                <textarea id="bootcamp-livecode-editor" name="code_content" rows="12" spellcheck="false" class="w-full font-mono text-xs p-3.5 rounded-xl bg-slate-900 text-emerald-400 border border-slate-700 focus:outline-none focus:border-emerald-500 leading-relaxed resize-y">package main
 
-import (
-    "errors"
-    "sync"
-)
-
-var (
-    ErrInvalidAmount     = errors.New("amount must be positive")
-    ErrInsufficientFunds = errors.New("insufficient funds")
-)
-
-// MoneyAccumulator mengelola saldo akun dalam satuan sen (int64) secara thread-safe.
-type MoneyAccumulator struct {
-    mu      sync.Mutex
-    balance int64 // dilarang keras menggunakan float!
-}
-
-// Deposit menambahkan saldo secara aman.
-// Kembalikan ErrInvalidAmount jika amount <= 0.
-func (a *MoneyAccumulator) Deposit(amount int64) error {
-    // TODO: Ketik implementasi deposit Anda di sini
-    return nil
-}
-
-// Withdraw mengurangi saldo secara aman.
-// Kembalikan ErrInvalidAmount jika amount <= 0.
-// Kembalikan ErrInsufficientFunds jika saldo tidak cukup.
-func (a *MoneyAccumulator) Withdraw(amount int64) error {
-    // TODO: Ketik implementasi withdraw Anda di sini
-    return nil
+// HasTargetSum mengecek apakah terdapat pasangan dua angka di dalam nums yang bernilai target.
+// Kembalikan true jika ditemukan, atau false jika tidak ada pasangan yang cocok.
+// Targetkan O(N) Time Complexity dengan Hash Map lookup O(1) amortized.
+func HasTargetSum(nums []int, target int) bool {
+    // TODO: Ketik implementasi fungsi HasTargetSum Anda di sini
+    // Petunjuk: Gunakan map[int]bool untuk mencatat angka yang sudah dilewati
+    return false
 }</textarea>
                             </div>
 
                             <div class="flex items-center justify-between">
-                                <span class="text-[11px] text-slate-500">Go 1.27 Sandbox &bull; Automated Unit & Concurrency Test</span>
+                                <span class="text-[11px] text-slate-500">Go 1.27 Sandbox &bull; Automated DSA Unit & Complexity Test</span>
                                 <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition shadow-md shadow-emerald-950/40 active:scale-95">
                                     <span>▶</span> Uji Kode Teori (Automated Runner)
                                 </button>
@@ -828,61 +780,62 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                 <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800/40 font-mono">
-                                Problem #101 &bull; Medium
+                            <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800/40 font-mono">
+                                Problem #1 &bull; Easy / Entry Level
                             </span>
-                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">Golang 1.27 Concurrency</span>
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">LeetCode &bull; Data Structures & Algorithms</span>
                         </div>
                         <span class="text-xs font-mono text-amber-600 dark:text-amber-300 font-semibold">+250 XP Reward</span>
                     </div>
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-2">
-                        <span>💻</span> Live Coding: Safe Concurrent Hot-Wallet Deduct
+                        <span>💻</span> Tahap 1: Live Coding DSA &bull; Two Sum (Transaction Target Matcher)
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        Ketik manual implementasi Go yang thread-safe untuk memotong saldo dompet bersama. Solusi Anda akan diuji di bawah serbuan 50 goroutine serentak.
+                        Pewawancara (Staff Software Engineer): <em>"Diberikan sebuah slice bilangan bulat <code>nums</code> (mewakili nominal saldo transaksi) dan sebuah target bilangan bulat <code>target</code>. Kembalikan <strong>dua indeks</strong> elemen sehingga penjumlahannya tepat sama dengan <code>target</code>."</em>
                     </p>
                 </div>
 
-                <!-- Kontrol Wallet Target (HANYA DITAMPILKAN DI TAHAP 1 KARENA RELEVAN DENGAN UJIAN INI) -->
-                <div class="rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 p-4 sm:p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 border-b border-slate-200 dark:border-slate-800/80 pb-3">
-                        <div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                                <span>💳</span> Status Saldo Dompet Sasaran Pengujian
-                            </span>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Saldo dipantau real-time selama uji konkurensi goroutine berlangsung.</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button hx-post="/api/wallets/reset" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition">
-                                ↺ Reset Saldo
-                            </button>
-                            <button hx-get="/api/wallets" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-200 transition">
-                                ↻ Segarkan
-                            </button>
-                        </div>
+                <!-- Contoh Test Cases (LeetCode Examples Style) -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                            <span>🧪</span> Contoh Kasus Uji (Sample Test Cases)
+                        </span>
+                        <span class="text-[11px] text-slate-400 font-mono">3 Examples Provided</span>
                     </div>
-                    <div id="wallet-cards-wrapper-live" hx-get="/api/wallets" hx-trigger="refreshWallets from:body" hx-target="#wallet-cards" hx-swap="outerHTML">
-                        <div id="wallet-cards" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-3.5 shadow-sm">
-                                <div class="flex justify-between items-center text-xs">
-                                    <span class="font-mono text-slate-500">wallet-alice-001 (Hot Wallet)</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono">Target Ujian</span>
-                                </div>
-                                <div class="mt-2 flex items-baseline justify-between">
-                                    <span class="text-xs text-slate-500">Saldo Tersedia</span>
-                                    <span class="text-xl font-mono font-bold text-slate-900 dark:text-white">$1000.00</span>
-                                </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+                        <!-- Example 1 -->
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
+                                <span>Example 1</span>
+                                <span class="text-emerald-600 dark:text-emerald-400 font-mono">Normal Case</span>
                             </div>
-                            <div class="rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-3.5 shadow-sm">
-                                <div class="flex justify-between items-center text-xs">
-                                    <span class="font-mono text-slate-500">wallet-bob-002 (Rekening Lawan)</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">Pasangan Ledger</span>
-                                </div>
-                                <div class="mt-2 flex items-baseline justify-between">
-                                    <span class="text-xs text-slate-500">Saldo Tersedia</span>
-                                    <span class="text-xl font-mono font-bold text-slate-900 dark:text-white">$250.00</span>
-                                </div>
+                            <div class="text-slate-700 dark:text-slate-300"><strong>Input:</strong> nums = [2, 7, 11, 15], target = 9</div>
+                            <div class="text-emerald-600 dark:text-emerald-400 font-bold"><strong>Output:</strong> [0, 1]</div>
+                            <div class="text-[11px] text-slate-500 font-sans pt-1">Penjelasan: nums[0] + nums[1] == 2 + 7 == 9.</div>
+                        </div>
+
+                        <!-- Example 2 -->
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
+                                <span>Example 2</span>
+                                <span class="text-cyan-600 dark:text-cyan-400 font-mono">Unsorted Array</span>
                             </div>
+                            <div class="text-slate-700 dark:text-slate-300"><strong>Input:</strong> nums = [3, 2, 4], target = 6</div>
+                            <div class="text-cyan-600 dark:text-cyan-400 font-bold"><strong>Output:</strong> [1, 2]</div>
+                            <div class="text-[11px] text-slate-500 font-sans pt-1">Penjelasan: nums[1] + nums[2] == 2 + 4 == 6.</div>
+                        </div>
+
+                        <!-- Example 3 -->
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
+                                <span>Example 3</span>
+                                <span class="text-amber-600 dark:text-amber-400 font-mono">Duplicate Values</span>
+                            </div>
+                            <div class="text-slate-700 dark:text-slate-300"><strong>Input:</strong> nums = [3, 3], target = 6</div>
+                            <div class="text-amber-600 dark:text-amber-400 font-bold"><strong>Output:</strong> [0, 1]</div>
+                            <div class="text-[11px] text-slate-500 font-sans pt-1">Penjelasan: nums[0] + nums[1] == 3 + 3 == 6.</div>
                         </div>
                     </div>
                 </div>
@@ -890,14 +843,15 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                 <!-- Constraints Box -->
                 <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
                     <div class="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
-                        <span>📋 Constraints & Spesifikasi Ujian:</span>
-                        <span class="text-[11px] text-amber-600 dark:text-amber-400 font-mono">Ketik manual &bull; Tanpa contekan instan</span>
+                        <span>📋 Constraints & Standar Efisiensi Industri:</span>
+                        <span class="text-[11px] text-amber-600 dark:text-amber-400 font-mono">Target: O(N) Hash Map &bull; Zero TLE</span>
                     </div>
                     <ul class="text-[11px] text-slate-600 dark:text-slate-400 list-disc list-inside space-y-0.5 font-mono">
-                        <li><code>amount > 0</code> (nominal penarikan dalam sen / int64)</li>
-                        <li><code>wallet.balance >= 0</code> (Invarian Moneter: DILARANG MINUS / OVERDRAFT!)</li>
-                        <li>Wajib mengembalikan <code>ErrInsufficientFunds</code> jika saldo tidak mencukupi.</li>
-                        <li>Uji Stres (Test Case 3): 50 goroutine menarik $25 serentak dari saldo $1.000 &rarr; Saldo akhir tepat $0.</li>
+                        <li><code>2 &le; len(nums) &le; 10⁴</code> (hingga 10.000 riwayat transaksi nasabah)</li>
+                        <li><code>-10⁹ &le; nums[i] &le; 10⁹</code> dan <code>-10⁹ &le; target &le; 10⁹</code></li>
+                        <li>Setiap input dijamin memiliki <strong>tepat satu solusi</strong>.</li>
+                        <li>Elemen pada indeks yang sama <strong>tidak boleh dipakai dua kali</strong>.</li>
+                        <li><strong>Standar Kompleksitas Waktu:</strong> Wajib <strong>O(N)</strong> menggunakan Hash Map! Solusi Brute Force nested loop O(N²) akan ditandai dengan peringatan <em>Time Limit Hazard (TLE)</em> pada Stress Test 10.000 items.</li>
                     </ul>
                 </div>
 
@@ -907,13 +861,13 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Butuh Bantuan?</span>
                             <button type="button" id="hint-btn-1" onclick="toggleHint(1)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
-                                💡 Hint 1: Konseptual
+                                💡 Hint 1: Brute Force vs Hash Map
                             </button>
                             <button type="button" id="hint-btn-2" onclick="toggleHint(2)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
-                                💡 Hint 2: Tipe Data & Mutex
+                                💡 Hint 2: Komplemen Target
                             </button>
                             <button type="button" id="hint-btn-3" onclick="toggleHint(3)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
-                                💡 Hint 3: Sintaks Go (Lock & Defer)
+                                💡 Hint 3: Sintaks Go (map[int]int)
                             </button>
                         </div>
                         <button type="button" onclick="resetLiveCode()" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-800 transition flex items-center gap-1">
@@ -922,24 +876,31 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                     </div>
 
                     <div id="hint-box-1" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 1: Memahami Masalah Race Condition (Lost Update)</strong>
+                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 1: Memahami Biaya Waktu Brute Force O(N²)</strong>
                         <p class="text-[11px] leading-relaxed">
-                            Operasi pengecekan saldo <code>if w.balance < amount</code> dan pemotongan saldo <code>w.balance -= amount</code> adalah dua langkah terpisah. Jika 50 goroutine membaca saldo pada saat bersamaan, semuanya akan melihat saldo mencukupi dan semuanya akan memotong saldo! Anda harus memastikan <strong>hanya satu goroutine</strong> yang boleh mengeksekusi blok kode ini sekaligus.
+                            Mencoba semua pasangan dengan 2 loop bersarang (<code>for i ... for j ...</code>) membutuhkan waktu O(N²). Untuk 10.000 data transaksi, perulangan akan berjalan sebanyak 100.000.000 kali dan memicu TLE! Bisakah Anda mengingat elemen yang sudah dilewati ke dalam hash map agar pencarian komplemen berlangsung dalam O(1) amortized?
                         </p>
                     </div>
 
                     <div id="hint-box-2" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 2: Menambahkan Pengunci Mutex ke Struct</strong>
+                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 2: Formula Komplemen Penjumlahan</strong>
                         <p class="text-[11px] leading-relaxed">
-                            Go menyediakan primitif sinkronisasi memori bawaan yaitu <code>sync.Mutex</code>. Tambahkan field <code>mu sync.Mutex</code> ke dalam deklarasi <code>type SharedWallet struct</code> agar dompet memiliki kunci pengaman sendiri.
+                            Jika kita sedang berada di angka <code>nums[i]</code>, pasangannya yang menghasilkan target haruslah bernilai: <code>complement := target - nums[i]</code>. Cukup tanyakan ke Hash Map: "Apakah <code>complement</code> ini sudah ada di map?". Jika ada, Anda langsung menemukan solusinya!
                         </p>
                     </div>
 
-                    <div id="hint-box-3" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 3: Pola Penulisan Lock & Defer Unlock</strong>
-                        <p class="text-[11px] leading-relaxed">
-                            Di awal fungsi <code>DeductWallet</code>, ketik <code>w.mu.Lock()</code>. Tepat di baris berikutnya, ketik <code>defer w.mu.Unlock()</code>. Menggunakan <code>defer</code> menjamin lock selalu dilepaskan meskipun fungsi Anda me-return error <code>ErrInsufficientFunds</code> di tengah jalan!
-                        </p>
+                    <div id="hint-box-3" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1 font-mono">
+                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold font-sans">💡 Hint 3: Idiom Comma-Ok di Go (map[int]int)</strong>
+                        <div class="text-[11px] leading-relaxed space-y-1">
+                            <div>seen := make(map[int]int) // memetakan: nilaiAngka &rarr; indeks</div>
+                            <div>for i, num := range nums {</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;complement := target - num</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;if prevIdx, exists := seen[complement]; exists {</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return []int{prevIdx, i}</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div>&nbsp;&nbsp;&nbsp;&nbsp;seen[num] = i</div>
+                            <div>}</div>
+                        </div>
                     </div>
                 </div>
 
@@ -952,31 +913,18 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                                 <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
                                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
                                 <span class="ml-2 font-mono font-bold text-slate-200">solution.go</span>
-                                <span class="text-[10px] text-slate-400 font-mono">(Ketik manual sintaks Go Anda)</span>
+                                <span class="text-[10px] text-slate-400 font-mono">(Ketik manual sintaks Go algoritma Anda)</span>
                             </div>
-                            <span class="text-[11px] font-mono text-emerald-400">// Thread-safe critical section</span>
+                            <span class="text-[11px] font-mono text-emerald-400">// LeetCode #1 &bull; TwoSum(nums []int, target int) []int</span>
                         </div>
 
                         <textarea id="live-code-editor" name="code_content" class="w-full h-64 bg-[#070b14] p-4 text-xs sm:text-sm font-mono text-emerald-400 leading-relaxed focus:outline-none resize-none select-text border-0 font-medium" spellcheck="false">package main
 
-import (
-    "errors"
-    "sync"
-)
-
-var ErrInsufficientFunds = errors.New("insufficient funds")
-
-// SharedWallet merepresentasikan dompet bersama dengan saldo dalam satuan sen (int64).
-type SharedWallet struct {
-    balance int64 // saldo dalam sen (int64)
-    // TODO: Tambahkan field sinkronisasi jika diperlukan
-}
-
-// DeductWallet memotong saldo dompet sejumlah amount (dalam sen).
-// Kembalikan ErrInsufficientFunds jika saldo tidak cukup.
-// Wajib aman dieksekusi secara serentak oleh 50 goroutine (Zero Overdraft)!
-func (w *SharedWallet) DeductWallet(amount int64) error {
-    // TODO: Ketik implementasi kode Anda di sini
+// TwoSum mencari dua indeks dari elemen nums yang jika dijumlahkan menghasilkan target.
+// Asumsikan setiap input tepat memiliki satu solusi, dan elemen yang sama tidak boleh digunakan dua kali.
+// Wajib O(N) Time Complexity menggunakan Hash Map untuk menghindari Time Limit Exceeded (TLE)!
+func TwoSum(nums []int, target int) []int {
+    // TODO: Ketik implementasi kode algoritma Anda di sini
     // Petunjuk: Buka tombol Hint jika membutuhkan panduan sintaks
 
     return nil
@@ -987,19 +935,19 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
                         <div class="flex items-center gap-2">
                             <button type="submit" name="action" value="run" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition border border-slate-300 dark:border-slate-700 active:scale-95 shadow-sm">
-                                <span>▶</span> Run Test Cases
+                                <span>▶</span> Run Test Cases (Fast Check)
                             </button>
                             <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
                                 <span>⚡</span> Submit Solution (+250 XP)
                             </button>
                         </div>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Test Case 3: 50 Goroutines Concurrency Stress</span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Stress Test: 10.000 Data Transaksi &bull; O(N) Benchmark</span>
                     </div>
                 </form>
 
                 <!-- Output Panel Terminal -->
                 <div id="leetcode-output-panel" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                    Ketik implementasi thread-safe Anda di editor di atas, lalu klik "Run Test Cases" atau "Submit Solution" untuk penilaian instan.
+                    Ketik implementasi Two Sum Anda di editor di atas, lalu klik "Run Test Cases" atau "Submit Solution" untuk penilaian instan.
                 </div>
             </div>
 
