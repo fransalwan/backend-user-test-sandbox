@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fintech Backend Dojo - Concurrency, Idempotensi & Saga</title>
+    <title>Fintech Hiring Gauntlet - Alur Wawancara Backend Engineer</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- HTMX -->
@@ -19,28 +19,26 @@
                             850: '#11192e',
                             800: '#17223b',
                             700: '#233355',
-                        },
-                        emerald: {
-                            450: '#10b981',
-                            500: '#059669',
                         }
                     }
                 }
             }
         }
 
-        // Tab Switcher
+        // Tab Switcher 5 Tahap Wawancara
         function switchScenario(tab) {
-            const tabs = [1, 2, 3];
+            const tabs = [1, 2, 3, 4, 5];
             tabs.forEach(t => {
                 const tabBtn = document.getElementById(`tab-scenario-${t}`);
                 const view = document.getElementById(`scenario-${t}-view`);
-                if (t === tab) {
-                    tabBtn.className = "flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/30 transition-all scale-[1.02]";
-                    view.classList.remove('hidden');
-                } else {
-                    tabBtn.className = "flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all";
-                    view.classList.add('hidden');
+                if (tabBtn && view) {
+                    if (t === tab) {
+                        tabBtn.className = "flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/40 transition-all scale-[1.02]";
+                        view.classList.remove('hidden');
+                    } else {
+                        tabBtn.className = "flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all";
+                        view.classList.add('hidden');
+                    }
                 }
             });
         }
@@ -51,8 +49,8 @@
             const input = document.getElementById('idempotency-key-input');
             if (input) {
                 input.value = uuid;
-                input.classList.add('ring-2', 'ring-emerald-400');
-                setTimeout(() => input.classList.remove('ring-2', 'ring-emerald-400'), 400);
+                input.classList.add('ring-2', 'ring-teal-400');
+                setTimeout(() => input.classList.remove('ring-2', 'ring-teal-400'), 400);
             }
         }
 
@@ -111,28 +109,25 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-md shadow-emerald-950">
-                    <span class="text-xl">⚡</span>
+                    <span class="text-xl">🏆</span>
                 </div>
                 <div>
                     <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-                        Fintech Backend Dojo
-                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Go 1.27 + ACID + HTMX</span>
+                        Fintech Hiring Gauntlet
+                        <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Interview to Offer Mode</span>
                     </h1>
-                    <p class="text-xs text-slate-400">Sandbox Uji Konkurensi, Idempotensi & Arsitektur Finansial</p>
+                    <p class="text-xs text-slate-400">Simulasi 1 Alur Penuh Ujian Teknis Backend Fintech sampai Surat Penawaran Kerja</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
-                <!-- Tombol Buka Panduan Penggunaan Web -->
                 <button onclick="toggleGuideModal()" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-emerald-300 border border-emerald-500/30 transition shadow-sm hover:scale-[1.02]">
-                    <span>📖</span> Panduan & Teori Fintech
+                    <span>📖</span> Panduan & Teori
                 </button>
-
                 <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Sistem Aktif (Port 8080)</span>
+                    <span>Game Mode Aktif</span>
                 </div>
-
                 <a href="https://github.com/fransalwan/backend-user-test-sandbox" target="_blank" class="text-xs text-slate-400 hover:text-white transition px-2 py-1">
                     GitHub &rarr;
                 </a>
@@ -143,21 +138,26 @@
     <!-- Konten Utama -->
     <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- ================= KARTU STATUS SALDO DOMPET NASABAH (LIVE SNAPSHOT) ================= -->
-        <section class="rounded-2xl bg-gradient-to-br from-dark-900 via-dark-850 to-dark-900 border border-slate-800 p-6 shadow-xl relative overflow-hidden">
-            <!-- Background Glow Decor -->
-            <div class="absolute -top-16 -right-16 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        <!-- ================= GAMIFIKASI STATUS KANDIDAT (HUD PANEL) ================= -->
+        <section id="gamification-hud-container" hx-get="/api/gamification/status" hx-trigger="load, refreshWallets from:body" hx-swap="innerHTML">
+            <!-- Loading placeholder -->
+            <div class="rounded-2xl bg-dark-900 border border-slate-800 p-5 animate-pulse text-xs text-slate-500">
+                Memuat status profil kandidat & progres wawancara...
+            </div>
+        </section>
 
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-slate-800/80 pb-4">
+        <!-- ================= KARTU STATUS SALDO DOMPET NASABAH ================= -->
+        <section class="rounded-2xl bg-gradient-to-br from-dark-900 via-dark-850 to-dark-900 border border-slate-800 p-6 shadow-xl relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-800/80 pb-4">
                 <div>
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                        <span>💳</span> Status Saldo Rekening Nasabah (Double-Entry Snapshot)
+                        <span>💳</span> Status Saldo Rekening Nasabah (Double-Entry Ledger)
                     </h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Saldo disimpan murni sebagai <code class="text-emerald-400 font-mono font-semibold">int64</code> (sen / unit terkecil) dengan jaminan anti floating-point rounding error.</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Saldo disimpan murni sebagai <code class="text-emerald-400 font-mono font-semibold">int64</code> (sen) untuk akurasi mutlak tanpa float rounding error.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button hx-post="/api/wallets/reset" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 shadow-sm active:scale-95">
-                        <span>↺</span> Reset ke $1.000,00
+                        <span>↺</span> Reset Saldo ke $1.000,00
                     </button>
                     <button hx-get="/api/wallets" hx-target="#wallet-cards" hx-swap="outerHTML" class="text-xs px-3 py-1.5 rounded-xl bg-emerald-950 text-emerald-400 hover:bg-emerald-900 border border-emerald-800/60 transition flex items-center gap-1.5 active:scale-95">
                         <span>↻</span> Segarkan
@@ -168,9 +168,8 @@
             <!-- Auto-refresh saat event 'refreshWallets' dipicu oleh HTMX -->
             <div id="wallet-cards-wrapper" hx-get="/api/wallets" hx-trigger="refreshWallets from:body" hx-target="#wallet-cards" hx-swap="outerHTML">
                 <div id="wallet-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
-                    <!-- Kartu Rekening Alice (Hot Wallet) -->
-                    <div class="rounded-xl bg-gradient-to-b from-[#0f172a] to-[#0b1120] border border-slate-800 p-5 shadow-md hover:border-slate-700 transition relative overflow-hidden group">
+                    <!-- Alice -->
+                    <div class="rounded-xl bg-gradient-to-b from-[#0f172a] to-[#0b1120] border border-slate-800 p-5 shadow-md">
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="flex items-center gap-2">
@@ -179,12 +178,9 @@
                                 </div>
                                 <div class="text-base font-bold text-white mt-1">Alice (Hot Wallet Target)</div>
                             </div>
-                            <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                                Versi: 1
-                            </span>
+                            <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Versi: 1</span>
                         </div>
-
-                        <div class="mt-5 flex items-baseline justify-between border-t border-slate-800/60 pt-3">
+                        <div class="mt-4 flex items-baseline justify-between border-t border-slate-800/60 pt-3">
                             <span class="text-xs text-slate-400 font-medium">Saldo Tersedia</span>
                             <div class="text-right">
                                 <span class="text-3xl font-mono font-extrabold text-white tracking-tight">$1000.00</span>
@@ -193,8 +189,8 @@
                         </div>
                     </div>
 
-                    <!-- Kartu Rekening Bob (Target Wallet) -->
-                    <div class="rounded-xl bg-gradient-to-b from-[#0f172a] to-[#0b1120] border border-slate-800 p-5 shadow-md hover:border-slate-700 transition relative overflow-hidden">
+                    <!-- Bob -->
+                    <div class="rounded-xl bg-gradient-to-b from-[#0f172a] to-[#0b1120] border border-slate-800 p-5 shadow-md">
                         <div class="flex justify-between items-start">
                             <div>
                                 <div class="flex items-center gap-2">
@@ -203,12 +199,9 @@
                                 </div>
                                 <div class="text-base font-bold text-white mt-1">Bob (Rekening Tujuan)</div>
                             </div>
-                            <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
-                                Versi: 1
-                            </span>
+                            <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">Versi: 1</span>
                         </div>
-
-                        <div class="mt-5 flex items-baseline justify-between border-t border-slate-800/60 pt-3">
+                        <div class="mt-4 flex items-baseline justify-between border-t border-slate-800/60 pt-3">
                             <span class="text-xs text-slate-400 font-medium">Saldo Tersedia</span>
                             <div class="text-right">
                                 <span class="text-3xl font-mono font-extrabold text-white tracking-tight">$250.00</span>
@@ -216,27 +209,32 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </section>
 
-        <!-- ================= NAVIGASI TAB SKENARIO ================= -->
+        <!-- ================= NAVIGASI 5 TAHAP ALUR WAWANCARA (TAB HIRING) ================= -->
         <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-dark-900 border border-slate-800 p-2.5 rounded-2xl shadow-sm">
             <div class="flex flex-wrap items-center gap-2">
-                <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/30 transition-all scale-[1.02]">
-                    <span>🔒</span> Skenario 01: Race Condition
+                <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-lg shadow-emerald-950/50 border border-emerald-500/40 transition-all scale-[1.02]">
+                    <span>🔒</span> Tahap 1: Live Coding (Race)
                 </button>
-                <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
-                    <span>🛡️</span> Skenario 02: Idempotency Keys
+                <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
+                    <span>🛡️</span> Tahap 2: System Defense (Idempotensi)
                 </button>
-                <button id="tab-scenario-3" onclick="switchScenario(3)" class="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
-                    <span>🔄</span> Skenario 03: Outbox & Saga
+                <button id="tab-scenario-3" onclick="switchScenario(3)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
+                    <span>🔄</span> Tahap 3: Take-Home (Saga & Outbox)
+                </button>
+                <button id="tab-scenario-4" onclick="switchScenario(4)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
+                    <span>⚡</span> Tahap 4: High Traffic (Flash Sale)
+                </button>
+                <button id="tab-scenario-5" onclick="switchScenario(5)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-amber-400 hover:text-amber-300 hover:bg-dark-850 border border-amber-500/30 transition-all">
+                    <span>🏆</span> Tahap 5: Keputusan Hiring (Offer Letter)
                 </button>
             </div>
-            <div class="text-xs text-slate-400 px-2 hidden lg:block">
-                Pilih skenario untuk menjalankan uji beban dan mengamati mitigasi finansial.
-            </div>
+            <button hx-post="/api/gamification/reset" hx-target="#gamification-hud-container" class="text-xs text-slate-500 hover:text-rose-400 px-2.5 py-1.5 transition">
+                Reset Karir Game
+            </button>
         </section>
 
         <!-- ================= WORKSPACE DUA KOLOM ================= -->
@@ -245,26 +243,25 @@
             <!-- Kolom Kiri: Panel Kontrol Skenario Aktif (7 Kolom) -->
             <div class="lg:col-span-7 space-y-6">
                 
-                <!-- ================= SKENARIO 01 ================= -->
+                <!-- ================= TAHAP 1: LIVE CODING CONCURRENCY ================= -->
                 <div id="scenario-1-view" class="bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/40">Skenario 01</span>
-                            <span class="text-xs text-slate-400 font-mono">Row Lock vs Version CAS</span>
+                            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/40">Tahap 1 &bull; Live Coding Test</span>
+                            <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>🔒</span> Concurrency Control & Race Condition
+                            <span>🔒</span> Misi: Menjinakkan Race Condition pada Hot Wallet
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Uji serbuan puluhan goroutine yang memotong saldo Alice secara serentak di milidetik yang sama.</p>
+                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji kemampuan Anda menangani 50 goroutine yang memotong saldo Alice serentak tanpa saldo minus.</p>
                     </div>
 
-                    <!-- Mini Panduan Cepat Skenario 1 -->
                     <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
                         <div class="font-semibold text-emerald-300 flex items-center gap-1.5">
-                            <span>💡</span> Rekomendasi Uji Cepat:
+                            <span>💡</span> Uji Lulus Tahap 1:
                         </div>
                         <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Coba <strong>Strategi Naive</strong> dengan 50 Goroutines @ $25 ➡️ Saksikan saldo Alice tembus minus (Overdraft!). Lalu reset dan coba <strong>Pessimistic Locking</strong> ➡️ Transaksi ditolak bersih tepat saat saldo menyentuh $0.
+                            Pilih <strong>Pessimistic Locking (SELECT FOR UPDATE)</strong> atau <strong>Redis Lock</strong> dengan 50 goroutine @ $25 ➡️ Buktikan ke interviewer saldo berhenti tepat di $0 tanpa anomali untuk membuka <strong>+250 XP</strong>!
                         </p>
                     </div>
 
@@ -290,40 +287,37 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Total percobaan: <strong class="text-white">$1.250,00</strong> (melebihi saldo)</span>
+                            <span class="text-[11px] text-slate-400">Total percobaan: <strong class="text-white">$1.250,00</strong></span>
                             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
-                                <span>▶</span> Jalankan Simulasi Konkurensi
+                                <span>▶</span> Selesaikan Ujian Tahap 1
                             </button>
                         </div>
                     </form>
 
                     <div id="simulation-output-1" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih strategi di atas dan klik tombol eksekusi untuk melihat hasil pengujian.
+                        Pilih strategi di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 1.
                     </div>
                 </div>
 
-                <!-- ================= SKENARIO 02 ================= -->
+                <!-- ================= TAHAP 2: SYSTEM DEFENSE IDEMPOTENCY ================= -->
                 <div id="scenario-2-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-teal-400 uppercase tracking-wider bg-teal-950/60 px-2.5 py-1 rounded-md border border-teal-800/40">Skenario 02</span>
-                            <button hx-post="/api/scenarios/02/clear" class="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 transition">
-                                Bersihkan Riwayat Kunci
-                            </button>
+                            <span class="text-[11px] font-bold text-teal-400 uppercase tracking-wider bg-teal-950/60 px-2.5 py-1 rounded-md border border-teal-800/40">Tahap 2 &bull; System Defense</span>
+                            <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>🛡️</span> Idempotency Keys & Pencegahan Double-Spending
+                            <span>🛡️</span> Misi: Menangkis Serangan Retry Badai Jaringan
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Simulasi kegagalan timeout jaringan, retry liar dari klien, serta pencegahan mutasi saldo berlipat ganda.</p>
+                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji apakah Anda bisa mencegah pemotongan saldo berulang saat klien me-retry request 5x berturut-turut.</p>
                     </div>
 
-                    <!-- Mini Panduan Cepat Skenario 2 -->
                     <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
                         <div class="font-semibold text-teal-300 flex items-center gap-1.5">
-                            <span>💡</span> Rekomendasi Uji Cepat:
+                            <span>💡</span> Uji Lulus Tahap 2:
                         </div>
                         <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Coba <strong>Mode 1 (Tanpa Kunci)</strong> dengan 5x retries @ $50 ➡️ Saldo Alice terpotong $250. Lalu reset, gunakan <strong>Mode 2 (Dengan Kunci Idempotensi)</strong> ➡️ Saldo hanya terpotong tepat 1 kali ($50), dan 4 request sisanya disajikan aman dari cache!
+                            Pilih <strong>Dengan Kunci Idempotensi</strong> dengan 5 Retries @ $50 ➡️ Buktikan bahwa saldo nasabah hanya terpotong tepat 1x saja untuk meraih <strong>+250 XP</strong>!
                         </p>
                     </div>
 
@@ -356,40 +350,37 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Mensimulasikan client timeout retry storm</span>
+                            <span class="text-[11px] text-slate-400">Zero double-spending defense</span>
                             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-teal-950/60 active:scale-95">
-                                <span>▶</span> Eksekusi Uji Idempotensi
+                                <span>▶</span> Selesaikan Ujian Tahap 2
                             </button>
                         </div>
                     </form>
 
                     <div id="simulation-output-2" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih mode di atas dan klik tombol eksekusi untuk menguji idempotensi.
+                        Pilih mode di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 2.
                     </div>
                 </div>
 
-                <!-- ================= SKENARIO 03 ================= -->
+                <!-- ================= TAHAP 3: TAKE-HOME SAGA & OUTBOX ================= -->
                 <div id="scenario-3-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40">Skenario 03</span>
-                            <button hx-post="/api/scenarios/03/clear" class="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 transition">
-                                Bersihkan Outbox
-                            </button>
+                            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40">Tahap 3 &bull; Take-Home Architecture</span>
+                            <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>🔄</span> Transactional Outbox & Saga Orchestration
+                            <span>🔄</span> Misi: Penyelamatan Bencana Bank Mitra dengan Saga
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Pencairan dana ke Bank Eksternal / Payout tanpa 2PC. Menghindari bahaya Dual-Write dan menguji kompensasi auto-refund otomatis.</p>
+                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji bagaimana Anda menghindari Dual-Write dan menyelamatkan uang nasabah dengan Auto-Refund saat Bank error 500.</p>
                     </div>
 
-                    <!-- Mini Panduan Cepat Skenario 3 -->
                     <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
                         <div class="font-semibold text-cyan-300 flex items-center gap-1.5">
-                            <span>💡</span> Rekomendasi Uji Cepat:
+                            <span>💡</span> Uji Lulus Tahap 3:
                         </div>
                         <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Pilih <strong>Mode 1 (Dual-Write Naif)</strong> dengan Bank BCA (500 Error) ➡️ Saksikan saldo nasabah hilang tanpa jejak! Lalu bandingkan dengan <strong>Mode 2 (Saga dengan Kompensasi)</strong> ➡️ Saga Orchestrator me-refund saldo nasabah seketika (Zero Data Loss).
+                            Pilih <strong>Saga dengan Kompensasi (Auto-Refund)</strong> saat Bank Central Asia (BCA) error 500 ➡️ Buktikan bahwa Saga Orchestrator mengembalikan saldo $100 utuh ke nasabah untuk membuka <strong>+250 XP</strong>!
                         </p>
                     </div>
 
@@ -408,7 +399,6 @@
                                 <select name="bank_target" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
                                     <option value="Bank BCA">Bank Central Asia (BCA)</option>
                                     <option value="Bank Mandiri">Bank Mandiri</option>
-                                    <option value="Bank BRI">Bank Rakyat Indonesia (BRI)</option>
                                     <option value="Stripe Payout">Stripe Connect Payout</option>
                                 </select>
                             </div>
@@ -427,15 +417,154 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Membuktikan keunggulan compensating transaction</span>
+                            <span class="text-[11px] text-slate-400">Compensating transaction defense</span>
                             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold transition shadow-lg shadow-cyan-950/60 active:scale-95">
-                                <span>▶</span> Eksekusi Alur Saga Penarikan
+                                <span>▶</span> Selesaikan Ujian Tahap 3
                             </button>
                         </div>
                     </form>
 
                     <div id="simulation-output-3" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih mode di atas dan klik tombol eksekusi untuk menguji alur Saga.
+                        Pilih mode di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 3.
+                    </div>
+                </div>
+
+                <!-- ================= TAHAP 4: HIGH TRAFFIC & SCALE ================= -->
+                <div id="scenario-4-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                    <div class="border-b border-slate-800 pb-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-800/40">Tahap 4 &bull; Scale & High Traffic</span>
+                            <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
+                        </div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
+                            <span>⚡</span> Misi: Bertahan dari Serbuan Flash Sale Tengah Malam
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji apakah Anda bisa melindungi 50 kuota voucher terbatas dari serbuan ratusan request konkuren tanpa overselling.</p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
+                        <div class="font-semibold text-amber-300 flex items-center gap-1.5">
+                            <span>💡</span> Uji Lulus Tahap 4:
+                        </div>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            Pilih <strong>Token Bucket Rate Limiting (Redis DECRBY)</strong> dengan 250 request konkuren ➡️ Buktikan kuota voucher terserap tepat di 0 dan kelebihan request ditolak rapi (429) untuk meraih <strong>+250 XP Terakhir</strong>!
+                        </p>
+                    </div>
+
+                    <form hx-post="/api/scenarios/04/run" hx-target="#simulation-output-4" hx-swap="innerHTML" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Strategi Pengendalian</label>
+                                <select name="strategy" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono">
+                                    <option value="unthrottled">1. Tanpa Rate Limiter (Overselling ⚠️)</option>
+                                    <option value="token_bucket" selected>2. Token Bucket (Redis DECRBY ✅)</option>
+                                    <option value="worker_queue">3. Worker Queue Leaky Bucket 📦</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Stok Kuota Voucher</label>
+                                <input type="number" name="stock" value="50" min="10" max="100" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Total Serbuan Request</label>
+                                <input type="number" name="requests" value="250" min="50" max="500" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <span class="text-[11px] text-slate-400">Rate Limiter burst max: <strong>40 RPS</strong></span>
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold transition shadow-lg shadow-amber-950/60 active:scale-95">
+                                <span>▶</span> Selesaikan Ujian Tahap 4
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="simulation-output-4" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
+                        Pilih mode di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 4.
+                    </div>
+                </div>
+
+                <!-- ================= TAHAP 5: HIRING DECISION & OFFER LETTER ================= -->
+                <div id="scenario-5-view" class="hidden bg-dark-900 border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-6">
+                    <div class="border-b border-slate-800 pb-4 flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-800/40">Tahap 5 &bull; Hasil Akhir Wawancara</span>
+                            <h2 class="text-lg font-extrabold text-white flex items-center gap-2 mt-2">
+                                <span>📜</span> Surat Penawaran Kerja (Official Job Offer Letter)
+                            </h2>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
+                            STRONG HIRE APPROVED ✓
+                        </span>
+                    </div>
+
+                    <!-- Dokumen Surat Penawaran Resmi -->
+                    <div class="p-6 rounded-2xl bg-gradient-to-b from-[#0b1220] to-[#070b14] border border-amber-500/20 space-y-5 text-xs text-slate-300">
+                        <div class="flex justify-between items-start border-b border-slate-800/80 pb-4">
+                            <div>
+                                <div class="text-sm font-bold text-white tracking-wide">UNICORN FINTECH BANK & PAYMENT GATEWAY</div>
+                                <div class="text-[11px] text-slate-400">Engineering Hiring Committee & Talent Acquisition</div>
+                            </div>
+                            <div class="text-right font-mono text-[11px] text-slate-400">
+                                Ref: OFF-FINTECH-2026-9812<br>
+                                Tanggal: 10 Oktober 2026
+                            </div>
+                        </div>
+
+                        <p class="leading-relaxed">
+                            Kepada Yth. <strong>Frans Alwan</strong>,<br>
+                            Selamat! Berdasarkan hasil evaluasi komprehensif pada seluruh rangkaian ujian teknis (Live Coding Concurrency, Idempotency Defense, Saga Outbox Recovery, dan High-Traffic Flash Sale), Komite Engineering dengan suara bulat memutuskan untuk memberikan Anda penawaran kerja resmi:
+                        </p>
+
+                        <!-- Kotak Rincian Tawaran -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-dark-950 border border-slate-800 font-mono">
+                            <div>
+                                <span class="text-slate-500 text-[10px] uppercase">Posisi / Jabatan</span>
+                                <div class="text-sm font-bold text-emerald-400">Principal Backend Engineer</div>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] uppercase">Tim / Divisi</span>
+                                <div class="text-sm font-bold text-white">Core Banking & Ledger Platform</div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-slate-500 text-[10px] uppercase">Paket Kompensasi Bulanan</span>
+                                <div class="text-sm font-bold text-white">IDR 85.000.000 / bulan</div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-slate-500 text-[10px] uppercase">Equity & Performance Bonus</span>
+                                <div class="text-sm font-bold text-white">Stock Options (ESOP) + 3x Bonus</div>
+                            </div>
+                        </div>
+
+                        <!-- Evaluasi Interviewer -->
+                        <div class="space-y-2 border-t border-slate-800/80 pt-4">
+                            <span class="font-bold text-slate-200 text-xs">Catatan Evaluasi Komite Pewawancara (VP of Engineering):</span>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800">
+                                    <div class="text-slate-400">Concurrency</div>
+                                    <div class="font-bold text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800">
+                                    <div class="text-slate-400">Idempotency</div>
+                                    <div class="font-bold text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800">
+                                    <div class="text-slate-400">Distributed Saga</div>
+                                    <div class="font-bold text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-dark-900 border border-slate-800">
+                                    <div class="text-slate-400">High Traffic</div>
+                                    <div class="font-bold text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+                            <span class="text-[11px] text-slate-400">Status Kelulusan: <strong>4 dari 4 Ujian Tuntas (1.000 XP)</strong></span>
+                            <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md">
+                                🖨️ Cetak Surat Penawaran & Rapor
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -443,7 +572,7 @@
 
             <!-- Kolom Kanan: Live Goroutine & Event Stream (5 Kolom) -->
             <div class="lg:col-span-5 space-y-4">
-                <div class="bg-dark-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col h-[700px]">
+                <div class="bg-dark-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col h-[720px]">
                     
                     <!-- Header Log Panel -->
                     <div class="border-b border-slate-800/80 pb-3 mb-3">
@@ -468,7 +597,7 @@
                                 Semua
                             </button>
                             <button id="filter-btn-error" onclick="filterLogs('error')" class="log-filter-btn px-2 py-1 text-[11px] rounded-md font-medium text-slate-400 hover:text-white transition bg-slate-800/60">
-                                🚨 Anomali / Error
+                                🚨 Anomali
                             </button>
                             <button id="filter-btn-lock" onclick="filterLogs('lock')" class="log-filter-btn px-2 py-1 text-[11px] rounded-md font-medium text-slate-400 hover:text-white transition bg-slate-800/60">
                                 🔒 Kunci / Lock
@@ -482,7 +611,7 @@
                     <!-- Scrollable Log Container -->
                     <div id="event-stream-container" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs font-mono select-text">
                         <div class="log-item text-slate-500 text-[11px]" data-type="info">[Sistem] Terhubung ke SSE Stream backend...</div>
-                        <div class="log-item text-slate-500 text-[11px]" data-type="info">[Siap] Pilih skenario di sebelah kiri dan jalankan simulasi.</div>
+                        <div class="log-item text-slate-500 text-[11px]" data-type="info">[Game Mode] Selesaikan Tahap 1 s/d 4 untuk membuka Surat Penawaran Kerja (Offer Letter)!</div>
                     </div>
                 </div>
             </div>
@@ -493,22 +622,21 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-800/80 bg-[#070b14] py-4 text-center text-xs text-slate-500">
-        Backend User Test Sandbox (Fintech Dojo) &bull; Modular Clean Architecture &bull; Go 1.27 + PostgreSQL ACID + Redis + HTMX
+        Fintech Hiring Gauntlet &bull; Career Assessment Sandbox &bull; Go 1.27 + PostgreSQL ACID + Redis + HTMX
     </footer>
 
-    <!-- ================= MODAL INTERAKTIF: PANDUAN LENGKAP & TEORI FINTECH ================= -->
+    <!-- ================= MODAL INTERAKTIF: PANDUAN LENGKAP ================= -->
     <div id="guide-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="relative bg-dark-900 border border-slate-800 rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col">
             
-            <!-- Modal Header -->
             <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-xl">
                         📖
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-white">Buku Panduan Sandbox & Materi Ujian Fintech</h2>
-                        <p class="text-xs text-slate-400">Pelajari skenario pengujian, konsep kunci finansial, dan alasan arsitektur di baliknya.</p>
+                        <h2 class="text-lg font-bold text-white">Panduan Alur Wawancara & Teori Fintech</h2>
+                        <p class="text-xs text-slate-400">Dari Ujian Teknis Live Coding sampai Keputusan Hiring Tingkat Principal.</p>
                     </div>
                 </div>
                 <button onclick="toggleGuideModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
@@ -516,98 +644,41 @@
                 </button>
             </div>
 
-            <!-- Modal Body (Scrollable) -->
             <div class="flex-1 overflow-y-auto space-y-6 text-xs text-slate-300 pr-2">
-                
-                <!-- Section 1: Cara Cepat Uji 3 Menit -->
                 <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-3">
                     <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                        <span>🚀</span> Alur Cepat Menguji Sandbox (3 Menit)
+                        <span>🎯</span> Aturan Permainan Gamifikasi (4 Misi):
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         <div class="p-3 rounded-xl bg-dark-900 border border-slate-800">
-                            <span class="font-bold text-white text-xs block mb-1">1. Skenario 01 (Race)</span>
-                            Pilih Naive 50 goroutines ➡️ amati saldo minus. Reset lalu pilih Pessimistic ➡️ amati penolakan bersih saat saldo $0.
-                        </div>
-                        <div class="p-3 rounded-xl bg-dark-900 border border-slate-800">
-                            <span class="font-bold text-white text-xs block mb-1">2. Skenario 02 (Idempotensi)</span>
-                            Pilih Tanpa Idempotensi 5 retries ➡️ saldo berkurang 5x. Pilih Dengan Idempotensi ➡️ saldo terpotong tepat 1x.
+                            <strong class="text-white block mb-1">Misi 1 (+250 XP)</strong>
+                            Jalankan <em>Pessimistic Locking</em> pada Skenario 1. Buktikan saldo berhenti di $0 tanpa overdraft.
                         </div>
                         <div class="p-3 rounded-xl bg-dark-900 border border-slate-800">
-                            <span class="font-bold text-white text-xs block mb-1">3. Skenario 03 (Saga)</span>
-                            Pilih Dual-Write saat bank 500 ➡️ uang lenyap. Pilih Saga Kompensasi ➡️ otomatis auto-refund seketika!
+                            <strong class="text-white block mb-1">Misi 2 (+250 XP)</strong>
+                            Jalankan <em>Dengan Kunci Idempotensi</em> pada Skenario 2. Buktikan saldo hanya terpotong tepat 1x.
+                        </div>
+                        <div class="p-3 rounded-xl bg-dark-900 border border-slate-800">
+                            <strong class="text-white block mb-1">Misi 3 (+250 XP)</strong>
+                            Jalankan <em>Saga dengan Kompensasi</em> pada Skenario 3 saat bank 500. Buktikan saldo nasabah di-refund.
+                        </div>
+                        <div class="p-3 rounded-xl bg-dark-900 border border-slate-800">
+                            <strong class="text-white block mb-1">Misi 4 (+250 XP)</strong>
+                            Jalankan <em>Token Bucket Rate Limiter</em> pada Skenario 4. Buktikan kuota voucher tidak jebol minus.
                         </div>
                     </div>
-                </div>
-
-                <!-- Section 2: Prinsip Emas Backend Finansial -->
-                <div class="space-y-3">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <span>🏛️</span> 4 Invarian Finansial yang Wajib Dikuasai
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
-                            <strong class="text-white text-xs flex items-center gap-1.5">
-                                <span class="text-rose-400">✕</span> Mengapa Dilarang Pakai Float?
-                            </strong>
-                            <p class="text-slate-400 text-[11px] leading-relaxed">
-                                Komputer merepresentasikan floating-point secara biner IEEE 754 (<code class="text-amber-300">0.1 + 0.2 = 0.30000000000000004</code>). Di bank, ini menimbulkan selisih pembulatan sen (*fractional pennies*). Solusi: Selalu gunakan <strong>int64</strong> (sen) atau tipe <em>exact decimal</em>.
-                            </p>
-                        </div>
-
-                        <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
-                            <strong class="text-white text-xs flex items-center gap-1.5">
-                                <span class="text-sky-400">✓</span> Double-Entry Bookkeeping
-                            </strong>
-                            <p class="text-slate-400 text-[11px] leading-relaxed">
-                                Setiap perpindahan uang wajib menghasilkan dua mutasi berpasangan yang seimbang (DEBIT dan CREDIT). Tabel mutasi bersifat <em>immutable</em> (hanya boleh INSERT, dilarang UPDATE/DELETE).
-                            </p>
-                        </div>
-
-                        <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
-                            <strong class="text-white text-xs flex items-center gap-1.5">
-                                <span class="text-emerald-400">✓</span> Idempotency Key Lifecycle
-                            </strong>
-                            <p class="text-slate-400 text-[11px] leading-relaxed">
-                                Klien mengirim header <code class="text-emerald-300">Idempotency-Key: UUID</code>. Transaksi dikunci saat <em>PROCESSING</em>. Jika request duplikat datang bersamaan ➡️ return <strong>409 Conflict</strong>. Jika sudah <em>COMPLETED</em> ➡️ sajikan cached response.
-                            </p>
-                        </div>
-
-                        <div class="p-3.5 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
-                            <strong class="text-white text-xs flex items-center gap-1.5">
-                                <span class="text-teal-400">✓</span> Saga vs Two-Phase Commit (2PC)
-                            </strong>
-                            <p class="text-slate-400 text-[11px] leading-relaxed">
-                                2PC memegang lock database antar sistem dan rentan deadlock jika gateway pihak ketiga lambat. Saga membagi transaksi menjadi langkah independen dan mengandalkan <strong>Compensating Transaction (Refund)</strong> jika langkah lanjutan gagal.
-                            </p>
-                        </div>
+                    <div class="text-[11px] text-emerald-300 font-semibold pt-1">
+                        🏆 Kumpulkan total 1.000 XP untuk membuka Surat Penawaran Kerja Resmi di Tab 5!
                     </div>
                 </div>
-
-                <!-- Section 3: Pertanyaan Interview Populer -->
-                <div class="p-4 rounded-2xl bg-dark-900 border border-slate-800 space-y-2.5">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <span>💼</span> Pertanyaan Wawancara Tech Lead Fintech
-                    </h3>
-                    <div class="space-y-2 text-[11px] text-slate-300">
-                        <p><strong>Q: Kapan memilih Pessimistic Locking dibanding Optimistic Locking?</strong><br>
-                        <span class="text-slate-400">A: Pilih <em>Pessimistic</em> pada kasus high-contention (seperti saldo dompet, kuota flash sale) agar tidak terjadi retry storm. Pilih <em>Optimistic</em> pada low-contention (seperti edit profil pengguna).</span></p>
-
-                        <p><strong>Q: Bagaimana cara mencegah Deadlock saat Alice mentransfer ke Bob dan Bob mentransfer ke Alice bersamaan?</strong><br>
-                        <span class="text-slate-400">A: Selalu terapkan <strong>Lock Ordering</strong>: Urutkan kunci berdasarkan ID terkecil terlebih dahulu (<code class="text-emerald-300">SELECT ... WHERE id IN (A, B) ORDER BY id FOR UPDATE</code>).</span></p>
-                    </div>
-                </div>
-
             </div>
 
-            <!-- Modal Footer -->
             <div class="border-t border-slate-800 pt-4 mt-4 flex items-center justify-between">
-                <span class="text-[11px] text-slate-500">Materi lengkap tersedia di <code class="text-slate-400 font-mono">docs/interview_qa.md</code></span>
+                <span class="text-[11px] text-slate-500">Fintech Hiring Gauntlet</span>
                 <button onclick="toggleGuideModal()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
-                    Mengerti, Mulai Praktik
+                    Mengerti, Mulai Game
                 </button>
             </div>
-
         </div>
     </div>
 
@@ -621,13 +692,13 @@
             el.className = 'log-item text-[11px] leading-relaxed break-all py-0.5 border-b border-slate-900/60';
             
             let type = 'info';
-            if (e.data.includes('✅') || e.data.includes('🛡️') || e.data.includes('🎉')) {
-                el.className += ' text-emerald-400';
+            if (e.data.includes('✅') || e.data.includes('🛡️') || e.data.includes('🎉') || e.data.includes('🎖️')) {
+                el.className += ' text-emerald-400 font-medium';
                 type = 'success';
             } else if (e.data.includes('❌') || e.data.includes('⚠️') || e.data.includes('💥') || e.data.includes('💸') || e.data.includes('🚨')) {
                 el.className += ' text-rose-400 font-semibold';
                 type = 'error';
-            } else if (e.data.includes('⏳') || e.data.includes('🔄') || e.data.includes('📨')) {
+            } else if (e.data.includes('⏳') || e.data.includes('🔄') || e.data.includes('📨') || e.data.includes('🛑')) {
                 el.className += ' text-amber-300';
                 type = 'lock';
             } else if (e.data.includes('🔒') || e.data.includes('🔐') || e.data.includes('🔑') || e.data.includes('↩️')) {
@@ -640,7 +711,6 @@
             el.dataset.type = type;
             el.textContent = `[${new Date().toLocaleTimeString()}] ${e.data}`;
 
-            // Periksa filter aktif
             if (activeLogFilter !== 'all') {
                 if (activeLogFilter === 'error' && type !== 'error') el.style.display = 'none';
                 else if (activeLogFilter === 'success' && type !== 'success') el.style.display = 'none';

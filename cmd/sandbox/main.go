@@ -27,6 +27,9 @@ func main() {
 	mux.HandleFunc("/api/scenarios/02/clear", handler.ClearIdempotencyRecords)
 	mux.HandleFunc("/api/scenarios/03/run", handler.RunScenario03)
 	mux.HandleFunc("/api/scenarios/03/clear", handler.ClearScenario03)
+	mux.HandleFunc("/api/scenarios/04/run", handler.RunScenario04)
+	mux.HandleFunc("/api/gamification/status", handler.GetGamificationStatus)
+	mux.HandleFunc("/api/gamification/reset", handler.ResetGamification)
 
 	port := ":8080"
 	fmt.Printf("Dashboard aktif di http://localhost%s\n", port)

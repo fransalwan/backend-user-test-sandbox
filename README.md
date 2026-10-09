@@ -85,9 +85,23 @@ backend-user-test-sandbox/
   3. **Saga Happy Path (Sukses Tuntas 🚀)**: Mutasi saldo atomik bersamaan dengan pencatatan event ke tabel Outbox, hingga outbox event berstatus `PUBLISHED`.
 
 
-### 🎯 Scenario 04: High Traffic & Flash Sales (`scenarios/04_high_traffic`)
-- **Fintech Problem**: Extreme traffic spikes (e.g., 10,000 requests/sec competing for 100 limited vouchers/cashbacks).
-- **Key Concepts**: Token Bucket / Sliding Window rate limiting (Redis Lua), hot-account caching with `DECRBY`, and asynchronous ledger reconciliation.
+### ✅ Scenario 04: High Traffic & Flash Sales (`scenarios/04_high_traffic`)
+- **Fintech Problem**: Serbuan lonjakan request pada promo terbatas (Flash Sale).
+- **Interactive Demonstrations**:
+  1. **Tanpa Rate Limiter (Overselling ⚠️)**: Membuktikan bagaimana serbuan request menjebol kuota voucher menjadi minus.
+  2. **Token Bucket Rate Limiter + Atomic Cache (DECRBY ✅)**: Kuota terserap tepat di 0 dan kelebihan request ditolak rapi dengan HTTP 429 Too Many Requests.
+  3. **Worker Queue Leaky Bucket 📦**: Peredaman lonjakan traffic dengan antrean buffer teratur.
+
+---
+
+## 🎮 Gamification Mode: Fintech Hiring Gauntlet
+Aplikasi didesain sebagai **1 alur penuh wawancara kerja dari screening teknis sampai penerbitan surat penawaran (Offer Letter)**:
+- **Tahap 1: Live Coding Test** (+250 XP) &bull; Concurrency Firefight
+- **Tahap 2: System Defense Test** (+250 XP) &bull; Idempotency & Network Retry Storm
+- **Tahap 3: Take-Home Architecture Test** (+250 XP) &bull; Saga Auto-Refund Disaster Recovery
+- **Tahap 4: High Traffic & Scale Test** (+250 XP) &bull; Flash Sale Overselling Protection
+- **Tahap 5: Keputusan Hiring & Penawaran Kontrak (Offer Letter)** &bull; Surat Penawaran Resmi Principal Backend Engineer (Gaji IDR 85.000.000/bln + ESOP + Rapor Evaluasi Nilai A+).
+
 
 ---
 
