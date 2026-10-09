@@ -543,17 +543,17 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 	totalXP := passedCount * 250
 	progressPct := passedCount * 25
 
-	levelTitle := "Tahap 1: Technical Screening"
-	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">Sedang Diuji (In Review)</span>`
+	levelTitle := "Tahap 1: Live Coding Concurrency Safe-Wallet"
+	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Sedang Diuji (In Review)</span>`
 	if passedCount == 1 {
-		levelTitle = "Tahap 2: System Resiliency Test"
+		levelTitle = "Tahap 2: System Design Idempotency Defense"
 	} else if passedCount == 2 {
-		levelTitle = "Tahap 3: Take-Home Architecture"
+		levelTitle = "Tahap 3: Take-Home Payment API Review"
 	} else if passedCount == 3 {
-		levelTitle = "Tahap 4: High Traffic & Scale Test"
+		levelTitle = "Tahap 4: Production War Room Rate Limiter"
 	} else if passedCount == 4 {
-		levelTitle = "🏆 LULUS SEMUA TAHAP - SURAT PENAWARAN TERBIT!"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">OFFER EXTENDED (STRONG HIRE) 🎉</span>`
+		levelTitle = "🏆 LULUS SEMUA TAHAP - SURAT PENAWARAN RESMI TERBIT!"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">OFFER EXTENDED (STRONG HIRE) 🎉</span>`
 	}
 
 	html := fmt.Sprintf(`
@@ -566,9 +566,9 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Kandidat: Frans Alwan</span>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">&bull; Target: Principal Backend Engineer</span>
+                        <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">&bull; Target: Junior / Associate Backend Engineer (Fintech Track)</span>
                     </div>
-                    <div class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">%s</div>
+                    <div class="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-0.5">%s</div>
                 </div>
             </div>
 
@@ -882,35 +882,35 @@ func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	if answer == "sha256_hash_and_inflight_lock" {
-		h.markStagePassed(2, "System Design Architect Approved")
-		h.hub.Broadcast("🏛️ [System Design] Principal Architect menyetujui pertahanan arsitektur kandidat! Nilai: A+ (+250 XP).")
+		h.markStagePassed(2, "System Design Idempotency Defense Approved")
+		h.hub.Broadcast("🏛️ [System Design] Lead Backend Engineer menyetujui pemahaman idempotensi kandidat! Nilai: A+ (+250 XP).")
 
 		html := `
-        <div class="p-4 rounded-xl bg-emerald-950/50 border border-emerald-800/70 space-y-3 font-sans text-xs">
-            <div class="flex items-center justify-between border-b border-emerald-800/60 pb-2">
+        <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/70 space-y-3 font-sans text-xs">
+            <div class="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800/60 pb-2">
                 <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-                    <strong class="text-sm font-bold text-emerald-300">HASIL INTERVIEW SYSTEM DESIGN: LULUS (STRONG HIRE) ✓</strong>
+                    <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                    <strong class="text-sm font-bold text-emerald-800 dark:text-emerald-300">HASIL INTERVIEW SYSTEM DESIGN: LULUS (STRONG HIRE) ✓</strong>
                 </div>
-                <span class="text-xs font-mono font-bold text-amber-300">+250 XP DI DAPAT</span>
+                <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-300">+250 XP DIDAPAT</span>
             </div>
-            <div class="text-slate-200 leading-relaxed text-xs space-y-2">
+            <div class="text-slate-700 dark:text-slate-200 leading-relaxed text-xs space-y-2">
                 <p>
-                    <strong>Pewawancara (Principal System Architect):</strong><br>
-                    <em>"Penjelasan arsitektur Anda sangat matang dan akurat. Mengkombinasikan SHA-256 Payload Hash (untuk menolak tampering HTTP 422) dengan In-Flight Distributed Lock (untuk menolak request bersamaan HTTP 409) adalah standar industri emas yang diterapkan oleh Stripe dan Adyen. Anda memahami batas antara idempotensi jaringan dan manipulasi data secara presisi."</em>
+                    <strong>Pewawancara (Lead Backend Engineer):</strong><br>
+                    <em>"Penjelasan Anda sangat tepat dan dewasa untuk level Junior/Associate! Memahami bahwa validasi sisi frontend (disable button) mudah ditembus oleh network retry otomatis atau API script adalah fondasi penting backend engineer. Menggunakan Idempotency-Key di backend dengan status lock 'PROCESSING' menjamin transaksi nasabah tidak pernah terpotong ganda."</em>
                 </p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
-                    <div class="p-2 rounded bg-dark-900 border border-slate-800">
-                        <span class="text-slate-400">Alur Diagram</span>
-                        <div class="text-emerald-400 font-bold">100% Solid</div>
+                    <div class="p-2 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                        <span class="text-slate-400">Pemahaman Alur</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold">100% Menguasai</div>
                     </div>
-                    <div class="p-2 rounded bg-dark-900 border border-slate-800">
-                        <span class="text-slate-400">Split-Brain Defense</span>
-                        <div class="text-emerald-400 font-bold">Terverifikasi</div>
+                    <div class="p-2 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                        <span class="text-slate-400">Pencegahan Double-Charge</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold">Terverifikasi</div>
                     </div>
-                    <div class="p-2 rounded bg-dark-900 border border-slate-800">
-                        <span class="text-slate-400">Skor Evaluasi</span>
-                        <div class="text-amber-400 font-bold">Nilai: A+</div>
+                    <div class="p-2 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                        <span class="text-slate-400">Nilai Interview</span>
+                        <div class="text-amber-600 dark:text-amber-400 font-bold">Nilai: A+</div>
                     </div>
                 </div>
             </div>
@@ -920,16 +920,16 @@ func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Jawaban salah
-	h.hub.Broadcast("⚠️ [System Design] Argumen pertahanan ditolak oleh interviewer: Pendekatan tidak memenuhi standar keamanan fintech.")
+	h.hub.Broadcast("⚠️ [System Design] Argumen pertahanan perlu perbaikan: Jangan hanya mengandalkan frontend disable.")
 	html := `
-    <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/70 space-y-2.5 font-sans text-xs">
-        <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
-            <strong class="text-sm font-bold text-rose-300">HASIL EVALUASI: PERLU REVISI ARSITEKTUR ✗</strong>
-            <span class="text-xs font-mono text-rose-400">Nilai: C</span>
+    <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800/70 space-y-2.5 font-sans text-xs">
+        <div class="flex items-center justify-between border-b border-rose-200 dark:border-rose-800/60 pb-2">
+            <strong class="text-sm font-bold text-rose-800 dark:text-rose-300">HASIL EVALUASI: PERLU REVISI LOGIKA ✗</strong>
+            <span class="text-xs font-mono text-rose-600 dark:text-rose-400">Nilai: C</span>
         </div>
-        <p class="text-slate-300 leading-relaxed text-xs">
-            <strong>Pewawancara (Principal System Architect):</strong><br>
-            <em>"Jawaban tersebut berisiko fatal pada sistem perbankan. Mengabaikan hash payload membuka celah keamanan di mana hacker dapat mengganti nominal transfer tetapi tetap menggunakan idempotency key yang sama. Silakan tinjau kembali alur diagram dan pilih strategi verifikasi yang tepat."</em>
+        <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
+            <strong>Pewawancara (Lead Backend Engineer):</strong><br>
+            <em>"Perhatian: Mengandalkan tombol disable di frontend saja sangat berisiko di sistem pembayaran! Jika koneksi timeout di tengah jalan dan pengguna me-refresh browser, request kedua akan terkirim lagi dan saldo nasabah bisa terpotong dua kali. Backend wajib memverifikasi Idempotency-Key secara mandiri."</em>
         </p>
     </div>`
 	_, _ = w.Write([]byte(html))
@@ -953,9 +953,9 @@ func (h *Handler) SubmitScenario03Repo(w http.ResponseWriter, r *http.Request) {
 
 	if !strings.HasPrefix(repoURL, "https://github.com/") {
 		html := `
-        <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1">
+        <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1">
             <strong>⚠️ Validasi Repositori Gagal:</strong>
-            <p class="text-[11px] text-rose-300">
+            <p class="text-[11px] text-rose-700 dark:text-rose-300">
                 Harap masukkan URL repositori GitHub publik yang valid (diawali dengan <code>https://github.com/username/project</code>).
             </p>
         </div>`
@@ -963,32 +963,32 @@ func (h *Handler) SubmitScenario03Repo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Simulasi Pipeline Evaluasi Komite Engineering
-	h.hub.Broadcast(fmt.Sprintf("🚀 [Take-Home Bot] Menerima submission repo: %s (Branch: %s). Menjalankan automated evaluation suite...", repoURL, branch))
-	h.markStagePassed(3, "Take-Home Assignment Accepted")
+	// Simulasi Pipeline Evaluasi Komite Engineering untuk Entry-Level
+	h.hub.Broadcast(fmt.Sprintf("🚀 [Take-Home Bot] Menerima submission repo: %s (Branch: %s). Menjalankan code review bot...", repoURL, branch))
+	h.markStagePassed(3, "Take-Home Payment API Accepted")
 
 	html := fmt.Sprintf(`
-    <div class="p-4 rounded-xl bg-gradient-to-b from-[#0b1424] to-[#070c18] border border-cyan-500/30 space-y-3 font-sans text-xs shadow-lg">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+    <div class="p-4 sm:p-5 rounded-xl bg-gradient-to-b from-cyan-50/60 to-white dark:from-[#0b1424] dark:to-[#070c18] border border-cyan-300 dark:border-cyan-500/30 space-y-3 font-sans text-xs shadow-md">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
             <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
-                <strong class="text-sm font-bold text-white uppercase tracking-wider">TAKE-HOME SUBMISSION REVIEW: APPROVED ✓</strong>
+                <span class="w-3 h-3 rounded-full bg-cyan-500 animate-pulse"></span>
+                <strong class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">TAKE-HOME CODE REVIEW: APPROVED (LEVEL ENTRY-READY) ✓</strong>
             </div>
-            <span class="text-xs font-mono font-bold text-amber-300">+250 XP DIRAIH</span>
+            <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-300">+250 XP DIRAIH</span>
         </div>
 
-        <div class="text-[11px] font-mono text-slate-300 bg-dark-950 p-3 rounded-lg border border-slate-800 space-y-1">
-            <div class="text-slate-400">Target Repo: <a href="%s" target="_blank" class="text-cyan-400 hover:underline">%s</a> (Branch: %s)</div>
-            <div class="text-emerald-400">[1/5] Verifikasi Git Remote Publik................... OK (200 OK)</div>
-            <div class="text-emerald-400">[2/5] Pemeriksaan Clean Architecture (Domain/Port)... COMPLIANT ✓</div>
-            <div class="text-emerald-400">[3/5] Audit Transactional Outbox & Saga Worker....... PASS ✓ (Zero Dual-Write)</div>
-            <div class="text-emerald-400">[4/5] Test Suite Coverage Analysis................... 92.4%% (Threshold > 80%%)</div>
-            <div class="text-emerald-400">[5/5] Docker Compose & Linter Static Analysis........ ZERO DEFECTS ✓</div>
+        <div class="text-[11px] font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-dark-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
+            <div class="text-slate-500">Target Repo: <a href="%s" target="_blank" class="text-cyan-600 dark:text-cyan-400 hover:underline">%s</a> (Branch: %s)</div>
+            <div class="text-emerald-600 dark:text-emerald-400">[1/5] Aksesibilitas Git Remote Publik................... OK (200 OK)</div>
+            <div class="text-emerald-600 dark:text-emerald-400">[2/5] Struktur Folder Modular (Handler/Service/Repo).... RAPI & TERPISAH ✓</div>
+            <div class="text-emerald-600 dark:text-emerald-400">[3/5] Integritas Moneter (DB Transaction & int64 Cents). BEBAS FLOAT BUG ✓</div>
+            <div class="text-emerald-600 dark:text-emerald-400">[4/5] Unit Test Logika Mutasi Saldo Dompet.............. PASS ✓ (Coverage 88.5%%)</div>
+            <div class="text-emerald-600 dark:text-emerald-400">[5/5] Panduan README.md & Dockerfile Container.......... JELAS & SIAP RUN ✓</div>
         </div>
 
-        <div class="p-3 rounded-lg bg-cyan-950/40 border border-cyan-800/60 text-cyan-200 text-xs space-y-1">
-            <strong class="text-cyan-300 block">📝 Rekomendasi Komite Wawancara:</strong>
-            Repositori publik kandidat telah memenuhi seluruh Functional & Non-Functional Requirements. Implementasi Transactional Outbox dan Saga Auto-Refund dinyatakan memenuhi standar arsitektur tingkat <strong>Principal</strong>. Lanjut ke Tahap 4 (War Room & Stress Test Defense)!
+        <div class="p-3 rounded-lg bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800/60 text-cyan-900 dark:text-cyan-200 text-xs space-y-1">
+            <strong class="text-cyan-700 dark:text-cyan-300 block font-semibold">📝 Catatan Evaluasi Tim Reviewer:</strong>
+            Kode yang Anda kirimkan menunjukkan kebiasaan pemrograman yang sangat baik untuk level Junior/Associate: penamaan variabel bersih, penanganan error eksplisit, dan penggunaan transaksi database atomic. Sangat layak untuk lanjut ke Tahap 4 (War Room & Traffic Safety)!
         </div>
     </div>`, repoURL, repoURL, branch)
 

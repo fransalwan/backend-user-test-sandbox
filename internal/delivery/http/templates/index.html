@@ -946,10 +946,10 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         <span class="text-xs font-mono text-amber-600 dark:text-amber-300 font-semibold">+250 XP Reward</span>
                     </div>
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-2">
-                        <span>🏛️</span> System Design: Global Payment Gateway Idempotency & Resiliency
+                        <span>🏛️</span> System Design: Idempotency Key & Mencegah Double-Charge
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        Pewawancara (Principal System Architect): Jelaskan alur diagram arsitektur penanganan badai retry dan pertahankan keputusan desain Anda di hadapan komite.
+                        Pewawancara (Lead Backend Engineer): Jelaskan mengapa tombol disable di sisi frontend saja tidak cukup untuk mencegah saldo nasabah terpotong ganda saat koneksi jaringan lambat/timeout.
                     </p>
                 </div>
 
@@ -1011,10 +1011,10 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                 <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 space-y-3">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
-                        <strong class="text-xs text-slate-900 dark:text-white uppercase tracking-wider">Pertanyaan Pewawancara (Principal Architect):</strong>
+                        <strong class="text-xs text-slate-900 dark:text-white uppercase tracking-wider">Pertanyaan Pewawancara (Lead Backend Engineer):</strong>
                     </div>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        <em>"Bagaimana strategi Anda membedakan antara retry jaringan yang sah, serangan manipulasi nominal (tampering), dan request konkuren yang datang bersamaan (in-flight)?"</em>
+                        <em>"Sebagai calon Junior/Associate Backend Engineer, jika nasabah menekan tombol 'Bayar' di aplikasi mobile lalu koneksinya putus-nyambung (timeout) dan aplikasi me-retry request secara otomatis, bagaimana strategi Anda di sisi server agar uang nasabah tidak terpotong dua kali?"</em>
                     </p>
 
                     <form hx-post="/api/scenarios/02/defend" hx-target="#system-design-defense-output" hx-swap="innerHTML" class="space-y-3">
@@ -1022,21 +1022,21 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                             <label class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-teal-500 cursor-pointer transition shadow-sm">
                                 <input type="radio" name="defense_choice" value="sha256_hash_and_inflight_lock" checked class="mt-0.5 text-teal-600 focus:ring-0">
                                 <span class="text-slate-700 dark:text-slate-200">
-                                    <strong class="text-teal-700 dark:text-teal-300 block mb-0.5">Opsi A (Rekomendasi Arsitektur):</strong>
-                                    Gunakan verifikasi <strong>SHA-256 Payload Hash</strong> untuk menolak tampering dengan <strong>HTTP 422 Unprocessable Entity</strong>, dan gunakan <strong>Redis Atomic Lock (SETNX)</strong> untuk mencegat in-flight request konkuren dengan status <strong>HTTP 409 Conflict</strong>.
+                                    <strong class="text-teal-700 dark:text-teal-300 block mb-0.5">Opsi A (Rekomendasi Entry-Level Backend):</strong>
+                                    Wajibkan klien mengirim header unik <strong>Idempotency-Key (UUID)</strong>. Backend mengecek status kunci dengan atomic lock: jika request kedua masuk saat request pertama masih berjalan, tolak dengan <strong>HTTP 409 Conflict</strong>, dan jika sudah selesai, sajikan kembali (replay) respons transaksi pertama tanpa memotong saldo ulang.
                                 </span>
                             </label>
                             <label class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-rose-500 cursor-pointer transition shadow-sm">
                                 <input type="radio" name="defense_choice" value="overwrite_payload" class="mt-0.5 text-teal-600 focus:ring-0">
                                 <span class="text-slate-700 dark:text-slate-200">
-                                    <strong class="text-rose-600 dark:text-rose-400 block mb-0.5">Opsi B:</strong>
-                                    Langsung abaikan hash payload dan timpa (overwrite) data transaksi yang sedang berjalan dengan nilai transaksi baru yang masuk.
+                                    <strong class="text-rose-600 dark:text-rose-400 block mb-0.5">Opsi B (Cukup Frontend Saja):</strong>
+                                    Cukup disable tombol bayar di aplikasi mobile/web setelah ditekan satu kali. Backend tidak perlu repot menyimpan Idempotency-Key karena user diyakini tidak akan bisa mengklik dua kali.
                                 </span>
                             </label>
                         </div>
 
                         <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-teal-950/40 active:scale-95">
-                            <span>💬</span> Pertahankan Keputusan Arsitektur (+250 XP)
+                            <span>💬</span> Pertahankan Jawaban Interview (+250 XP)
                         </button>
                     </form>
 
@@ -1058,10 +1058,10 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         <span class="text-xs font-mono text-amber-600 dark:text-amber-300 font-semibold">+250 XP Reward</span>
                     </div>
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-2">
-                        <span>📦</span> Take-Home Assignment: Distributed Outbox & Saga Worker
+                        <span>📦</span> Take-Home Assignment: Safe Payment Transfer API Service
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        Instruksi Resmi Komite Hiring: Buat implementasi di repositori publik GitHub Anda sesuai requirement di bawah dan kirimkan URL-nya untuk di-review secara otomatis oleh bot komite.
+                        Instruksi Resmi Komite Hiring (Junior Track): Buat REST API transfer saldo dompet yang aman di repositori publik GitHub Anda sesuai spesifikasi dasar di bawah, lalu kirimkan URL-nya untuk di-review otomatis oleh bot komite.
                     </p>
                 </div>
 
@@ -1069,27 +1069,27 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                 <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-3 text-xs text-slate-700 dark:text-slate-300">
                     <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2">
                         <strong class="text-slate-900 dark:text-white flex items-center gap-2">
-                            <span>📄</span> Lembar Spesifikasi Proyek Take-Home (Fintech Engineering Challenge)
+                            <span>📄</span> Lembar Spesifikasi Proyek Take-Home (Junior Backend Engineer Challenge)
                         </strong>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 font-mono">Spesifikasi Wajib</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 font-mono">Spesifikasi Dasar</span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] leading-relaxed">
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
                             <strong class="text-cyan-700 dark:text-cyan-400 block font-semibold">1. Functional Requirements:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>Wajib menerapkan <strong>Transactional Outbox Pattern</strong> di PostgreSQL.</li>
-                                <li>Wajib memiliki background worker / publisher untuk memproses event outbox.</li>
-                                <li>Wajib menerapkan <strong>Saga Compensating Auto-Refund</strong> jika Bank mitra error 5xx / timeout.</li>
+                                <li>Endpoint <code class="font-mono">POST /api/v1/transfers</code> (sender_id, recipient_id, amount_cents, idempotency_key).</li>
+                                <li>Wajib menggunakan <strong>ACID Database Transaction</strong> (<code class="font-mono">BEGIN ... COMMIT/ROLLBACK</code>) agar saldo tidak hilang jika server crash di tengah mutasi.</li>
+                                <li>Validasi input mendasar: saldo pengirim mencukupi, nominal &gt; 0, dan pengirim tidak boleh transfer ke diri sendiri.</li>
                             </ul>
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
-                            <strong class="text-emerald-700 dark:text-emerald-400 block font-semibold">2. Non-Functional Requirements:</strong>
+                            <strong class="text-emerald-700 dark:text-emerald-400 block font-semibold">2. Code Quality & Standards:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>Bahasa: <strong>Golang</strong> dengan Clean / Hexagonal Architecture.</li>
-                                <li>Format Uang: Murni <code class="text-emerald-600 dark:text-emerald-400 font-mono">int64</code> sen (dilarang float).</li>
-                                <li>Unit & Integration Test coverage <strong>&ge; 80%</strong>.</li>
-                                <li>Sertakan <code class="font-mono">docker-compose.yml</code> dan CI GitHub Action.</li>
+                                <li>Bahasa: <strong>Golang</strong> dengan struktur modular rapi (Handler, Service, Repository).</li>
+                                <li>Format Uang: Tipe data integer murni <code class="text-emerald-600 dark:text-emerald-400 font-mono">int64</code> sen (Dilarang menggunakan float).</li>
+                                <li>Unit Test untuk logika bisnis mutasi saldo dompet.</li>
+                                <li>Sertakan <code class="font-mono">README.md</code> panduan run lokal dan <code class="font-mono">Dockerfile</code> / compose.</li>
                             </ul>
                         </div>
                     </div>
@@ -1110,7 +1110,7 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">URL Repositori GitHub Publik</label>
-                                <input type="url" name="repo_url" value="https://github.com/fransalwan/backend-user-test-sandbox" required placeholder="https://github.com/username/fintech-outbox-takehome" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 font-mono">
+                                <input type="url" name="repo_url" value="https://github.com/fransalwan/backend-user-test-sandbox" required placeholder="https://github.com/username/fintech-payment-api" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 font-mono">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Branch Git</label>
@@ -1119,8 +1119,8 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Catatan Desain & Trade-Off Arsitektur (Opsional)</label>
-                            <textarea name="notes" rows="2" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-cyan-500 font-mono resize-none">Clean Architecture dengan Transactional Outbox Pattern dan Saga Auto-Refund saat Bank 500. Zero float integer money.</textarea>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Catatan Desain & Struktur Kode (Opsional)</label>
+                            <textarea name="notes" rows="2" class="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl p-2.5 text-xs text-slate-900 dark:text-slate-200 focus:outline-none focus:border-cyan-500 font-mono resize-none">Clean modular architecture (Handler, Service, Repository) dengan ACID DB transaction, zero float integer money, dan unit test coverage.</textarea>
                         </div>
 
                         <div class="flex items-center justify-between pt-1">
@@ -1149,10 +1149,10 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         <span class="text-xs font-mono text-amber-600 dark:text-amber-300 font-semibold">+250 XP Reward</span>
                     </div>
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-2">
-                        <span>🔥</span> Production War Room: Flash Sale Stress Test Defense
+                        <span>🔥</span> Production War Room: Flash Sale & Concurrency Defense
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        Pewawancara (VP of Engineering): Uji stres langsung di depan dewan eksekutif! Buktikan kuota voucher tidak bocor minus di bawah serbuan 250 request serentak.
+                        Pewawancara (Engineering Manager): Uji pemahaman lalu lintas tinggi! Gunakan analogi kasir minimarket untuk melindungi database dari thundering herd saat 250 request serentak berebut voucher.
                     </p>
                 </div>
 
@@ -1163,10 +1163,11 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                     <div class="lg:col-span-7 space-y-4">
                         <div class="p-3.5 rounded-xl bg-amber-50 dark:bg-slate-950/70 border border-amber-200 dark:border-slate-800/80 text-xs text-slate-700 dark:text-slate-300 space-y-1.5">
                             <div class="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-                                <span>💡</span> Misi Kelulusan War Room (+250 XP Terakhir):
+                                <span>💡</span> Analogi War Room Kasir Minimarket (+250 XP Terakhir):
                             </div>
                             <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
-                                Aktifkan strategi <strong>Token Bucket Rate Limiting (Redis DECRBY)</strong> dengan 250 request konkuren &rarr; Buktikan kuota voucher terserap tepat di 0 dan kelebihan request ditolak rapi (429) untuk membuka <strong>Surat Penawaran Kerja (Offer Letter)</strong>!
+                                Bayangkan kasir minimarket hanya sanggup melayani <strong>40 orang per detik</strong>. Jika 250 orang merangsek masuk bersamaan tanpa antrean, kasir akan pingsan (database crash 500) dan barang tercuri (kuota minus).
+                                Aktifkan <strong>Token Bucket Rate Limiting (Maks 40 RPS)</strong> &rarr; Saksikan 50 kuota terserap tepat habis (0) dan kelebihan request ditolak rapi dengan <strong>HTTP 429 Too Many Requests</strong> untuk membuka <strong>Surat Penawaran Kerja (Offer Letter)</strong>!
                             </p>
                         </div>
 
@@ -1244,7 +1245,7 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         </h2>
                     </div>
                     <span class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 animate-pulse w-fit">
-                        STRONG HIRE APPROVED ✓
+                        ACCELERATION HIRE APPROVED ✓
                     </span>
                 </div>
 
@@ -1263,54 +1264,54 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
 
                     <p class="leading-relaxed">
                         Kepada Yth. <strong>Frans Alwan</strong>,<br>
-                        Selamat! Berdasarkan hasil evaluasi komprehensif pada seluruh rangkaian ujian teknis (Live Coding Concurrency, Idempotency Architecture Defense, Saga Outbox Recovery, dan High-Traffic Flash Sale Stress Test), Komite Engineering dengan suara bulat memutuskan untuk memberikan Anda penawaran kerja resmi:
+                        Selamat! Berdasarkan hasil evaluasi komprehensif pada seluruh rangkaian ujian teknis (Fundamental Concurrency Safe-Wallet, System Design Idempotency Defense, Modular Payment API Take-Home, dan Rate Limiter Traffic Protection), Komite Engineering dengan senang hati memberikan Anda penawaran kerja resmi:
                     </p>
 
                     <!-- Rincian Paket Tawaran Kerja -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 sm:p-5 rounded-xl bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 font-mono shadow-sm">
                         <div>
                             <span class="text-slate-400 text-[10px] uppercase">Posisi / Jabatan</span>
-                            <div class="text-base font-bold text-emerald-600 dark:text-emerald-400">Principal Backend Engineer</div>
+                            <div class="text-base font-bold text-emerald-600 dark:text-emerald-400">Junior / Associate Backend Engineer</div>
                         </div>
                         <div>
-                            <span class="text-slate-400 text-[10px] uppercase">Tim / Divisi</span>
-                            <div class="text-base font-bold text-slate-900 dark:text-white">Core Banking & Ledger Platform</div>
+                            <span class="text-slate-400 text-[10px] uppercase">Program & Divisi</span>
+                            <div class="text-base font-bold text-slate-900 dark:text-white">Core Payment Platform (Fintech Track)</div>
                         </div>
                         <div class="mt-2">
                             <span class="text-slate-400 text-[10px] uppercase">Paket Kompensasi Bulanan</span>
-                            <div class="text-base font-bold text-slate-900 dark:text-white">IDR 85.000.000 / bulan</div>
+                            <div class="text-base font-bold text-slate-900 dark:text-white">IDR 13.500.000 / bulan</div>
                         </div>
                         <div class="mt-2">
-                            <span class="text-slate-400 text-[10px] uppercase">Equity & Performance Bonus</span>
-                            <div class="text-base font-bold text-slate-900 dark:text-white">Stock Options (ESOP) + 3x Bonus</div>
+                            <span class="text-slate-400 text-[10px] uppercase">Fasilitas & Pendampingan</span>
+                            <div class="text-base font-bold text-slate-900 dark:text-white">6-Bulan 1-on-1 Senior Mentorship + Mac Workstation</div>
                         </div>
                     </div>
 
                     <!-- Evaluasi Nilai Komite -->
                     <div class="space-y-2 border-t border-slate-200 dark:border-slate-800/80 pt-4">
-                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">Catatan Evaluasi Komite Pewawancara (VP of Engineering):</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">Rapor Penilaian Komite Pewawancara (Engineering Hiring Team):</span>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
                             <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">Concurrency</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                <div class="text-slate-500">Concurrency (Go Mutex)</div>
+                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
                             </div>
                             <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">Idempotency</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                <div class="text-slate-500">System Design (Idempotency)</div>
+                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
                             </div>
                             <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">Distributed Saga</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                <div class="text-slate-500">Clean Code & DB Tx</div>
+                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
                             </div>
                             <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">High Traffic</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A+</div>
+                                <div class="text-slate-500">Rate Limiter Awareness</div>
+                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <span class="text-[11px] text-slate-500">Status Kelulusan: <strong>4 dari 4 Ujian Tuntas (1.000 XP)</strong></span>
+                        <span class="text-[11px] text-slate-500">Status Kelulusan: <strong>4 dari 4 Ujian Tuntas (1.000 XP) &bull; Penawaran Resmi Diterbitkan!</strong></span>
                         <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md w-full sm:w-auto">
                             🖨️ Cetak Surat Penawaran & Rapor
                         </button>
@@ -1337,7 +1338,7 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                     </div>
                     <div>
                         <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Panduan Alur Wawancara & Teori Fintech</h2>
-                        <p class="text-[11px] text-slate-500">Dari Ujian Teknis Live Coding sampai Keputusan Hiring Tingkat Principal.</p>
+                        <p class="text-[11px] text-slate-500">Dari Ujian Teknis Live Coding sampai Penawaran Kerja Junior Backend Engineer.</p>
                     </div>
                 </div>
                 <button onclick="toggleGuideModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center transition">
@@ -1357,7 +1358,7 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
                             <strong class="text-slate-900 dark:text-white block mb-1">Misi 2 (+250 XP)</strong>
-                            Pertahankan arsitektur Idempotency Key & in-flight locking di hadapan Principal Architect.
+                            Pertahankan arsitektur Idempotency Key & in-flight locking di hadapan Lead Backend Engineer.
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
                             <strong class="text-slate-900 dark:text-white block mb-1">Misi 3 (+250 XP)</strong>
@@ -1365,7 +1366,7 @@ func (w *SharedWallet) DeductWallet(amount int64) error {
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
                             <strong class="text-slate-900 dark:text-white block mb-1">Misi 4 (+250 XP)</strong>
-                            Luncurkan uji stres Flash Sale di War Room dengan Token Bucket Rate Limiter.
+                            Luncurkan simulasi War Room kasir minimarket dengan Token Bucket Rate Limiter.
                         </div>
                     </div>
                 </div>
