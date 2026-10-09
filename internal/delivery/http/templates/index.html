@@ -487,10 +487,61 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
             editor.dispatchEvent(new Event('input'));
         }
 
+        // Mobile Segmented Tab Switcher untuk Tahap 1
+        function switchLivecodeMobileTab(tab) {
+            const leftPane = document.getElementById('livecode-left-pane');
+            const editorContainer = document.getElementById('livecode-editor-container');
+            const outputPanel = document.getElementById('leetcode-output-panel');
+
+            const btnSoal = document.getElementById('seg-btn-soal');
+            const btnEditor = document.getElementById('seg-btn-editor');
+            const btnOutput = document.getElementById('seg-btn-output');
+
+            if (!leftPane || !editorContainer || !outputPanel) return;
+
+            // Di desktop (>= 1024px), biarkan CSS grid menampilkan berdampingan
+            if (window.innerWidth >= 1024) return;
+
+            const inactiveClass = "flex-1 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center flex items-center justify-center gap-1.5";
+            const activeClass = "flex-1 py-2 px-2 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-sm transition text-center flex items-center justify-center gap-1.5";
+
+            if (btnSoal) btnSoal.className = inactiveClass;
+            if (btnEditor) btnEditor.className = inactiveClass;
+            if (btnOutput) btnOutput.className = inactiveClass;
+
+            if (tab === 'soal') {
+                leftPane.classList.remove('hidden');
+                editorContainer.classList.add('hidden');
+                outputPanel.classList.add('hidden');
+                if (btnSoal) btnSoal.className = activeClass;
+            } else if (tab === 'editor') {
+                leftPane.classList.add('hidden');
+                editorContainer.classList.remove('hidden');
+                outputPanel.classList.add('hidden');
+                if (btnEditor) btnEditor.className = activeClass;
+                const editor = document.getElementById('live-code-editor');
+                if (editor) editor.focus();
+            } else if (tab === 'output') {
+                leftPane.classList.add('hidden');
+                editorContainer.classList.add('hidden');
+                outputPanel.classList.remove('hidden');
+                if (btnOutput) btnOutput.className = activeClass;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setupCodeEditor('live-code-editor', 'livecode-gutter', 'livecode-save-status', 'code_draft_livecode', STARTER_CODE_SKELETON, 'form-live-code');
             setupCodeEditor('bootcamp-livecode-editor', 'bootcamp-livecode-gutter', 'bootcamp-livecode-save-status', 'code_draft_bootcamp_live', BOOTCAMP_STARTER_LIVECODE, 'form-bootcamp-livecode');
             setupCodeEditor('bootcamp-sysdesign-editor', 'bootcamp-sysdesign-gutter', 'bootcamp-sysdesign-save-status', 'code_draft_bootcamp_sys', BOOTCAMP_STARTER_SYSDESIGN, 'form-bootcamp-sysdesign');
+
+            // Auto-switch mobile view ke Hasil Test saat pengujian selesai di-swap HTMX
+            document.body.addEventListener('htmx:afterSwap', function(evt) {
+                if (evt.detail.target && evt.detail.target.id === 'leetcode-output-panel') {
+                    if (window.innerWidth < 1024) {
+                        switchLivecodeMobileTab('output');
+                    }
+                }
+            });
         });
     </script>
 </head>
@@ -999,167 +1050,187 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                     </p>
                 </div>
 
-                <!-- Contoh Test Cases (LeetCode Examples Style) -->
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                            <span>🧪</span> Contoh Kasus Uji (Sample Test Cases)
-                        </span>
-                        <span class="text-[11px] text-slate-400 font-mono">3 Examples Provided</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
-                        <!-- Example 1 -->
-                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
-                            <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
-                                <span>Example 1</span>
-                                <span class="text-emerald-600 dark:text-emerald-400 font-mono">Normal Case</span>
-                            </div>
-                            <div class="text-slate-700 dark:text-slate-300"><strong>Input:</strong> nums = [2, 7, 11, 15], target = 9</div>
-                            <div class="text-emerald-600 dark:text-emerald-400 font-bold"><strong>Output:</strong> [0, 1]</div>
-                            <div class="text-[11px] text-slate-500 font-sans pt-1">Penjelasan: nums[0] + nums[1] == 2 + 7 == 9.</div>
-                        </div>
-
-                        <!-- Example 2 -->
-                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
-                            <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
-                                <span>Example 2</span>
-                                <span class="text-cyan-600 dark:text-cyan-400 font-mono">Unsorted Array</span>
-                            </div>
-                            <div class="text-slate-700 dark:text-slate-300"><strong>Input:</strong> nums = [3, 2, 4], target = 6</div>
-                            <div class="text-cyan-600 dark:text-cyan-400 font-bold"><strong>Output:</strong> [1, 2]</div>
-                            <div class="text-[11px] text-slate-500 font-sans pt-1">Penjelasan: nums[1] + nums[2] == 2 + 4 == 6.</div>
-                        </div>
-
-                        <!-- Example 3 -->
-                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1.5">
-                            <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
-                                <span>Example 3</span>
-                                <span class="text-amber-600 dark:text-amber-400 font-mono">Duplicate Values</span>
-                            </div>
-                            <div class="text-slate-700 dark:text-slate-300"><strong>Input:</strong> nums = [3, 3], target = 6</div>
-                            <div class="text-amber-600 dark:text-amber-400 font-bold"><strong>Output:</strong> [0, 1]</div>
-                            <div class="text-[11px] text-slate-500 font-sans pt-1">Penjelasan: nums[0] + nums[1] == 3 + 3 == 6.</div>
-                        </div>
-                    </div>
+                <!-- Mobile Segmented Control Bar (Hanya Tampil di Layar < lg) -->
+                <div class="lg:hidden flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs gap-1">
+                    <button id="seg-btn-soal" type="button" onclick="switchLivecodeMobileTab('soal')" class="flex-1 py-2 px-2 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-sm transition text-center flex items-center justify-center gap-1.5">
+                        <span>📄</span> <span>Soal & Hints</span>
+                    </button>
+                    <button id="seg-btn-editor" type="button" onclick="switchLivecodeMobileTab('editor')" class="flex-1 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center flex items-center justify-center gap-1.5">
+                        <span>💻</span> <span>Editor Kode</span>
+                    </button>
+                    <button id="seg-btn-output" type="button" onclick="switchLivecodeMobileTab('output')" class="flex-1 py-2 px-2 text-xs font-semibold rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition text-center flex items-center justify-center gap-1.5">
+                        <span>🧪</span> <span>Hasil Test</span>
+                    </button>
                 </div>
 
-                <!-- Constraints Box -->
-                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
-                    <div class="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
-                        <span>📋 Constraints & Standar Efisiensi Industri:</span>
-                        <span class="text-[11px] text-amber-600 dark:text-amber-400 font-mono">Target: O(N) Hash Map &bull; Zero TLE</span>
-                    </div>
-                    <ul class="text-[11px] text-slate-600 dark:text-slate-400 list-disc list-inside space-y-0.5 font-mono">
-                        <li><code>2 &le; len(nums) &le; 10⁴</code> (hingga 10.000 riwayat transaksi nasabah)</li>
-                        <li><code>-10⁹ &le; nums[i] &le; 10⁹</code> dan <code>-10⁹ &le; target &le; 10⁹</code></li>
-                        <li>Setiap input dijamin memiliki <strong>tepat satu solusi</strong>.</li>
-                        <li>Elemen pada indeks yang sama <strong>tidak boleh dipakai dua kali</strong>.</li>
-                        <li><strong>Standar Kompleksitas Waktu:</strong> Wajib <strong>O(N)</strong> menggunakan Hash Map! Solusi Brute Force nested loop O(N²) akan ditandai dengan peringatan <em>Time Limit Hazard (TLE)</em> pada Stress Test 10.000 items.</li>
-                    </ul>
-                </div>
-
-                <!-- Progressive Hints Accordion -->
-                <div class="space-y-2">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Butuh Bantuan?</span>
-                            <button type="button" id="hint-btn-1" onclick="toggleHint(1)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
-                                💡 Hint 1: Brute Force vs Hash Map
-                            </button>
-                            <button type="button" id="hint-btn-2" onclick="toggleHint(2)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
-                                💡 Hint 2: Komplemen Target
-                            </button>
-                            <button type="button" id="hint-btn-3" onclick="toggleHint(3)" class="px-2.5 py-1 text-[11px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
-                                💡 Hint 3: Sintaks Go (map[int]int)
-                            </button>
-                        </div>
-                        <button type="button" onclick="resetLiveCode()" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-800 transition flex items-center gap-1">
-                            <span>↺</span> Reset ke Skeleton
-                        </button>
-                    </div>
-
-                    <div id="hint-box-1" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 1: Memahami Biaya Waktu Brute Force O(N²)</strong>
-                        <p class="text-[11px] leading-relaxed">
-                            Mencoba semua pasangan dengan 2 loop bersarang (<code>for i ... for j ...</code>) membutuhkan waktu O(N²). Untuk 10.000 data transaksi, perulangan akan berjalan sebanyak 100.000.000 kali dan memicu TLE! Bisakah Anda mengingat elemen yang sudah dilewati ke dalam hash map agar pencarian komplemen berlangsung dalam O(1) amortized?
-                        </p>
-                    </div>
-
-                    <div id="hint-box-2" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold">💡 Hint 2: Formula Komplemen Penjumlahan</strong>
-                        <p class="text-[11px] leading-relaxed">
-                            Jika kita sedang berada di angka <code>nums[i]</code>, pasangannya yang menghasilkan target haruslah bernilai: <code>complement := target - nums[i]</code>. Cukup tanyakan ke Hash Map: "Apakah <code>complement</code> ini sudah ada di map?". Jika ada, Anda langsung menemukan solusinya!
-                        </p>
-                    </div>
-
-                    <div id="hint-box-3" class="hidden p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1 font-mono">
-                        <strong class="text-amber-700 dark:text-amber-300 block font-semibold font-sans">💡 Hint 3: Idiom Comma-Ok di Go (map[int]int)</strong>
-                        <div class="text-[11px] leading-relaxed space-y-1">
-                            <div>seen := make(map[int]int) // memetakan: nilaiAngka &rarr; indeks</div>
-                            <div>for i, num := range nums {</div>
-                            <div>&nbsp;&nbsp;&nbsp;&nbsp;complement := target - num</div>
-                            <div>&nbsp;&nbsp;&nbsp;&nbsp;if prevIdx, exists := seen[complement]; exists {</div>
-                            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return []int{prevIdx, i}</div>
-                            <div>&nbsp;&nbsp;&nbsp;&nbsp;}</div>
-                            <div>&nbsp;&nbsp;&nbsp;&nbsp;seen[num] = i</div>
-                            <div>}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Code Editor & Form Submission (Enhanced Developer Experience) -->
-                <form id="form-live-code" hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="space-y-4">
-                    <div class="rounded-xl border border-slate-300 dark:border-slate-800 bg-[#070b14] overflow-hidden shadow-xl">
-                        <!-- Toolbar Header -->
-                        <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-900 border-b border-slate-800 flex-wrap gap-2">
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-                                <span class="ml-1 font-mono font-bold text-slate-200">solution.go</span>
-                                <span id="livecode-save-status" class="text-[10px] text-emerald-400 font-mono">✓ Draf lokal siap</span>
+                <!-- Split-Screen Grid (Desktop 5:7 Side-by-Side & Mobile Tabbed) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    
+                    <!-- ================= PANEL KIRI: SOAL, CONSTRAINTS & HINTS ================= -->
+                    <div id="livecode-left-pane" class="lg:!block lg:col-span-5 space-y-4 lg:max-h-[820px] lg:overflow-y-auto lg:pr-2">
+                        <!-- Contoh Test Cases (LeetCode Examples Style) -->
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <span>🧪</span> Contoh Kasus Uji (Test Cases)
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">3 Examples</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <span class="hidden md:inline text-[10px] text-slate-400 font-mono">⌨️ Ctrl+Enter: Run &bull; Tab: Indent 4 spasi</span>
-                                <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-mono border border-slate-700 transition flex items-center gap-1 active:scale-95">
-                                    <span>💡</span> <span>Contekan Go</span>
-                                </button>
+
+                            <div class="space-y-2 text-xs font-mono">
+                                <!-- Example 1 -->
+                                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1">
+                                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
+                                        <span>Example 1</span>
+                                        <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">Normal Case</span>
+                                    </div>
+                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>Input:</strong> nums = [2, 7, 11, 15], target = 9</div>
+                                    <div class="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]"><strong>Output:</strong> [0, 1]</div>
+                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: nums[0] + nums[1] == 2 + 7 == 9.</div>
+                                </div>
+
+                                <!-- Example 2 -->
+                                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1">
+                                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
+                                        <span>Example 2</span>
+                                        <span class="text-cyan-600 dark:text-cyan-400 font-mono text-[10px]">Unsorted Array</span>
+                                    </div>
+                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>Input:</strong> nums = [3, 2, 4], target = 6</div>
+                                    <div class="text-cyan-600 dark:text-cyan-400 font-bold text-[11px]"><strong>Output:</strong> [1, 2]</div>
+                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: nums[1] + nums[2] == 2 + 4 == 6.</div>
+                                </div>
+
+                                <!-- Example 3 -->
+                                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1">
+                                    <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
+                                        <span>Example 3</span>
+                                        <span class="text-amber-600 dark:text-amber-400 font-mono text-[10px]">Duplicates</span>
+                                    </div>
+                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>Input:</strong> nums = [3, 3], target = 6</div>
+                                    <div class="text-amber-600 dark:text-amber-400 font-bold text-[11px]"><strong>Output:</strong> [0, 1]</div>
+                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: nums[0] + nums[1] == 3 + 3 == 6.</div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Cheatsheet Popover Drawer -->
-                        <div id="cheatsheet-livecode" class="hidden p-3 bg-slate-950/95 border-b border-slate-800 text-xs font-mono space-y-2">
-                            <div class="flex items-center justify-between text-[11px] text-teal-300 font-bold border-b border-slate-800/80 pb-1">
-                                <span>📖 Contekan Cepat Sintaks Golang (Klik untuk Menyisipkan)</span>
-                                <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="text-slate-400 hover:text-white">&times; Tutup</button>
+                        <!-- Constraints Box -->
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
+                            <div class="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
+                                <span>📋 Constraints & Spek:</span>
+                                <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono">Wajib O(N)</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen := make(map[int]int)\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                    <div class="text-teal-400 font-bold">1. Deklarasi Hash Map</div>
-                                    <div class="text-[10px] text-slate-400">seen := make(map[int]int)</div>
-                                </button>
-                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'if prevIdx, exists := seen[complement]; exists {\n    return []int{prevIdx, i}\n}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                    <div class="text-teal-400 font-bold">2. Pengecekan Comma-Ok</div>
-                                    <div class="text-[10px] text-slate-400">if idx, ok := seen[comp]; ok</div>
-                                </button>
-                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen[num] = i\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                    <div class="text-teal-400 font-bold">3. Simpan Elemen ke Map</div>
-                                    <div class="text-[10px] text-slate-400">seen[num] = i</div>
-                                </button>
-                                <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'return []int{0, 0}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                    <div class="text-teal-400 font-bold">4. Return Nil / Slice</div>
-                                    <div class="text-[10px] text-slate-400">return []int{...}</div>
-                                </button>
-                            </div>
+                            <ul class="text-[11px] text-slate-600 dark:text-slate-400 list-disc list-inside space-y-0.5 font-mono">
+                                <li><code>2 &le; len(nums) &le; 10⁴</code></li>
+                                <li><code>-10⁹ &le; nums[i], target &le; 10⁹</code></li>
+                                <li>Tepat <strong>satu solusi valid</strong>.</li>
+                                <li>Indeks sama <strong>dilarang dipakai 2x</strong>.</li>
+                                <li>Solusi O(N²) berisiko <em>Time Limit Exceeded</em>.</li>
+                            </ul>
                         </div>
 
-                        <!-- Editor + Line Numbers Gutter -->
-                        <div class="relative flex font-mono text-xs bg-[#070b14] overflow-hidden">
-                            <div id="livecode-gutter" class="select-none py-3.5 pl-3 pr-2 text-right text-slate-600 bg-[#060910] border-r border-slate-800/80 min-w-[2.8rem] overflow-hidden leading-relaxed pointer-events-none font-mono text-xs">
-                                1<br>2<br>3<br>4
+                        <!-- Progressive Hints Accordion -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-1 flex-wrap">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Butuh Bantuan?</span>
+                                <div class="flex items-center gap-1">
+                                    <button type="button" id="hint-btn-1" onclick="toggleHint(1)" class="px-2 py-1 text-[10px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
+                                        💡 Hint 1
+                                    </button>
+                                    <button type="button" id="hint-btn-2" onclick="toggleHint(2)" class="px-2 py-1 text-[10px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
+                                        💡 Hint 2
+                                    </button>
+                                    <button type="button" id="hint-btn-3" onclick="toggleHint(3)" class="px-2 py-1 text-[10px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
+                                        💡 Hint 3
+                                    </button>
+                                </div>
                             </div>
-                            <textarea id="live-code-editor" name="code_content" class="flex-1 bg-transparent py-3.5 px-3 font-mono text-xs sm:text-sm text-emerald-400 leading-relaxed focus:outline-none resize-y select-text border-0 font-medium whitespace-pre min-h-[16rem]" spellcheck="false">package main
+
+                            <div id="hint-box-1" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold text-[11px]">💡 Hint 1: Brute Force vs Hash Map</strong>
+                                <p class="text-[11px] leading-relaxed">
+                                    Nested loop O(N²) butuh 100 juta operasi pada 10k data transaksi (TLE!). Simpan angka yang sudah dilewati ke hash map agar pencarian komplemen berlangsung O(1) amortized.
+                                </p>
+                            </div>
+
+                            <div id="hint-box-2" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold text-[11px]">💡 Hint 2: Formula Komplemen</strong>
+                                <p class="text-[11px] leading-relaxed">
+                                    Untuk tiap <code>nums[i]</code>, cari <code>complement := target - nums[i]</code> di map. Jika ada, solusinya ketemu!
+                                </p>
+                            </div>
+
+                            <div id="hint-box-3" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1 font-mono">
+                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold font-sans text-[11px]">💡 Hint 3: Idiom Comma-Ok</strong>
+                                <div class="text-[10px] leading-relaxed space-y-0.5">
+                                    <div>seen := make(map[int]int)</div>
+                                    <div>if prev, ok := seen[comp]; ok {</div>
+                                    <div>&nbsp;&nbsp;return []int{prev, i}</div>
+                                    <div>}</div>
+                                    <div>seen[num] = i</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= PANEL KANAN: EDITOR & OUTPUT CONSOLE ================= -->
+                    <div id="livecode-right-pane" class="lg:!block lg:col-span-7 space-y-4">
+                        
+                        <!-- Editor Container -->
+                        <div id="livecode-editor-container" class="lg:!block space-y-3">
+                            <form id="form-live-code" hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="space-y-3">
+                                <div class="rounded-xl border border-slate-300 dark:border-slate-800 bg-[#070b14] overflow-hidden shadow-xl">
+                                    <!-- Toolbar Header -->
+                                    <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-900 border-b border-slate-800 flex-wrap gap-2">
+                                        <div class="flex items-center gap-2 text-xs">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                                            <span class="ml-1 font-mono font-bold text-slate-200">solution.go</span>
+                                            <span id="livecode-save-status" class="text-[10px] text-emerald-400 font-mono">✓ Draf lokal siap</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="hidden md:inline text-[10px] text-slate-400 font-mono">⌨️ Ctrl+Enter: Run</span>
+                                            <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 text-[10px] font-mono border border-slate-700 transition flex items-center gap-1 active:scale-95">
+                                                <span>💡</span> <span>Contekan</span>
+                                            </button>
+                                            <button type="button" onclick="resetLiveCode()" class="text-[10px] px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 transition flex items-center gap-1 active:scale-95">
+                                                <span>↺</span> Reset
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cheatsheet Popover Drawer -->
+                                    <div id="cheatsheet-livecode" class="hidden p-3 bg-slate-950/95 border-b border-slate-800 text-xs font-mono space-y-2">
+                                        <div class="flex items-center justify-between text-[11px] text-teal-300 font-bold border-b border-slate-800/80 pb-1">
+                                            <span>📖 Contekan Cepat Sintaks Golang (Klik untuk Menyisipkan)</span>
+                                            <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="text-slate-400 hover:text-white">&times; Tutup</button>
+                                        </div>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen := make(map[int]int)\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">1. Deklarasi Hash Map</div>
+                                                <div class="text-[10px] text-slate-400">seen := make(map[int]int)</div>
+                                            </button>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'if prevIdx, exists := seen[complement]; exists {\n    return []int{prevIdx, i}\n}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">2. Pengecekan Comma-Ok</div>
+                                                <div class="text-[10px] text-slate-400">if idx, ok := seen[comp]; ok</div>
+                                            </button>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen[num] = i\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">3. Simpan Elemen ke Map</div>
+                                                <div class="text-[10px] text-slate-400">seen[num] = i</div>
+                                            </button>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'return []int{0, 0}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">4. Return Nil / Slice</div>
+                                                <div class="text-[10px] text-slate-400">return []int{...}</div>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Editor + Line Numbers Gutter -->
+                                    <div class="relative flex font-mono text-xs bg-[#070b14] overflow-hidden">
+                                        <div id="livecode-gutter" class="select-none py-3 pl-2.5 pr-2 text-right text-slate-600 bg-[#060910] border-r border-slate-800/80 min-w-[2.6rem] overflow-hidden leading-relaxed pointer-events-none font-mono text-xs">
+                                            1<br>2<br>3<br>4
+                                        </div>
+                                        <textarea id="live-code-editor" name="code_content" class="flex-1 bg-transparent py-3 px-3 font-mono text-xs sm:text-sm text-emerald-400 leading-relaxed focus:outline-none resize-y select-text border-0 font-medium whitespace-pre min-h-[17rem]" spellcheck="false">package main
 
 // TwoSum mencari dua indeks dari elemen nums yang jika dijumlahkan menghasilkan target.
 // Asumsikan setiap input tepat memiliki satu solusi, dan elemen yang sama tidak boleh digunakan dua kali.
@@ -1170,26 +1241,30 @@ func TwoSum(nums []int, target int) []int {
 
     return nil
 }</textarea>
-                        </div>
-                    </div>
+                                    </div>
+                                </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                        <div class="flex items-center gap-2">
-                            <button type="submit" name="action" value="run" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition border border-slate-300 dark:border-slate-700 active:scale-95 shadow-sm">
-                                <span>▶</span> Run Test Cases (Fast Check)
-                            </button>
-                            <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
-                                <span>⚡</span> Submit Solution (+250 XP)
-                            </button>
+                                <!-- Action Buttons -->
+                                <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                    <div class="flex items-center gap-2">
+                                        <button type="submit" name="action" value="run" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition border border-slate-300 dark:border-slate-700 active:scale-95 shadow-sm">
+                                            <span>▶</span> Run Cases
+                                        </button>
+                                        <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
+                                            <span>⚡</span> Submit (+250 XP)
+                                        </button>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">10.000 Transaksi Benchmark</span>
+                                </div>
+                            </form>
                         </div>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">Stress Test: 10.000 Data Transaksi &bull; O(N) Benchmark</span>
-                    </div>
-                </form>
 
-                <!-- Output Panel Terminal -->
-                <div id="leetcode-output-panel" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                    Ketik implementasi Two Sum Anda di editor di atas, lalu klik "Run Test Cases" atau "Submit Solution" untuk penilaian instan.
+                        <!-- Output Panel Terminal -->
+                        <div id="leetcode-output-panel" class="lg:!block p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
+                            Ketik implementasi Two Sum Anda di editor di atas, lalu klik "Run Cases" atau "Submit" untuk penilaian instan.
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
