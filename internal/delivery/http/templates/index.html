@@ -720,11 +720,12 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
     <style>
         /* ================= FORMAT CETAK DOKUMEN RESMI A4 (OFFER LETTER) ================= */
         @media print {
-            /* Sembunyikan seluruh komponen antarmuka web, navigasi, HUD, modal, & footer */
+            /* Sembunyikan seluruh komponen antarmuka web, navigasi, HUD, modal, banner ekosistem, & footer */
             header,
             footer,
             nav,
             .no-print,
+            #banner-ecosystem,
             #gamification-hud-container,
             #guide-modal,
             #scenario-0-view,
@@ -753,7 +754,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 print-color-adjust: exact !important;
             }
 
-            main, #main-workspace, #scenario-5-view {
+            main, #main-workspace, #scenario-5-view, #official-offer-letter-doc {
                 max-width: 100% !important;
                 padding: 0 !important;
                 margin: 0 !important;
@@ -764,63 +765,50 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 background: transparent !important;
             }
 
-            #official-offer-letter-doc {
-                display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-                background: #ffffff !important;
-            }
-
             /* Sembunyikan garis batas layar agar tidak menambah break halaman */
             .print-page-break {
                 display: none !important;
             }
 
-            /* LEMBAR 1: Tepat 1 Lembar A4 Pertama */
+            /* LEMBAR 1: Persis 1 Lembar A4 Pertama */
             .offer-page-1 {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
                 page-break-after: always !important;
                 break-after: page !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                display: block !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 272mm !important;
-                max-height: 272mm !important;
-                overflow: hidden !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
             }
 
-            /* LEMBAR 2: Tepat 1 Lembar A4 Kedua */
+            /* LEMBAR 2: Persis 1 Lembar A4 Kedua */
             .offer-page-2 {
-                page-break-before: auto !important;
-                break-before: auto !important;
+                page-break-before: always !important;
+                break-before: page !important;
                 page-break-after: avoid !important;
                 break-after: avoid !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
+                display: block !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
-                height: 272mm !important;
-                max-height: 272mm !important;
-                overflow: hidden !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
             }
 
             /* SKALASI HURUF DINAMIS & PENGATURAN SPASI CETAK KOMPAK */
             .offer-page {
-                font-size: 8pt !important;
+                font-size: 7.8pt !important;
                 line-height: 1.25 !important;
                 background: #ffffff !important;
                 color: #0f172a !important;
@@ -846,8 +834,9 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
             .offer-page .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 1.5px !important;
             }
-            .offer-page .space-y-12 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 10px !important;
+            .offer-page .space-y-12 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .print\:space-y-10 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 14px !important;
             }
 
             /* Kop Surat Compact */
@@ -1001,7 +990,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
         </section>
 
         <!-- ================= BANNER PANDUAN EKOSISTEM HIRING GAUNTLET ================= -->
-        <div class="bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div id="banner-ecosystem" class="no-print bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div class="space-y-1">
                 <div class="flex items-center gap-2">
                     <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
