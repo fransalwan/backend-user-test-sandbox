@@ -121,15 +121,23 @@
             }
         }
 
-        // Skeleton Starter Code Tahap 1 (LeetCode #1: Two Sum)
+        // Skeleton Starter Code Tahap 1 (DSA: Financial Transaction Deduplication & Sliding Window)
         const STARTER_CODE_SKELETON = `package main
 
-// TwoSum mencari dua indeks dari elemen nums yang jika dijumlahkan menghasilkan target.
-// Asumsikan setiap input tepat memiliki satu solusi, dan elemen yang sama tidak boleh digunakan dua kali.
-// Wajib O(N) Time Complexity menggunakan Hash Map untuk menghindari Time Limit Exceeded (TLE)!
-func TwoSum(nums []int, target int) []int {
-    // TODO: Ketik implementasi kode algoritma Anda di sini
-    // Petunjuk: Buka tombol Hint jika membutuhkan panduan sintaks
+type Transaction struct {
+    ID        string
+    UserID    string
+    Amount    int64 // Nominal dalam satuan sen (contoh: 50000 = Rp 50.000)
+    Timestamp int64 // Unix epoch timestamp dalam detik
+}
+
+// FindDuplicateTransactions mendeteksi transaksi dari UserID dan Amount yang sama
+// yang terjadi dalam selang waktu <= windowSeconds.
+// Kembalikan slice ID transaksi kedua (duplikat) yang terdeteksi.
+// Wajib O(N) Time Complexity menggunakan Hash Map untuk mencegah Time Limit Exceeded (TLE)!
+func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string {
+    // TODO: Ketik implementasi deduplikasi transaksi finansial Anda di sini
+    // Petunjuk: Buka tombol Contekan / Hint jika memerlukan panduan sintaks
 
     return nil
 }`;
@@ -545,6 +553,53 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
             }
         }
 
+        // Salin Struktur Boilerplate Clean Architecture
+        function copyBoilerplateStructure() {
+            const tree = `my-payment-service/
+├── cmd/
+│   └── api/
+│       └── main.go
+├── internal/
+│   ├── delivery/
+│   │   └── http/
+│   │       ├── handler.go
+│   │       └── router.go
+│   ├── domain/
+│   │   ├── wallet.go
+│   │   ├── transaction.go
+│   │   └── ledger.go
+│   ├── repository/
+│   │   ├── postgres/
+│   │   │   ├── wallet_repo.go
+│   │   │   └── ledger_repo.go
+│   │   └── redis/
+│   │       └── idempotency_repo.go
+│   └── usecase/
+│       ├── transfer_usecase.go
+│       └── transfer_usecase_test.go
+├── migrations/
+│   ├── 000001_create_wallets_table.up.sql
+│   └── 000002_create_ledgers_table.up.sql
+├── go.mod
+├── go.sum
+├── Dockerfile
+├── docker-compose.yml
+└── README.md`;
+
+            navigator.clipboard.writeText(tree).then(() => {
+                const btn = document.getElementById('copy-boilerplate-btn');
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<span>✓</span> <span>Struktur Boilerplate Berhasil Disalin!</span>';
+                    btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-500');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-500');
+                    }, 2200);
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setupCodeEditor('live-code-editor', 'livecode-gutter', 'livecode-save-status', 'code_draft_livecode', STARTER_CODE_SKELETON, 'form-live-code');
             setupCodeEditor('bootcamp-livecode-editor', 'bootcamp-livecode-gutter', 'bootcamp-livecode-save-status', 'code_draft_bootcamp_live', BOOTCAMP_STARTER_LIVECODE, 'form-bootcamp-livecode');
@@ -560,6 +615,69 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
             });
         });
     </script>
+
+    <style>
+        /* ================= PRINT FORMATTING KHUSUS TAHAP 5 (OFFER LETTER) ================= */
+        @media print {
+            /* Sembunyikan elemen navigasi, UI aplikasi, HUD, dan footer */
+            header,
+            nav,
+            footer,
+            #gamification-hud-container,
+            #guide-modal,
+            #scenario-0-view,
+            #scenario-1-view,
+            #scenario-2-view,
+            #scenario-3-view,
+            #scenario-4-view,
+            .no-print,
+            button {
+                display: none !important;
+            }
+
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+
+            main, #main-workspace {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+
+            #scenario-5-view {
+                display: block !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
+
+            #official-offer-letter-doc {
+                display: block !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 auto !important;
+                background: #ffffff !important;
+                color: #0f172a !important;
+                page-break-inside: avoid;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm 12mm 15mm;
+            }
+        }
+    </style>
 </head>
 <body class="h-full flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white bg-slate-50 dark:bg-[#0a0f1d] text-slate-800 dark:text-slate-100 transition-colors duration-200">
 
@@ -1058,17 +1176,17 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800/40 font-mono">
-                                Problem #1 &bull; Easy / Entry Level
+                                Live Problem #1 &bull; Industry Practical Track
                             </span>
-                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">LeetCode &bull; Data Structures & Algorithms</span>
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono">Data Structures & Sliding Window</span>
                         </div>
                         <span class="text-xs font-mono text-amber-600 dark:text-amber-300 font-semibold">+250 XP Reward</span>
                     </div>
                     <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-2">
-                        <span>💻</span> Tahap 1: Live Coding DSA &bull; Two Sum (Transaction Target Matcher)
+                        <span>💻</span> Tahap 1: Live Coding &bull; Financial Transaction Deduplication (Sliding Window)
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                        Pewawancara (Staff Software Engineer): <em>"Diberikan sebuah slice bilangan bulat <code>nums</code> (mewakili nominal saldo transaksi) dan sebuah target bilangan bulat <code>target</code>. Kembalikan <strong>dua indeks</strong> elemen sehingga penjumlahannya tepat sama dengan <code>target</code>."</em>
+                        Pewawancara (Staff Software Engineer): <em>"Di platform payment gateway, gangguan sinyal seluler atau retry agresif sering mengirimkan transaksi kembar. Diberikan slice data <code>Transaction</code> dan <code>windowSeconds</code> (misal 60 detik). Tuliskan fungsi Go efisien untuk mendeteksi dan mengembalikan ID dari transaksi duplikat (UserID dan Amount persis sama dalam selang waktu &le; windowSeconds)!"</em>
                     </p>
                 </div>
 
@@ -1090,7 +1208,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                     
                     <!-- ================= PANEL KIRI: SOAL, CONSTRAINTS & HINTS ================= -->
                     <div id="livecode-left-pane" class="lg:!block lg:col-span-5 space-y-4 lg:max-h-[820px] lg:overflow-y-auto lg:pr-2">
-                        <!-- Contoh Test Cases (LeetCode Examples Style) -->
+                        <!-- Contoh Test Cases -->
                         <div class="space-y-2.5">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
@@ -1103,34 +1221,34 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                                 <!-- Example 1 -->
                                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1">
                                     <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
-                                        <span>Example 1</span>
-                                        <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">Normal Case</span>
+                                        <span>Example 1: Duplikat Terdeteksi</span>
+                                        <span class="text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">Valid Duplicate</span>
                                     </div>
-                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>Input:</strong> nums = [2, 7, 11, 15], target = 9</div>
-                                    <div class="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]"><strong>Output:</strong> [0, 1]</div>
-                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: nums[0] + nums[1] == 2 + 7 == 9.</div>
+                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>txs:</strong> [ID:"tx_01", User:"alice", Amt:50k, t:100], [ID:"tx_02", User:"alice", Amt:50k, t:120]<br><strong>windowSeconds:</strong> 60</div>
+                                    <div class="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]"><strong>Output:</strong> ["tx_02"]</div>
+                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: User dan nominal sama, selisih 20 detik &le; 60s (Duplikat).</div>
                                 </div>
 
                                 <!-- Example 2 -->
                                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1">
                                     <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
-                                        <span>Example 2</span>
-                                        <span class="text-cyan-600 dark:text-cyan-400 font-mono text-[10px]">Unsorted Array</span>
+                                        <span>Example 2: Nominal / User Berbeda</span>
+                                        <span class="text-cyan-600 dark:text-cyan-400 font-mono text-[10px]">No Duplicate</span>
                                     </div>
-                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>Input:</strong> nums = [3, 2, 4], target = 6</div>
-                                    <div class="text-cyan-600 dark:text-cyan-400 font-bold text-[11px]"><strong>Output:</strong> [1, 2]</div>
-                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: nums[1] + nums[2] == 2 + 4 == 6.</div>
+                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>txs:</strong> [ID:"tx_01", User:"alice", Amt:50k, t:100], [ID:"tx_02", User:"alice", Amt:75k, t:115]<br><strong>windowSeconds:</strong> 60</div>
+                                    <div class="text-cyan-600 dark:text-cyan-400 font-bold text-[11px]"><strong>Output:</strong> []</div>
+                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: Nominal berbeda (50k vs 75k), bukan transaksi kembar.</div>
                                 </div>
 
                                 <!-- Example 3 -->
                                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 space-y-1">
                                     <div class="flex items-center justify-between text-[11px] text-slate-500 font-sans font-bold">
-                                        <span>Example 3</span>
-                                        <span class="text-amber-600 dark:text-amber-400 font-mono text-[10px]">Duplicates</span>
+                                        <span>Example 3: Jeda Melebihi Window</span>
+                                        <span class="text-amber-600 dark:text-amber-400 font-mono text-[10px]">Normal Recurring</span>
                                     </div>
-                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>Input:</strong> nums = [3, 3], target = 6</div>
-                                    <div class="text-amber-600 dark:text-amber-400 font-bold text-[11px]"><strong>Output:</strong> [0, 1]</div>
-                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: nums[0] + nums[1] == 3 + 3 == 6.</div>
+                                    <div class="text-slate-700 dark:text-slate-300 text-[11px]"><strong>txs:</strong> [ID:"tx_01", User:"alice", Amt:50k, t:100], [ID:"tx_02", User:"alice", Amt:50k, t:250]<br><strong>windowSeconds:</strong> 60</div>
+                                    <div class="text-amber-600 dark:text-amber-400 font-bold text-[11px]"><strong>Output:</strong> []</div>
+                                    <div class="text-[10px] text-slate-500 font-sans">Penjelasan: Selisih 150 detik &gt; 60s window, transaksi berulang sah.</div>
                                 </div>
                             </div>
                         </div>
@@ -1138,15 +1256,15 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                         <!-- Constraints Box -->
                         <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5">
                             <div class="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between">
-                                <span>📋 Constraints & Spek:</span>
+                                <span>📋 Constraints & Spek Industri:</span>
                                 <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono">Wajib O(N)</span>
                             </div>
                             <ul class="text-[11px] text-slate-600 dark:text-slate-400 list-disc list-inside space-y-0.5 font-mono">
-                                <li><code>2 &le; len(nums) &le; 10⁴</code></li>
-                                <li><code>-10⁹ &le; nums[i], target &le; 10⁹</code></li>
-                                <li>Tepat <strong>satu solusi valid</strong>.</li>
-                                <li>Indeks sama <strong>dilarang dipakai 2x</strong>.</li>
-                                <li>Solusi O(N²) berisiko <em>Time Limit Exceeded</em>.</li>
+                                <li><code>1 &le; len(txs) &le; 10⁴</code></li>
+                                <li><code>Amount &gt; 0</code> (satuan sen int64)</li>
+                                <li><code>windowSeconds &gt; 0</code> (biasanya 30s s/d 120s)</li>
+                                <li>Wajib <strong>O(N) Time Complexity</strong> via Hash Map.</li>
+                                <li>Solusi nested loop O(N²) akan ditolak komite karena TLE!</li>
                             </ul>
                         </div>
 
@@ -1168,27 +1286,31 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                             </div>
 
                             <div id="hint-box-1" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold text-[11px]">💡 Hint 1: Brute Force vs Hash Map</strong>
+                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold text-[11px]">💡 Hint 1: Hash Map Composite Key</strong>
                                 <p class="text-[11px] leading-relaxed">
-                                    Nested loop O(N²) butuh 100 juta operasi pada 10k data transaksi (TLE!). Simpan angka yang sudah dilewati ke hash map agar pencarian komplemen berlangsung O(1) amortized.
+                                    Dua transaksi dianggap sama jika <code>UserID</code> dan <code>Amount</code> identik. Buat string key gabungan, misal: <code>key := tx.UserID + "_" + strconv.FormatInt(tx.Amount, 10)</code> atau <code>fmt.Sprintf("%s_%d", tx.UserID, tx.Amount)</code>.
                                 </p>
                             </div>
 
                             <div id="hint-box-2" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
-                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold text-[11px]">💡 Hint 2: Formula Komplemen</strong>
+                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold text-[11px]">💡 Hint 2: Melacak Timestamp Terakhir</strong>
                                 <p class="text-[11px] leading-relaxed">
-                                    Untuk tiap <code>nums[i]</code>, cari <code>complement := target - nums[i]</code> di map. Jika ada, solusinya ketemu!
+                                    Simpan timestamp terakhir per key dalam <code>seen := make(map[string]int64)</code>. Jika key sudah ada di map dan <code>tx.Timestamp - lastTime &le; windowSeconds</code>, tambahkan <code>tx.ID</code> ke slice hasil duplikat!
                                 </p>
                             </div>
 
                             <div id="hint-box-3" class="hidden p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-200 space-y-1 font-mono">
-                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold font-sans text-[11px]">💡 Hint 3: Idiom Comma-Ok</strong>
+                                <strong class="text-amber-700 dark:text-amber-300 block font-semibold font-sans text-[11px]">💡 Hint 3: Kerangka Algoritma</strong>
                                 <div class="text-[10px] leading-relaxed space-y-0.5">
-                                    <div>seen := make(map[int]int)</div>
-                                    <div>if prev, ok := seen[comp]; ok {</div>
-                                    <div>&nbsp;&nbsp;return []int{prev, i}</div>
+                                    <div>var duplicates []string</div>
+                                    <div>seen := make(map[string]int64)</div>
+                                    <div>for _, tx := range txs {</div>
+                                    <div>&nbsp;&nbsp;key := fmt.Sprintf("%s_%d", tx.UserID, tx.Amount)</div>
+                                    <div>&nbsp;&nbsp;if prev, ok := seen[key]; ok && (tx.Timestamp - prev &le; windowSeconds) {</div>
+                                    <div>&nbsp;&nbsp;&nbsp;&nbsp;duplicates = append(duplicates, tx.ID)</div>
+                                    <div>&nbsp;&nbsp;}</div>
+                                    <div>&nbsp;&nbsp;seen[key] = tx.Timestamp</div>
                                     <div>}</div>
-                                    <div>seen[num] = i</div>
                                 </div>
                             </div>
                         </div>
@@ -1207,7 +1329,7 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                                             <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
                                             <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
                                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
-                                            <span class="ml-1 font-mono font-bold text-slate-200">solution.go</span>
+                                            <span class="ml-1 font-mono font-bold text-slate-200">dedup_transactions.go</span>
                                             <span id="livecode-save-status" class="text-[10px] text-emerald-400 font-mono">✓ Draf lokal siap</span>
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -1224,25 +1346,25 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                                     <!-- Cheatsheet Popover Drawer -->
                                     <div id="cheatsheet-livecode" class="hidden p-3 bg-slate-950/95 border-b border-slate-800 text-xs font-mono space-y-2">
                                         <div class="flex items-center justify-between text-[11px] text-teal-300 font-bold border-b border-slate-800/80 pb-1">
-                                            <span>📖 Contekan Cepat Sintaks Golang (Klik untuk Menyisipkan)</span>
+                                            <span>📖 Contekan Sintaks Golang (Klik untuk Menyisipkan)</span>
                                             <button type="button" onclick="toggleCheatsheet('cheatsheet-livecode')" class="text-slate-400 hover:text-white">&times; Tutup</button>
                                         </div>
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen := make(map[int]int)\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                                <div class="text-teal-400 font-bold">1. Deklarasi Hash Map</div>
-                                                <div class="text-[10px] text-slate-400">seen := make(map[int]int)</div>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen := make(map[string]int64)\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">1. Deklarasi Map Timestamp</div>
+                                                <div class="text-[10px] text-slate-400">seen := make(map[string]int64)</div>
                                             </button>
-                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'if prevIdx, exists := seen[complement]; exists {\n    return []int{prevIdx, i}\n}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                                <div class="text-teal-400 font-bold">2. Pengecekan Comma-Ok</div>
-                                                <div class="text-[10px] text-slate-400">if idx, ok := seen[comp]; ok</div>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'key := fmt.Sprintf(&quot;%s_%d&quot;, tx.UserID, tx.Amount)\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">2. Composite Key</div>
+                                                <div class="text-[10px] text-slate-400">key := fmt.Sprintf(...)</div>
                                             </button>
-                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen[num] = i\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                                <div class="text-teal-400 font-bold">3. Simpan Elemen ke Map</div>
-                                                <div class="text-[10px] text-slate-400">seen[num] = i</div>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'if prevTime, ok := seen[key]; ok &amp;&amp; (tx.Timestamp-prevTime &lt;= windowSeconds) {\n    duplicates = append(duplicates, tx.ID)\n}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">3. Cek Window &amp; Append</div>
+                                                <div class="text-[10px] text-slate-400">if diff &lt;= windowSeconds</div>
                                             </button>
-                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'return []int{0, 0}\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
-                                                <div class="text-teal-400 font-bold">4. Return Nil / Slice</div>
-                                                <div class="text-[10px] text-slate-400">return []int{...}</div>
+                                            <button type="button" onclick="insertSnippet('live-code-editor', 'livecode-gutter', 'seen[key] = tx.Timestamp\n')" class="p-2 rounded bg-slate-900 hover:bg-slate-800 text-left border border-slate-800 text-slate-300 transition">
+                                                <div class="text-teal-400 font-bold">4. Update Timestamp</div>
+                                                <div class="text-[10px] text-slate-400">seen[key] = tx.Timestamp</div>
                                             </button>
                                         </div>
                                     </div>
@@ -1254,12 +1376,20 @@ func (e *IdempotencyEngine) AcquireOrReplay(key string) (bool, error) {
                                         </div>
                                         <textarea id="live-code-editor" name="code_content" class="flex-1 bg-transparent py-3 px-3 font-mono text-xs sm:text-sm text-emerald-400 leading-relaxed focus:outline-none resize-y select-text border-0 font-medium whitespace-pre min-h-[17rem]" spellcheck="false">package main
 
-// TwoSum mencari dua indeks dari elemen nums yang jika dijumlahkan menghasilkan target.
-// Asumsikan setiap input tepat memiliki satu solusi, dan elemen yang sama tidak boleh digunakan dua kali.
-// Wajib O(N) Time Complexity menggunakan Hash Map untuk menghindari Time Limit Exceeded (TLE)!
-func TwoSum(nums []int, target int) []int {
-    // TODO: Ketik implementasi kode algoritma Anda di sini
-    // Petunjuk: Buka tombol Hint jika membutuhkan panduan sintaks
+type Transaction struct {
+    ID        string
+    UserID    string
+    Amount    int64 // Nominal dalam satuan sen (contoh: 50000 = Rp 50.000)
+    Timestamp int64 // Unix epoch timestamp dalam detik
+}
+
+// FindDuplicateTransactions mendeteksi transaksi dari UserID dan Amount yang sama
+// yang terjadi dalam selang waktu <= windowSeconds.
+// Kembalikan slice ID transaksi kedua (duplikat) yang terdeteksi.
+// Wajib O(N) Time Complexity menggunakan Hash Map untuk mencegah Time Limit Exceeded (TLE)!
+func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string {
+    // TODO: Ketik implementasi deduplikasi transaksi finansial Anda di sini
+    // Petunjuk: Buka tombol Contekan / Hint jika memerlukan panduan sintaks
 
     return nil
 }</textarea>
@@ -1273,10 +1403,10 @@ func TwoSum(nums []int, target int) []int {
                                             <span>▶</span> Run Cases
                                         </button>
                                         <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
-                                            <span>⚡</span> Submit (+250 XP)
+                                            <span>⚡</span> Submit Solution (+250 XP)
                                         </button>
                                     </div>
-                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">10.000 Transaksi Benchmark</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">10.000 Transaksi Stress Ingestion Benchmark</span>
                                 </div>
                             </form>
                         </div>
@@ -1363,41 +1493,70 @@ func TwoSum(nums []int, target int) []int {
                     </div>
                 </div>
 
-                <!-- SESI PERTAHANAN ARSITEKTUR -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 space-y-3">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
-                        <strong class="text-xs text-slate-900 dark:text-white uppercase tracking-wider">Pertanyaan Pewawancara (Lead Backend Engineer):</strong>
+                <!-- SESI PERTAHANAN ARSITEKTUR KE DEWAN ARSITEK -->
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-dark-950 border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                            <strong class="text-xs text-slate-900 dark:text-white uppercase tracking-wider">Dewan Arsitek &bull; 3 Keputusan Desain Sistem (Trade-Off Matrix):</strong>
+                        </div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-700 dark:text-teal-300 font-mono">Architecture Board</span>
                     </div>
+
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        <em>"Sebagai calon Junior/Associate Backend Engineer, jika nasabah menekan tombol 'Bayar' di aplikasi mobile lalu koneksinya putus-nyambung (timeout) dan aplikasi me-retry request secara otomatis, bagaimana strategi Anda di sisi server agar uang nasabah tidak terpotong dua kali?"</em>
+                        <em>"Sebagai calon Backend Engineer, tentukan 3 pilar arsitektur sistem pembayaran Anda untuk menghadapi latensi jaringan, konsistensi saldo, dan gangguan pihak ketiga:"</em>
                     </p>
 
-                    <form hx-post="/api/scenarios/02/defend" hx-target="#system-design-defense-output" hx-swap="innerHTML" class="space-y-3">
-                        <div class="space-y-2 text-xs">
-                            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-teal-500 cursor-pointer transition shadow-sm">
-                                <input type="radio" name="defense_choice" value="sha256_hash_and_inflight_lock" checked class="mt-0.5 text-teal-600 focus:ring-0">
-                                <span class="text-slate-700 dark:text-slate-200">
-                                    <strong class="text-teal-700 dark:text-teal-300 block mb-0.5">Opsi A (Rekomendasi Entry-Level Backend):</strong>
-                                    Wajibkan klien mengirim header unik <strong>Idempotency-Key (UUID)</strong>. Backend mengecek status kunci dengan atomic lock: jika request kedua masuk saat request pertama masih berjalan, tolak dengan <strong>HTTP 409 Conflict</strong>, dan jika sudah selesai, sajikan kembali (replay) respons transaksi pertama tanpa memotong saldo ulang.
-                                </span>
-                            </label>
-                            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-rose-500 cursor-pointer transition shadow-sm">
-                                <input type="radio" name="defense_choice" value="overwrite_payload" class="mt-0.5 text-teal-600 focus:ring-0">
-                                <span class="text-slate-700 dark:text-slate-200">
-                                    <strong class="text-rose-600 dark:text-rose-400 block mb-0.5">Opsi B (Cukup Frontend Saja):</strong>
-                                    Cukup disable tombol bayar di aplikasi mobile/web setelah ditekan satu kali. Backend tidak perlu repot menyimpan Idempotency-Key karena user diyakini tidak akan bisa mengklik dua kali.
-                                </span>
-                            </label>
+                    <form hx-post="/api/scenarios/02/defend" hx-target="#system-design-defense-output" hx-swap="innerHTML" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <!-- Dilema 1: Idempotency Storage -->
+                            <div class="p-3.5 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    1. Idempotency Key Storage
+                                </label>
+                                <select name="idempotency_storage" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white font-mono focus:border-teal-500">
+                                    <option value="redis_lock" selected>Redis SETNX In-Flight Lock (Sub-ms Latency) [Rekomendasi]</option>
+                                    <option value="pg_unique">PostgreSQL UNIQUE Constraint (Beban DB Pool)</option>
+                                    <option value="frontend_only">Frontend Button Disable Saja [Anti-Pattern Fatal]</option>
+                                </select>
+                                <p class="text-[10px] text-slate-500">Mencegah double-spending saat koneksi timeout atau client retry paralel.</p>
+                            </div>
+
+                            <!-- Dilema 2: Ledger Model -->
+                            <div class="p-3.5 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    2. Data Model Saldo Ledger
+                                </label>
+                                <select name="ledger_model" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white font-mono focus:border-teal-500">
+                                    <option value="double_entry" selected>Double-Entry Bookkeeping (Debit/Kredit Imbang) [Standar Fintech]</option>
+                                    <option value="single_column">Single Mutable Column (UPDATE balance = balance - x) [Rawan Selisih]</option>
+                                </select>
+                                <p class="text-[10px] text-slate-500">Buku besar berpasangan memastikan riwayat audit transaksi selalu seimbang nol.</p>
+                            </div>
+
+                            <!-- Dilema 3: External Gateway Resiliency -->
+                            <div class="p-3.5 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm">
+                                <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    3. Resiliensi Gangguan Mitra Bank
+                                </label>
+                                <select name="failure_handling" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg p-2 text-xs text-slate-900 dark:text-white font-mono focus:border-teal-500">
+                                    <option value="circuit_breaker_dlq" selected>Circuit Breaker (3s Timeout) + Asynchronous DLQ [High Resiliency]</option>
+                                    <option value="sync_infinite_retry">Synchronous Infinite Retry Loop [Cascading Failure Hazard]</option>
+                                </select>
+                                <p class="text-[10px] text-slate-500">Menjaga worker thread server tetap hidup saat bank pihak ketiga mengalami down.</p>
+                            </div>
                         </div>
 
-                        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-teal-950/40 active:scale-95">
-                            <span>💬</span> Pertahankan Jawaban Interview (+250 XP)
-                        </button>
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-[11px] text-slate-500">Evaluasi Komprehensif Principal Architect &bull; 3 Pilar Arsitektur</span>
+                            <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-teal-950/40 active:scale-95">
+                                <span>💬</span> Pertahankan Keputusan Arsitektur (+250 XP)
+                            </button>
+                        </div>
                     </form>
 
                     <div id="system-design-defense-output" class="min-h-[50px] flex items-center justify-center text-center text-xs text-slate-500 font-mono">
-                        Pilih argumen arsitektur di atas dan klik tombol pertahankan untuk dinilai oleh pewawancara.
+                        Pilih kombinasi arsitektur di atas dan klik tombol pertahankan untuk dinilai oleh dewan arsitek.
                     </div>
                 </div>
             </div>
@@ -1422,30 +1581,36 @@ func TwoSum(nums []int, target int) []int {
                 </div>
 
                 <!-- DOKUMEN REQUIREMENT TANTANGAN RESMI -->
-                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-3 text-xs text-slate-700 dark:text-slate-300">
-                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-2">
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200 dark:border-slate-800 space-y-3.5 text-xs text-slate-700 dark:text-slate-300">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 dark:border-slate-800/80 pb-3 gap-2">
                         <strong class="text-slate-900 dark:text-white flex items-center gap-2">
                             <span>📄</span> Lembar Spesifikasi Proyek Take-Home (Junior Backend Engineer Challenge)
                         </strong>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 font-mono">Spesifikasi Dasar</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 font-mono">Standar Fintech</span>
+                            <button id="copy-boilerplate-btn" type="button" onclick="copyBoilerplateStructure()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-dark-850 hover:bg-slate-100 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition shadow-sm active:scale-95">
+                                <span>📋</span> <span>Salin Boilerplate Clean Architecture</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] leading-relaxed">
-                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
-                            <strong class="text-cyan-700 dark:text-cyan-400 block font-semibold">1. Functional Requirements:</strong>
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-sm">
+                            <strong class="text-cyan-700 dark:text-cyan-400 block font-semibold">1. Functional & Data Invariant Requirements:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>Endpoint <code class="font-mono">POST /api/v1/transfers</code> (sender_id, recipient_id, amount_cents, idempotency_key).</li>
-                                <li>Wajib menggunakan <strong>ACID Database Transaction</strong> (<code class="font-mono">BEGIN ... COMMIT/ROLLBACK</code>) agar saldo tidak hilang jika server crash di tengah mutasi.</li>
-                                <li>Validasi input mendasar: saldo pengirim mencukupi, nominal &gt; 0, dan pengirim tidak boleh transfer ke diri sendiri.</li>
+                                <li>Endpoint <code class="font-mono">POST /api/v1/transfers</code> (<code class="font-mono">sender_id, recipient_id, amount_cents, idempotency_key</code>).</li>
+                                <li><strong>Double-Entry Bookkeeping Ledger</strong>: Setiap transfer menghasilkan 2 baris ledger berpasangan (DEBIT pengirim &amp; KREDIT penerima) yang balance bernilai nol.</li>
+                                <li><strong>ACID Database Transaction</strong>: Wajib row-level lock <code class="font-mono">SELECT FOR UPDATE</code> pada kedua dompet dan bungkus mutasi saldo di dalam blok <code class="font-mono">BEGIN ... COMMIT/ROLLBACK</code>.</li>
+                                <li>Invarian Uang: Gunakan tipe data integer murni <code class="text-cyan-600 dark:text-cyan-400 font-mono">int64</code> dalam satuan sen terkecil (Dilarang menggunakan tipe float).</li>
                             </ul>
                         </div>
-                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
-                            <strong class="text-emerald-700 dark:text-emerald-400 block font-semibold">2. Code Quality & Standards:</strong>
+                        <div class="p-3.5 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-sm">
+                            <strong class="text-emerald-700 dark:text-emerald-400 block font-semibold">2. Clean Architecture & Code Standards:</strong>
                             <ul class="list-disc list-inside space-y-1">
-                                <li>Bahasa: <strong>Golang</strong> dengan struktur modular rapi (Handler, Service, Repository).</li>
-                                <li>Format Uang: Tipe data integer murni <code class="text-emerald-600 dark:text-emerald-400 font-mono">int64</code> sen (Dilarang menggunakan float).</li>
-                                <li>Unit Test untuk logika bisnis mutasi saldo dompet.</li>
-                                <li>Sertakan <code class="font-mono">README.md</code> panduan run lokal dan <code class="font-mono">Dockerfile</code> / compose.</li>
+                                <li>Bahasa: <strong>Golang</strong> dengan Clean Architecture modular rapi (Handler HTTP, Service / Usecase, Repository).</li>
+                                <li><strong>Table-Driven Unit Tests</strong>: Uji skenario sukses, saldo tidak mencukupi, transfer ke diri sendiri, dan deteksi idempotensi berulang.</li>
+                                <li>Idempotency Key Cache: Simpan status transaksi di Redis atau PostgreSQL unique index untuk menangkal duplicate network retry.</li>
+                                <li>Dokumentasi & Deployability: Sertakan <code class="font-mono">README.md</code> petunjuk lokal dan file <code class="font-mono">Dockerfile</code> / <code class="font-mono">docker-compose.yml</code>.</li>
                             </ul>
                         </div>
                     </div>
@@ -1588,90 +1753,242 @@ func TwoSum(nums []int, target int) []int {
             </div>
 
             <!-- ========================================================================= -->
+            <!-- ========================================================================= -->
             <!-- ================= TAHAP 5: OFFER LETTER (DEDICATED FULL VIEW) ============ -->
             <!-- ========================================================================= -->
-            <div id="scenario-5-view" class="hidden bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-500/30 rounded-2xl p-4 sm:p-8 shadow-xl space-y-6">
-                <div class="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800/40">
-                            Tahap 5 &bull; Hasil Akhir Wawancara & Keputusan Hiring
-                        </span>
-                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2 mt-2">
+            <div id="scenario-5-view" class="hidden space-y-6">
+                <!-- Bar Kontrol Layar (Akan disembunyikan otomatis saat Cetak) -->
+                <div class="no-print bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800/40">
+                                Tahap 5 &bull; Keputusan Hiring & Penawaran Resmi
+                            </span>
+                            <span class="px-2.5 py-1 text-[11px] font-bold rounded-md bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">
+                                STRONG HIRE APPROVED ✓
+                            </span>
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                             <span>📜</span> Surat Penawaran Kerja Resmi (Job Offer Letter)
                         </h2>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">
+                            Format dokumen di bawah ini telah disesuaikan dengan standar legal ketenagakerjaan dan siap dicetak / disimpan sebagai PDF resmi (A4).
+                        </p>
                     </div>
-                    <span class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 animate-pulse w-fit">
-                        ACCELERATION HIRE APPROVED ✓
-                    </span>
-                </div>
-
-                <!-- Dokumen Resmi Penawaran Kerja -->
-                <div class="p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-slate-50 to-white dark:from-[#0b1220] dark:to-[#070b14] border border-slate-200 dark:border-amber-500/20 space-y-6 text-xs sm:text-sm text-slate-700 dark:text-slate-300 shadow-inner">
-                    <div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-800/80 pb-4">
-                        <div>
-                            <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-wide">UNICORN FINTECH BANK & PAYMENT GATEWAY</div>
-                            <div class="text-[11px] text-slate-500">Engineering Hiring Committee & Talent Acquisition Division</div>
-                        </div>
-                        <div class="text-right font-mono text-[11px] text-slate-500">
-                            Ref: OFF-FINTECH-2026-9812<br>
-                            Tanggal: 10 Oktober 2026
-                        </div>
-                    </div>
-
-                    <p class="leading-relaxed">
-                        Kepada Yth. <strong>Frans Alwan</strong>,<br>
-                        Selamat! Berdasarkan hasil evaluasi komprehensif pada seluruh rangkaian ujian teknis (Fundamental Concurrency Safe-Wallet, System Design Idempotency Defense, Modular Payment API Take-Home, dan Rate Limiter Traffic Protection), Komite Engineering dengan senang hati memberikan Anda penawaran kerja resmi:
-                    </p>
-
-                    <!-- Rincian Paket Tawaran Kerja -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 sm:p-5 rounded-xl bg-white dark:bg-dark-950 border border-slate-200 dark:border-slate-800 font-mono shadow-sm">
-                        <div>
-                            <span class="text-slate-400 text-[10px] uppercase">Posisi / Jabatan</span>
-                            <div class="text-base font-bold text-emerald-600 dark:text-emerald-400">Junior / Associate Backend Engineer</div>
-                        </div>
-                        <div>
-                            <span class="text-slate-400 text-[10px] uppercase">Program & Divisi</span>
-                            <div class="text-base font-bold text-slate-900 dark:text-white">Core Payment Platform (Fintech Track)</div>
-                        </div>
-                        <div class="mt-2">
-                            <span class="text-slate-400 text-[10px] uppercase">Paket Kompensasi Bulanan</span>
-                            <div class="text-base font-bold text-slate-900 dark:text-white">IDR 13.500.000 / bulan</div>
-                        </div>
-                        <div class="mt-2">
-                            <span class="text-slate-400 text-[10px] uppercase">Fasilitas & Pendampingan</span>
-                            <div class="text-base font-bold text-slate-900 dark:text-white">6-Bulan 1-on-1 Senior Mentorship + Mac Workstation</div>
-                        </div>
-                    </div>
-
-                    <!-- Evaluasi Nilai Komite -->
-                    <div class="space-y-2 border-t border-slate-200 dark:border-slate-800/80 pt-4">
-                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs">Rapor Penilaian Komite Pewawancara (Engineering Hiring Team):</span>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
-                            <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">Concurrency (Go Mutex)</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
-                            </div>
-                            <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">System Design (Idempotency)</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
-                            </div>
-                            <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">Clean Code & DB Tx</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
-                            </div>
-                            <div class="p-2.5 rounded-lg bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                                <div class="text-slate-500">Rate Limiter Awareness</div>
-                                <div class="font-bold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5">Nilai: A</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-800/80">
-                        <span class="text-[11px] text-slate-500">Status Kelulusan: <strong>4 dari 4 Ujian Tuntas (1.000 XP) &bull; Penawaran Resmi Diterbitkan!</strong></span>
-                        <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md w-full sm:w-auto">
-                            🖨️ Cetak Surat Penawaran & Rapor
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="window.print()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-950/40 active:scale-95">
+                            <span>🖨️</span> <span>Cetak Dokumen Resmi (Print / Save PDF)</span>
                         </button>
                     </div>
+                </div>
+
+                <!-- LEMBAR DOKUMEN RESMI A4 (DICETAK KE KERTAS ATAU PDF) -->
+                <div id="official-offer-letter-doc" class="max-w-4xl mx-auto bg-white text-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl p-6 sm:p-12 space-y-6 text-xs sm:text-sm font-sans">
+                    
+                    <!-- KOP SURAT RESMI PERUSAHAAN -->
+                    <div class="border-b-2 border-slate-900 pb-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-2xl shadow-md">
+                                    ITP
+                                </div>
+                                <div>
+                                    <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase">PT INTEGRASI TEKNOLOGI PEMBAYARAN</h1>
+                                    <div class="text-[11px] font-semibold text-slate-600">Core Financial Infrastructure & Licensed Payment Gateway</div>
+                                </div>
+                            </div>
+                            <div class="text-left sm:text-right text-[10px] sm:text-[11px] text-slate-500 font-mono leading-tight">
+                                <div>Treasury Tower Lt. 38, District 8 SCBD</div>
+                                <div>Jl. Jend. Sudirman Kav. 52-53, Jakarta Selatan 12190</div>
+                                <div>Telp: (021) 5088-2600 &bull; Web: www.integrasiteknologi.co.id</div>
+                            </div>
+                        </div>
+                        <div class="w-full border-b border-slate-400 mt-3"></div>
+                    </div>
+
+                    <!-- METADATA & NOMOR SURAT -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-2 text-xs font-mono">
+                        <div class="space-y-0.5">
+                            <div><strong class="font-sans">Nomor:</strong> 042/HRD-OFFER/ITP/X/2026</div>
+                            <div><strong class="font-sans">Lampiran:</strong> 1 (Satu) Berkas Rincian Kompensasi & Benefit</div>
+                            <div><strong class="font-sans">Perihal:</strong> <strong>SURAT PENAWARAN KERJA (EMPLOYMENT OFFER LETTER)</strong></div>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <div>Jakarta, 10 Oktober 2026</div>
+                            <div class="text-[11px] font-sans text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded mt-1 border border-emerald-300 inline-block">STATUS: STRONG HIRE (DEWAN DIREKSI & TEKNIS)</div>
+                        </div>
+                    </div>
+
+                    <!-- TUJUAN SURAT -->
+                    <div class="pt-2">
+                        <div>Kepada Yth.</div>
+                        <div class="font-bold text-base text-slate-900">Sdr. Frans Alwan</div>
+                        <div class="text-slate-600">Kandidat Rekayasa Perangkat Lunak Backend</div>
+                        <div class="text-slate-600">Di Tempat</div>
+                    </div>
+
+                    <!-- PARAGRAF PEMBUKA -->
+                    <div class="space-y-2 leading-relaxed text-justify">
+                        <p>
+                            Dengan hormat,
+                        </p>
+                        <p>
+                            Sehubungan dengan rangkaian evaluasi dan uji kompetensi teknis komprehensif pada program seleksi <strong>Fintech Technical Hiring Gauntlet</strong> yang telah Saudara selesaikan dengan predikat <strong>Sangat Memuaskan (Nilai A - 1.000 XP)</strong>, Dewan Rekrutmen Engineering bersama Manajemen <strong>PT Integrasi Teknologi Pembayaran</strong> dengan sukacita menyampaikan penawaran kerja resmi kepada Saudara untuk bergabung bersama kami.
+                        </p>
+                    </div>
+
+                    <!-- KETENTUAN POKOK PENUGASAN -->
+                    <div class="space-y-2">
+                        <div class="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                            I. Ketentuan Pokok Jabatan & Hubungan Kerja
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Posisi / Jabatan</span>
+                                <span class="font-bold text-slate-900 text-sm">Junior / Associate Backend Engineer</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Unit Kerja / Divisi</span>
+                                <span class="font-bold text-slate-900 text-sm">Core Payment Platform & Settlement</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Status Hubungan Kerja</span>
+                                <span class="font-bold text-slate-900">Perjanjian Kerja Waktu Tidak Tertentu (PKWTT / Tetap)</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Tanggal Efektif Masuk Kerja</span>
+                                <span class="font-bold text-slate-900 font-mono">1 November 2026</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 sm:col-span-2">
+                                <span class="text-slate-500 block text-[10px] uppercase font-semibold">Lokasi & Skema Kerja</span>
+                                <span class="font-bold text-slate-900">Hybrid Work (Kantor Pusat SCBD Jakarta / Fleksibel Remote) &bull; Laporan ke: Engineering Manager - Core Platform</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RINCIAN PAKET KOMPENSASI & FASILITAS -->
+                    <div class="space-y-2">
+                        <div class="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                            II. Paket Kompensasi & Fasilitas Kesejahteraan
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+                                <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-2.5">Komponen Remunerasi</th>
+                                        <th class="p-2.5">Nominal / Ketentuan</th>
+                                        <th class="p-2.5">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <tr>
+                                        <td class="p-2.5 font-semibold text-slate-900">1. Gaji Pokok Bulanan (Gross)</td>
+                                        <td class="p-2.5 font-mono font-bold text-emerald-700">Rp 13.500.000,-</td>
+                                        <td class="p-2.5 text-slate-600">Dibayarkan setiap tanggal 25 per bulan</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-semibold text-slate-900">2. Tunjangan Transport &amp; Komunikasi</td>
+                                        <td class="p-2.5 font-mono font-bold text-slate-900">Rp 1.500.000,-</td>
+                                        <td class="p-2.5 text-slate-600">Tunjangan tetap operasional bulanan</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-semibold text-slate-900">3. Tunjangan Hari Raya (THR)</td>
+                                        <td class="p-2.5 font-mono text-slate-900">1 (Satu) Bulan Gaji</td>
+                                        <td class="p-2.5 text-slate-600">Sesuai regulasi ketenagakerjaan RI</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-semibold text-slate-900">4. Jaminan Sosial &amp; Asuransi</td>
+                                        <td class="p-2.5 text-slate-900">BPJS TK + BPJS Kes Kelas 1</td>
+                                        <td class="p-2.5 text-slate-600">Plus asuransi swasta rawat inap &amp; rawat jalan</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-semibold text-slate-900">5. Perangkat Kerja (Workstation)</td>
+                                        <td class="p-2.5 text-slate-900">MacBook Pro Apple Silicon M-Series</td>
+                                        <td class="p-2.5 text-slate-600">Fasilitas inventaris + budget home-office setup</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-semibold text-slate-900">6. Pelatihan &amp; Mentorship Khusus</td>
+                                        <td class="p-2.5 text-slate-900">6 Bulan 1-on-1 Senior Mentorship</td>
+                                        <td class="p-2.5 text-slate-600">Budget pembelajaran Rp 10.000.000,- per tahun</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- RAPOR EVALUASI TEKNIS KOMITE -->
+                    <div class="space-y-2">
+                        <div class="font-bold text-xs uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                            III. Lampiran Rapor Evaluasi Teknis (Engineering Committee Scorecard)
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-[10px] text-slate-500 font-medium">Tahap 1: Live Coding DSA</div>
+                                <div class="font-black text-emerald-700 text-sm mt-0.5">NILAI: A (100)</div>
+                                <div class="text-[9px] text-slate-500 mt-0.5">Tx Deduplication O(N)</div>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-[10px] text-slate-500 font-medium">Tahap 2: System Design</div>
+                                <div class="font-black text-emerald-700 text-sm mt-0.5">NILAI: A (100)</div>
+                                <div class="text-[9px] text-slate-500 mt-0.5">Idempotency &amp; Ledger</div>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-[10px] text-slate-500 font-medium">Tahap 3: Take-Home Code</div>
+                                <div class="font-black text-emerald-700 text-sm mt-0.5">NILAI: A (100)</div>
+                                <div class="text-[9px] text-slate-500 mt-0.5">ACID DB &amp; Table Tests</div>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-[10px] text-slate-500 font-medium">Tahap 4: War Room</div>
+                                <div class="font-black text-emerald-700 text-sm mt-0.5">NILAI: A (100)</div>
+                                <div class="text-[9px] text-slate-500 mt-0.5">Zero Overselling (429)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KLAUSUL PERSETUJUAN & TANDA TANGAN RESMI -->
+                    <div class="space-y-4 pt-2">
+                        <p class="leading-relaxed text-justify text-xs text-slate-600">
+                            Surat penawaran ini berlaku selama 7 (tujuh) hari kerja terhitung sejak tanggal diterbitkan. Mohon untuk menandatangani dan mengembalikan salinan surat penawaran ini sebelum <strong>17 Oktober 2026</strong> sebagai konfirmasi persetujuan penerimaan Saudara.
+                        </p>
+
+                        <div class="grid grid-cols-2 gap-8 pt-6 border-t border-slate-200">
+                            <!-- Kolom Kiri: Calon Karyawan -->
+                            <div class="text-center space-y-12">
+                                <div class="text-xs font-semibold text-slate-700">
+                                    Disetujui dan Diterima Oleh,<br>
+                                    <strong>Calon Karyawan</strong>
+                                </div>
+                                <div class="pt-6 border-t border-slate-400 w-44 mx-auto">
+                                    <div class="font-bold text-slate-900 text-xs">Frans Alwan</div>
+                                    <div class="text-[10px] text-slate-500">Tanggal: ........................................</div>
+                                </div>
+                            </div>
+
+                            <!-- Kolom Kanan: Pihak Perusahaan -->
+                            <div class="text-center space-y-4 relative">
+                                <div class="text-xs font-semibold text-slate-700">
+                                    Atas Nama Manajemen &amp; Komite Direksi,<br>
+                                    <strong>PT Integrasi Teknologi Pembayaran</strong>
+                                </div>
+                                
+                                <!-- Stempel Resmi Digital -->
+                                <div class="w-24 h-24 mx-auto rounded-full border-2 border-emerald-600/60 flex items-center justify-center text-center p-1 transform -rotate-12 select-none">
+                                    <div class="text-[8px] font-black uppercase text-emerald-700 leading-tight">
+                                        ★ PT ITP ★<br>
+                                        TALENT ACQUISITION<br>
+                                        OFFICIALLY<br>
+                                        APPROVED
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-slate-400 w-48 mx-auto pt-1">
+                                    <div class="font-bold text-slate-900 text-xs">Dr. Ir. Hendra Gunawan, M.T.</div>
+                                    <div class="text-[10px] text-slate-600 font-medium">Head of People &amp; VP of Engineering</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -1705,24 +2022,28 @@ func TwoSum(nums []int, target int) []int {
             <div class="flex-1 overflow-y-auto space-y-4 text-xs text-slate-700 dark:text-slate-300 pr-1">
                 <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
                     <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-                        🎯 Aturan Permainan Gamifikasi (4 Misi):
+                        🎯 Alur Perjalanan Hiring Gauntlet (Tahap 0 s/d Tahap 5):
                     </h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 1 (+250 XP)</strong>
-                            Ketik solusi thread-safe dengan Mutex di Tahap 1. Buktikan 50 goroutine tidak menyebabkan overdraft.
+                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 0 &bull; Bootcamp Teori &amp; Lab</strong>
+                            Pelajari invarian uang integer sen (<code class="font-mono text-emerald-500">int64</code>), double-entry ledger, concurrency locking, dan uji pemahaman di lab coding mandiri.
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 2 (+250 XP)</strong>
-                            Pertahankan arsitektur Idempotency Key & in-flight locking di hadapan Lead Backend Engineer.
+                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 1 &bull; Tahap 1 (+250 XP)</strong>
+                            Ketik algoritma <strong>Financial Transaction Deduplication</strong> dalam kompleksitas <code class="font-mono text-cyan-500">O(N)</code> Hash Map untuk mencegah Time Limit Exceeded (TLE).
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 3 (+250 XP)</strong>
-                            Kirimkan link repositori publik GitHub Anda untuk ditinjau oleh automated CI review bot.
+                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 2 &bull; Tahap 2 (+250 XP)</strong>
+                            Pilih dan pertahankan 3 keputusan arsitektur (Idempotency Storage, Ledger Data Model, dan External Partner Resiliency) di hadapan Lead Architect.
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 4 (+250 XP)</strong>
-                            Luncurkan simulasi War Room kasir minimarket dengan Token Bucket Rate Limiter.
+                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 3 &bull; Tahap 3 (+250 XP)</strong>
+                            Kirimkan link repositori GitHub Take-Home Anda dengan Clean Architecture, Double-Entry Ledger, dan ACID DB Transaction (<code class="font-mono text-emerald-500">SELECT FOR UPDATE</code>).
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 sm:col-span-2">
+                            <strong class="text-slate-900 dark:text-white block mb-1">Misi 4 &bull; Tahap 4 (+250 XP) &rarr; Buka Tahap 5 (Offer Letter)</strong>
+                            Luncurkan mitigasi insiden Flash Sale War Room dengan <strong>Token Bucket Rate Limiter</strong> (40 RPS) untuk mencegah kuota voucher minus dan database pool crash, lalu cetak Surat Penawaran Kerja resmi A4 di Tahap 5!
                         </div>
                     </div>
                 </div>

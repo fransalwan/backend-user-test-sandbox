@@ -95,13 +95,13 @@ backend-user-test-sandbox/
 ---
 
 ## 🎮 Gamification Mode: Fintech Hiring Gauntlet
-Aplikasi didesain sebagai **1 alur penuh wawancara kerja dari screening teknis sampai penerbitan surat penawaran (Offer Letter)**:
-- **Tahap 0: Bootcamp Teori & Learning Preparation** &bull; Teori fundamental invarian uang (`int64`), double-entry ledger, concurrency locking, idempotency engine, distributed saga, dan flash sale isolation sebelum ujian.
-- **Tahap 1: Live Coding Test (LeetCode / CodeWars Style)** (+250 XP) &bull; Problem #101 Medium: *Safe Hot-Wallet Deduct* dengan in-browser code editor, template strategi, uji stres 50 goroutine, dan runtime/memory statistics.
-- **Tahap 2: System Design Interview (Alur Diagram Interaktif)** (+250 XP) &bull; *Global Payment Gateway Idempotency & Resiliency* dengan visual flow stepper (Client &rarr; Gateway &rarr; Redis &rarr; Core Ledger &rarr; DB) dan sesi tanya-jawab pertahanan arsitektur bersama Principal Architect.
-- **Tahap 3: Take-Home Engineering Challenge (Repo Publik)** (+250 XP) &bull; *Transactional Outbox & Saga Worker* dengan lembar spesifikasi tantangan resmi, formulir submission repository GitHub publik, serta automated CI bot code review.
-- **Tahap 4: Production War Room & Stress Test Defense** (+250 XP) &bull; Simulasi insiden Flash Sale tengah malam bersama VP of Engineering: Token Bucket Rate Limiting & Atomic Redis Counter menahan serbuan 250 RPS tanpa overselling.
-- **Tahap 5: Keputusan Hiring & Penawaran Kontrak (Offer Letter)** &bull; Surat Penawaran Resmi Principal Backend Engineer (Gaji IDR 85.000.000/bln + ESOP + Rapor Evaluasi Nilai A+).
+Aplikasi didesain sebagai **1 alur penuh wawancara kerja backend fintech dari persiapan teori hingga penawaran kerja resmi**:
+- **Tahap 0: Bootcamp Teori & Learning Lab** &bull; Teori invarian uang (`int64`), double-entry ledger, database row locks (`SELECT FOR UPDATE`), idempotency engine, dan distributed outbox dilengkapi dua lab coding mandiri (DSA Hash Map & State Machine).
+- **Tahap 1: Live Coding Test (Algoritma DSA Finansial)** (+250 XP) &bull; Problem #101: *Financial Transaction Deduplication & Sliding Window Matcher*. Evaluasi otomatis kompleksitas waktu $O(N)$ Hash Map amortized vs $O(N^2)$ TLE hazard.
+- **Tahap 2: System Design Architecture Board (Trade-Off Dilemma)** (+250 XP) &bull; Evaluasi multi-dimensi arsitektur sistem pembayaran: *Idempotency Storage* (Redis atomic lock vs PostgreSQL unique index), *Ledger Data Model* (Double-entry journal vs mutable balance), dan *External Partner Resiliency* (Circuit breaker + asynchronous DLQ).
+- **Tahap 3: Take-Home Engineering Challenge (Repo Publik & Clean Architecture)** (+250 XP) &bull; *Safe Payment Transfer API Service* dengan Clean Architecture (Handler, Service, Repository), Double-Entry Bookkeeping Ledger, transaksi database ACID berpasangan, tombol salin boilerplate otomatis, dan table-driven unit tests.
+- **Tahap 4: Production War Room & Stress Test Defense** (+250 XP) &bull; Skenario insiden mitigasi lonjakan traffic Flash Sale (250 RPS): Token Bucket Rate Limiting menahan thundering herd, melindungi database connection pool, dan menjamin zero overselling (kuota voucher tidak minus).
+- **Tahap 5: Keputusan Hiring & Penawaran Kontrak (Offer Letter)** &bull; Surat Penawaran Kerja Resmi *PT Integrasi Teknologi Pembayaran* untuk posisi **Junior / Associate Backend Engineer** (Gaji Pokok IDR 13.500.000/bln + Tunjangan + Mentorship 1-on-1 + Format Cetak Dokumen Legal Formal A4).
 
 
 ---

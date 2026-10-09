@@ -556,16 +556,16 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 		levelTitle = "Tahap 5: Peninjauan Tawaran Kerja (Offer Letter)"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">Siap Review Penawaran</span>`
 	} else if s3 {
-		levelTitle = "Tahap 4: Production War Room (Flash Sale Rate Limiter)"
+		levelTitle = "Tahap 4: Production War Room (Flash Sale Rate Limiter & Concurrency Incident)"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40">Tahap Akhir Evaluasi</span>`
 	} else if s2 {
-		levelTitle = "Tahap 3: Take-Home Payment API Review"
+		levelTitle = "Tahap 3: Take-Home Core Payment API Review"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/40">Ujian Praktik</span>`
 	} else if s1 {
-		levelTitle = "Tahap 2: System Design Idempotency Defense"
+		levelTitle = "Tahap 2: System Design Payment Architecture Board"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Arsitektur Terbuka</span>`
 	} else if s0 {
-		levelTitle = "Tahap 1: Live Coding DSA (Two Sum Target Match)"
+		levelTitle = "Tahap 1: Live Coding DSA (Financial Transaction Deduplication)"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Bootcamp Lulus ✓</span>`
 	}
 
@@ -934,7 +934,8 @@ func (h *Handler) EvalBootcampSystemDesignCode(w http.ResponseWriter, r *http.Re
 	_, _ = w.Write([]byte(html))
 }
 
-// EvalScenario01Code mengevaluasi kode Go yang diketik manual oleh kandidat untuk LeetCode Problem #1: Two Sum.
+// EvalScenario01Code mengevaluasi kode Go yang diketik manual oleh kandidat untuk Live Coding DSA:
+// Financial Transaction Deduplication & Sliding Window Matcher.
 func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
@@ -951,15 +952,14 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	hasTODO := strings.Contains(codeContent, "// TODO") && !strings.Contains(codeContent, "return")
-	hasReturnSlice := strings.Contains(codeContent, "[]int{") || strings.Contains(codeContent, "return []int") || strings.Contains(codeContent, "return nil")
-	hasLogic := strings.Contains(codeContent, "target -") || strings.Contains(codeContent, "target-") || strings.Contains(codeContent, "==")
-	hasHashMap := strings.Contains(codeContent, "map[int]int") || strings.Contains(codeContent, "make(map") || strings.Contains(codeContent, "map[int]")
+	hasReturnSlice := strings.Contains(codeContent, "[]string{") || strings.Contains(codeContent, "return []string") || strings.Contains(codeContent, "return duplicates") || strings.Contains(codeContent, "return result") || strings.Contains(codeContent, "return nil") || strings.Contains(codeContent, "append(")
+	hasLogic := strings.Contains(codeContent, "windowSeconds") || strings.Contains(codeContent, "<=") || strings.Contains(codeContent, "Timestamp") || strings.Contains(codeContent, "UserID")
+	hasHashMap := strings.Contains(codeContent, "map[string]") || strings.Contains(codeContent, "make(map") || strings.Contains(codeContent, "map[")
 	hasNestedLoop := (strings.Contains(codeContent, "for i") && strings.Contains(codeContent, "for j")) ||
-		(strings.Contains(codeContent, "for ") && strings.Count(codeContent, "for ") >= 2 && !hasHashMap)
+		(strings.Count(codeContent, "for ") >= 2 && !hasHashMap)
 
-	h.hub.Broadcast(fmt.Sprintf("💻 [LeetCode Runner] Menganalisis algoritma Two Sum kandidat (%d baris, Aksi: %s)...", len(strings.Split(codeContent, "\n")), action))
+	h.hub.Broadcast(fmt.Sprintf("💻 [DSA Live Runner] Menganalisis algoritma Deduplikasi Transaksi kandidat (%d baris, Aksi: %s)...", len(strings.Split(codeContent, "\n")), action))
 
-	// Jika kandidat belum mengetik implementasi sama sekali
 	if codeContent == "" || (hasTODO && !hasLogic) {
 		html := `
         <div class="space-y-3 font-mono text-xs">
@@ -970,9 +970,9 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                 </div>
             </div>
             <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1.5">
-                <strong class="text-rose-300 block">Fungsi TwoSum Belum Diimplementasikan!</strong>
+                <strong class="text-rose-300 block">Fungsi FindDuplicateTransactions Belum Diisi!</strong>
                 <p class="text-[11px] text-rose-300 leading-relaxed">
-                    Ketik manual algoritma pencarian indeks Two Sum Anda pada editor di atas. Jika Anda bingung, klik tombol <strong>"💡 Hint 1 (Konseptual)"</strong> di atas editor!
+                    Ketik implementasi fungsi deduplikasi transaksi finansial pada editor. Gunakan Hash Map untuk melacak riwayat transaksi terakhir per pengguna dalam jendela waktu <code>windowSeconds</code>.
                 </p>
             </div>
         </div>`
@@ -980,22 +980,19 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Cek apakah kandidat lupa me-return slice hasil
 	if !hasReturnSlice && !hasLogic {
 		html := `
         <div class="space-y-3 font-mono text-xs">
             <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
                 <div class="flex items-center gap-2">
                     <span class="text-base font-extrabold text-rose-400">❌ WRONG ANSWER</span>
-                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Missing Return Value</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Missing Return Slice</span>
                 </div>
-                <span class="text-rose-400 font-mono text-[11px]">Runtime: 0.2 ms</span>
             </div>
             <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1.5">
-                <strong class="text-rose-300 block">Test Case 1 Gagal: Output Tidak Valid</strong>
+                <strong class="text-rose-300 block">Test Case 1 Gagal: Output Tidak Sesuai Spesifikasi</strong>
                 <p class="text-[11px] text-rose-300 leading-relaxed">
-                    Input: <code>nums = [2, 7, 11, 15], target = 9</code> &rarr; Expected: <code>[0, 1]</code>.
-                    Pastikan Anda me-return slice dua indeks yang valid: <code>return []int{prevIdx, currIdx}</code>!
+                    Fungsi wajib mengembalikan slice <code>[]string</code> berisi daftar ID transaksi kedua yang teridentifikasi sebagai duplikat.
                 </p>
             </div>
         </div>`
@@ -1003,47 +1000,47 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Jika action == "run" (Cek Cepat 3 Test Cases)
+	// Action == "run" (Cek Cepat 3 Test Cases)
 	if action == "run" {
-		complexityText := "O(N) Optimal (Hash Map terdeteksi)"
+		complexityText := "O(N) Optimal (Hash Map Single-Pass)"
 		if hasNestedLoop && !hasHashMap {
-			complexityText = "O(N^2) Suboptimal (Nested Loop terdeteksi)"
+			complexityText = "O(N²) Suboptimal (Nested Loop Brute Force)"
 		}
 
 		html := fmt.Sprintf(`
         <div class="space-y-3 font-mono text-xs">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                 <span class="text-sm font-bold text-amber-300 flex items-center gap-2">
-                    <span>▶</span> Hasil Uji Cepat (Run Test Cases)
+                    <span>▶</span> Hasil Uji Cepat (3 Test Cases)
                 </span>
-                <span class="text-slate-500 text-[11px]">Go 1.27 Live Sandbox &bull; LeetCode #1</span>
+                <span class="text-slate-500 text-[11px]">Go 1.27 Live Sandbox &bull; Transaction Deduplication</span>
             </div>
             <div class="space-y-2">
                 <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
                     <div>
-                        <strong class="text-emerald-400">Case 1: Normal Pair</strong>
-                        <div class="text-[11px] text-slate-400">Input: nums=[2, 7, 11, 15], target=9 &rarr; Output: [0, 1] (2 + 7 = 9)</div>
+                        <strong class="text-emerald-400">Case 1: Duplicate dalam Window 60s</strong>
+                        <div class="text-[11px] text-slate-400">tx1 (t=100s, Rp50k) & tx2 (t=120s, Rp50k) &rarr; Output: ["tx2"]</div>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
                 </div>
                 <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
                     <div>
-                        <strong class="text-emerald-400">Case 2: Unsorted Array</strong>
-                        <div class="text-[11px] text-slate-400">Input: nums=[3, 2, 4], target=6 &rarr; Output: [1, 2] (2 + 4 = 6)</div>
+                        <strong class="text-emerald-400">Case 2: Beda Nominal / Beda Pengguna</strong>
+                        <div class="text-[11px] text-slate-400">tx1 (User Alice, Rp50k) vs tx2 (User Bob, Rp50k) &rarr; Output: [] (Bukan Duplikat)</div>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
                 </div>
                 <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
                     <div>
-                        <strong class="text-emerald-400">Case 3: Duplicate Numbers</strong>
-                        <div class="text-[11px] text-slate-400">Input: nums=[3, 3], target=6 &rarr; Output: [0, 1] (3 + 3 = 6)</div>
+                        <strong class="text-emerald-400">Case 3: Jeda Waktu Melebihi Window (&gt; 60s)</strong>
+                        <div class="text-[11px] text-slate-400">tx1 (t=100s) & tx2 (t=200s, selisih 100s &gt; window 60s) &rarr; Output: []</div>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
                 </div>
             </div>
             <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
-                <span>Kompleksitas: <strong>%s</strong></span>
-                <span class="text-amber-400">Klik "⚡ Submit Solution" untuk evaluasi komite resmi!</span>
+                <span>Kompleksitas Terdeteksi: <strong>%s</strong></span>
+                <span class="text-amber-400">Klik "⚡ Submit (+250 XP)" untuk evaluasi komite resmi!</span>
             </div>
         </div>`, complexityText)
 		_, _ = w.Write([]byte(html))
@@ -1052,8 +1049,7 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 
 	// Action == "submit"
 	if hasNestedLoop && !hasHashMap {
-		// Kasus Brute Force: Lolos input kecil, tapi ditolak komite karena TLE pada 10.000 transaksi
-		h.hub.Broadcast("⚠️ [LeetCode Runner] SUBOPTIMAL WARNING: Algoritma brute force O(N^2) terdeteksi. Risiko TLE pada skala produksi!")
+		h.hub.Broadcast("⚠️ [DSA Live Runner] SUBOPTIMAL WARNING: Algoritma nested loop O(N²) terdeteksi. Risiko TLE pada 10.000 transaksi ingestion!")
 		html := `
         <div class="space-y-3 font-mono text-xs">
             <div class="flex items-center justify-between border-b border-amber-800/60 pb-2">
@@ -1061,34 +1057,19 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                     <span class="text-base font-extrabold text-amber-400">⚠️ TIME LIMIT HAZARD (O(N²) SUBOPTIMAL)</span>
                     <span class="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Perlu Optimasi</span>
                 </div>
-                <span class="text-amber-400 font-mono text-[11px]">Runtime: 1,840 ms (Too Slow)</span>
+                <span class="text-amber-400 font-mono text-[11px]">Runtime: 1,980 ms (TLE Risk)</span>
             </div>
             <div class="p-3 rounded-lg bg-amber-950/60 border border-amber-800 text-amber-200 text-xs space-y-2">
                 <strong class="text-amber-300 block">Evaluasi Pewawancara (Staff Software Engineer):</strong>
                 <p class="text-[11px] text-amber-200 leading-relaxed">
-                    <em>"Solusi brute force nested loop <code>for i := 0 ... for j := i+1 ...</code> Anda berhasil untuk array kecil (Case 1 & 2), tetapi memiliki Time Complexity <strong>O(N²)</strong>. Saat diuji pada 10.000 data transaksi nasabah (Stress Test Case 4), server membutuhkan 1.840 ms dan berisiko Time Limit Exceeded (TLE)!"</em>
+                    <em>"Solusi brute force nested loop Anda berhasil untuk batch transaksi kecil, tetapi beresiko <strong>Time Limit Exceeded (TLE)</strong> saat pipeline ingestion menerima 10.000 transaksi serentak (Case 4 butuh 1.980 ms!). Gunakan <strong>Hash Map</strong> dengan key kombinasi <code>fmt.Sprintf('%s_%d', tx.UserID, tx.Amount)</code> untuk mencatat waktu transaksi terakhir secara <strong>O(1)</strong> lookup, menghasilkan total waktu <strong>O(N)</strong>!"</em>
                 </p>
-                <div class="p-2 rounded bg-dark-950 border border-amber-800/60 text-[11px] text-slate-300">
-                    💡 <strong>Arahan Optimasi:</strong> Gunakan <strong>Hash Map (map[int]int)</strong> untuk mencatat angka yang sudah dilewati. Dengan begitu, Anda bisa mencari <code>complement := target - nums[i]</code> dalam <strong>O(1)</strong> amortized, memangkas total runtime menjadi <strong>O(N)</strong>!
-                </div>
             </div>
             <div class="grid grid-cols-4 gap-2 text-center text-[11px]">
-                <div class="p-2 rounded bg-slate-900 border border-slate-800">
-                    <span class="text-slate-500">Case 1</span>
-                    <div class="font-bold text-emerald-400">PASS ✓</div>
-                </div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800">
-                    <span class="text-slate-500">Case 2</span>
-                    <div class="font-bold text-emerald-400">PASS ✓</div>
-                </div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800">
-                    <span class="text-slate-500">Case 3</span>
-                    <div class="font-bold text-emerald-400">PASS ✓</div>
-                </div>
-                <div class="p-2 rounded bg-slate-900 border border-amber-800/80 bg-amber-950/30">
-                    <span class="text-amber-400">Case 4 (10k items)</span>
-                    <div class="font-bold text-amber-400">TLE HAZARD ⚠️</div>
-                </div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-500">Case 1</span><div class="font-bold text-emerald-400">PASS ✓</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-500">Case 2</span><div class="font-bold text-emerald-400">PASS ✓</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-500">Case 3</span><div class="font-bold text-emerald-400">PASS ✓</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-amber-800/80 bg-amber-950/30"><span class="text-amber-400">Case 4 (10k txs)</span><div class="font-bold text-amber-400">TLE HAZARD ⚠️</div></div>
             </div>
         </div>`
 		_, _ = w.Write([]byte(html))
@@ -1096,8 +1077,8 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Solusi Optimal O(N) Hash Map:
-	h.markStagePassed(1, "LeetCode DSA Champion: Two Sum O(N)")
-	h.hub.Broadcast("🎉 [LeetCode Runner] STATUS: ACCEPTED! Solusi Two Sum Hash Map O(N) lolos seluruh test cases dengan runtime 0.8 ms (+250 XP).")
+	h.markStagePassed(1, "Pragmatic DSA Master: Transaction Deduplication O(N)")
+	h.hub.Broadcast("🎉 [DSA Live Runner] STATUS: ACCEPTED! Solusi Deduplikasi Transaksi O(N) Hash Map lolos seluruh 4 test cases dengan runtime 0.7 ms (+250 XP).")
 
 	html := `
     <div class="space-y-3 font-mono text-xs">
@@ -1106,21 +1087,21 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
                 <span class="text-base font-extrabold text-emerald-400">ACCEPTED ✅</span>
                 <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">+250 XP DIRAIH</span>
             </div>
-            <span class="text-emerald-400 font-mono text-[11px]">Runtime: 0.8 ms (Beats 99.4%)</span>
+            <span class="text-emerald-400 font-mono text-[11px]">Runtime: 0.7 ms (Beats 99.6%)</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
                 <span class="text-slate-500">Runtime</span>
-                <div class="font-bold text-emerald-400">0.8 ms</div>
-                <div class="text-[10px] text-emerald-400">Beats 99.4%</div>
+                <div class="font-bold text-emerald-400">0.7 ms</div>
+                <div class="text-[10px] text-emerald-400">Beats 99.6%</div>
             </div>
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
                 <span class="text-slate-500">Memory</span>
-                <div class="font-bold text-white">3.2 MB</div>
-                <div class="text-[10px] text-emerald-400">Beats 97.5%</div>
+                <div class="font-bold text-white">2.8 MB</div>
+                <div class="text-[10px] text-emerald-400">O(U) Unique Keys</div>
             </div>
             <div class="p-2 rounded bg-slate-900 border border-slate-800">
-                <span class="text-slate-500">Kompleksitas Waktu</span>
+                <span class="text-slate-500">Kompleksitas</span>
                 <div class="font-bold text-emerald-400">O(N) Linear</div>
                 <div class="text-[10px] text-emerald-400">Single-Pass Map</div>
             </div>
@@ -1133,10 +1114,10 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
         <div class="p-3.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-emerald-200 text-xs space-y-1.5">
             <strong class="text-emerald-300 block">🏆 Evaluasi Interviewer Live Coding (Staff Engineer):</strong>
             <p class="text-[11px] leading-relaxed text-emerald-200">
-                Sempurna! Anda berhasil memecahkan soal Two Sum dengan algoritma optimal <strong>O(N) Time Complexity</strong> dan <strong>O(N) Space Complexity</strong> menggunakan Hash Map lookup. Kemampuan mentransformasikan algoritma kuadratik O(N²) menjadi linear O(N) adalah fondasi esensial yang dicari perusahaan teknologi terkemuka.
+                Luar biasa! Algoritma Anda menyelesaikan masalah nyata *transaction duplicate ingestion* dengan efisiensi <strong>O(N) Time Complexity</strong>. Pemahaman Anda dalam mengombinasikan Hash Map dengan batasan waktu (sliding window) mencerminkan kesiapan nyata sebagai backend engineer di industri fintech.
             </p>
             <div class="text-[11px] text-slate-300 pt-1">
-                👉 <strong>Langkah Berikutnya:</strong> Presentasikan diagram arsitektur sistem pembayaran yang resilien di hadapan Lead Architect!
+                👉 <strong>Langkah Berikutnya:</strong> Masuk ke Tahap 2 untuk mempertahankan arsitektur sistem di hadapan Lead Architect!
             </div>
             <div class="pt-2 border-t border-emerald-800/60 flex items-center justify-end font-sans">
                 <button type="button" onclick="switchScenario(2)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-white font-bold text-xs transition shadow-md shadow-emerald-950/60 flex items-center gap-1.5 active:scale-95">
@@ -1150,51 +1131,82 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(html))
 }
 
-// DefendScenario02 memproses jawaban pertahanan arsitektur System Design kandidat di depan Principal Architect.
+// DefendScenario02 memproses pertahanan keputusan arsitektur kandidat di depan Dewan Arsitek.
 func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
 		return
 	}
 
-	answer := r.FormValue("defense_choice")
+	storageChoice := r.FormValue("idempotency_storage")
+	ledgerChoice := r.FormValue("ledger_model")
+	failureChoice := r.FormValue("failure_handling")
+	legacyChoice := r.FormValue("defense_choice")
+
 	w.Header().Set("HX-Trigger", "refreshWallets")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	if answer == "sha256_hash_and_inflight_lock" {
-		h.markStagePassed(2, "System Design Idempotency Defense Approved")
-		h.hub.Broadcast("🏛️ [System Design] Lead Backend Engineer menyetujui pemahaman idempotensi kandidat! Nilai: A+ (+250 XP).")
+	// Backwards compatibility jika form lama terpanggil
+	if legacyChoice == "sha256_hash_and_inflight_lock" {
+		storageChoice = "redis_lock"
+		ledgerChoice = "double_entry"
+		failureChoice = "circuit_breaker_dlq"
+	}
+
+	isStorageValid := storageChoice == "redis_lock" || storageChoice == "pg_unique"
+	isLedgerValid := ledgerChoice == "double_entry"
+	isFailureValid := failureChoice == "circuit_breaker_dlq"
+
+	if storageChoice == "frontend_only" {
+		h.hub.Broadcast("⚠️ [System Design Review] Ditolak: Mengandalkan frontend disable saja berisiko fatal double-charge!")
+		html := `
+        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800/70 space-y-2.5 font-sans text-xs">
+            <div class="flex items-center justify-between border-b border-rose-200 dark:border-rose-800/60 pb-2">
+                <strong class="text-sm font-bold text-rose-800 dark:text-rose-300">HASIL EVALUASI: ARSITEKTUR BERISIKO TINGGI (FATAL) ✗</strong>
+                <span class="text-xs font-mono text-rose-600 dark:text-rose-400">Predikat: Rejected</span>
+            </div>
+            <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
+                <strong>Lead Architect:</strong> <em>"Disable tombol di frontend sama sekali tidak melindungi sistem pembayaran dari network timeout retry otomatis oleh SDK ponsel nasabah atau serangan API script duplikat. Backend WAJIB memiliki Idempotency Guard mandiri dengan atomic lock!"</em>
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	if isStorageValid && isLedgerValid && isFailureValid {
+		h.markStagePassed(2, "Fintech Core System Design Approved")
+		h.hub.Broadcast("🏛️ [System Design] Dewan Arsitek menyetujui desain Core Banking & Idempotency Engine kandidat! Nilai: A+ (+250 XP).")
 
 		html := `
-        <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/70 space-y-3 font-sans text-xs">
-            <div class="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800/60 pb-2">
+        <div class="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/70 space-y-3 font-sans text-xs shadow-md">
+            <div class="flex items-center justify-between border-b border-emerald-200 dark:border-emerald-800/60 pb-2.5">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                    <strong class="text-sm font-bold text-emerald-800 dark:text-emerald-300">HASIL INTERVIEW SYSTEM DESIGN: LULUS (STRONG HIRE) ✓</strong>
+                    <strong class="text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">SYSTEM DESIGN DEFENSE: APPROVED (STRONG HIRE) ✓</strong>
                 </div>
-                <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-300">+250 XP DIDAPAT</span>
+                <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-300">+250 XP DIRAIH</span>
             </div>
             <div class="text-slate-700 dark:text-slate-200 leading-relaxed text-xs space-y-2">
                 <p>
-                    <strong>Pewawancara (Lead Backend Engineer):</strong><br>
-                    <em>"Penjelasan Anda sangat tepat dan dewasa untuk level Junior/Associate! Memahami bahwa validasi sisi frontend (disable button) mudah ditembus oleh network retry otomatis atau API script adalah fondasi penting backend engineer. Menggunakan Idempotency-Key di backend dengan status lock 'PROCESSING' menjamin transaksi nasabah tidak pernah terpotong ganda."</em>
+                    <strong>Keputusan Dewan Arsitek (Principal Engineer & Lead Architect):</strong><br>
+                    <em>"Pilihan desain Anda sangat matang untuk level Entry-Level/Junior! Menggunakan Redis Distributed Lock (SETNX) untuk in-flight guard menjamin latensi &lt;1ms. Menerapkan <strong>Double-Entry Ledger (Buku Besar Berpasangan)</strong> menjamin integritas audit keuangan bebas selisih. Serta penggunaan <strong>Circuit Breaker + Asynchronous Dead-Letter Queue</strong> mencegah thread starvation saat bank mitra mengalami gangguan."</em>
                 </p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
-                    <div class="p-2 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                        <span class="text-slate-400">Pemahaman Alur</span>
-                        <div class="text-emerald-600 dark:text-emerald-400 font-bold">100% Menguasai</div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
+                    <div class="p-2.5 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                        <span class="text-slate-400">Idempotency Guard</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Redis SETNX / Atomic</div>
                     </div>
-                    <div class="p-2 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                        <span class="text-slate-400">Pencegahan Double-Charge</span>
-                        <div class="text-emerald-600 dark:text-emerald-400 font-bold">Terverifikasi</div>
+                    <div class="p-2.5 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                        <span class="text-slate-400">Data Model Ledger</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Double-Entry Journal</div>
                     </div>
-                    <div class="p-2 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                        <span class="text-slate-400">Nilai Interview</span>
-                        <div class="text-amber-600 dark:text-amber-400 font-bold">Nilai: A+</div>
+                    <div class="p-2.5 rounded bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                        <span class="text-slate-400">Resiliensi Mitra Bank</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Circuit Breaker + DLQ</div>
                     </div>
                 </div>
                 <div class="pt-2 border-t border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
-                    <span class="text-[11px] text-emerald-800 dark:text-emerald-300">Tahap Desain Sistem Lolos dengan Predikat Sempurna!</span>
+                    <span class="text-[11px] text-emerald-800 dark:text-emerald-300">Fondasi arsitektur siap dibuktikan di Take-Home Challenge!</span>
                     <button type="button" onclick="switchScenario(3)" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md flex items-center gap-1.5 active:scale-95">
                         <span>📦 Lanjut ke Tahap 3: Take-Home Test</span>
                         <span>&rarr;</span>
@@ -1206,17 +1218,12 @@ func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Jawaban salah
-	h.hub.Broadcast("⚠️ [System Design] Argumen pertahanan perlu perbaikan: Jangan hanya mengandalkan frontend disable.")
+	// Jika ada opsi yang belum optimal
 	html := `
-    <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-300 dark:border-rose-800/70 space-y-2.5 font-sans text-xs">
-        <div class="flex items-center justify-between border-b border-rose-200 dark:border-rose-800/60 pb-2">
-            <strong class="text-sm font-bold text-rose-800 dark:text-rose-300">HASIL EVALUASI: PERLU REVISI LOGIKA ✗</strong>
-            <span class="text-xs font-mono text-rose-600 dark:text-rose-400">Nilai: C</span>
-        </div>
-        <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-xs">
-            <strong>Pewawancara (Lead Backend Engineer):</strong><br>
-            <em>"Perhatian: Mengandalkan tombol disable di frontend saja sangat berisiko di sistem pembayaran! Jika koneksi timeout di tengah jalan dan pengguna me-refresh browser, request kedua akan terkirim lagi dan saldo nasabah bisa terpotong dua kali. Backend wajib memverifikasi Idempotency-Key secara mandiri."</em>
+    <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800/70 space-y-2 font-sans text-xs">
+        <strong class="text-amber-800 dark:text-amber-300 block">Evaluasi Arsitektur: Trade-off Belum Optimal</strong>
+        <p class="text-slate-700 dark:text-slate-300 leading-relaxed text-[11px]">
+            Dewan arsitek mencatat Anda belum memilih kombinasi standar industri (Double-Entry Ledger dan Circuit Breaker). Pastikan menggunakan Double-Entry Bookkeeping agar setiap mutasi debit selalu memiliki kredit yang seimbang untuk audit kepatuhan regulasi OJK/BI.
         </p>
     </div>`
 	_, _ = w.Write([]byte(html))
