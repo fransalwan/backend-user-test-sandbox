@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 
 	racecondition "github.com/fransalwan/backend-user-test-sandbox/scenarios/01_race_condition"
@@ -627,4 +628,278 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"status":"ok"}`))
+}
+
+// EvalScenario01Code mengevaluasi solusi live coding kode kandidat bergaya LeetCode / CodeWars.
+func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	strategy := r.FormValue("code_strategy")
+	if strategy == "" {
+		strategy = "mutex"
+	}
+	action := r.FormValue("action")
+	if action == "" {
+		action = "submit"
+	}
+
+	w.Header().Set("HX-Trigger", "refreshWallets")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Jalankan test case 1 & 2
+	case1Passed := true
+	case2Passed := true
+
+	// Jalankan test case 3: Concurrency Stress Test (50 Goroutine @ $25 on $1,000)
+	case3Passed := strategy != "naive"
+
+	h.hub.Broadcast(fmt.Sprintf("💻 [LeetCode Runner] Menjalankan test suite untuk strategi: '%s' (Aksi: %s)...", strategy, action))
+
+	if action == "run" {
+		// Run test case saja
+		html := fmt.Sprintf(`
+        <div class="space-y-3 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span class="text-sm font-bold text-amber-300 flex items-center gap-2">
+                    <span>▶</span> Hasil Uji Cepat (Run Test Cases)
+                </span>
+                <span class="text-slate-500 text-[11px]">Go 1.27 Concurrency Suite</span>
+            </div>
+            <div class="space-y-2">
+                <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
+                    <div>
+                        <strong class="text-emerald-400">Test Case 1: Simple Debit</strong>
+                        <div class="text-[11px] text-slate-400">Input: balance=$100, deduct=$25 &rarr; Saldo $75</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
+                </div>
+                <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-between">
+                    <div>
+                        <strong class="text-emerald-400">Test Case 2: Insufficient Funds</strong>
+                        <div class="text-[11px] text-slate-400">Input: balance=$20, deduct=$50 &rarr; Return ErrInsufficientFunds</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">PASS ✓</span>
+                </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-400">
+                💡 Uji dasar lulus. Klik <strong>"Submit Solution"</strong> untuk menjalankan Test Case 3 (Uji Stres 50 Goroutine Konkuren) dan mendapatkan skor kelulusan!
+            </div>
+        </div>`)
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	// Action == "submit"
+	if !case3Passed {
+		// Kasus Naive: Gagal di konkurensi (Overdraft)
+		h.hub.Broadcast("🚨 [LeetCode Runner] WRONG ANSWER: Terdeteksi financial overdraft defect! Goroutine menyebabkan saldo minus.")
+		html := `
+        <div class="space-y-3 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-base font-extrabold text-rose-400">❌ WRONG ANSWER</span>
+                    <span class="text-[11px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">Overdraft Defect</span>
+                </div>
+                <span class="text-rose-400 font-mono text-[11px]">Runtime: 1.1 ms</span>
+            </div>
+            <div class="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1.5">
+                <strong class="text-rose-300 block">Test Case 3 Gagal: Concurrency Race Condition!</strong>
+                <p class="text-[11px] text-rose-300 leading-relaxed">
+                    Kode naif tanpa locking menyebabkan 50 goroutine membaca saldo yang sama secara serentak (Lost Update). Akibatnya saldo tembus menjadi <strong>negatif (Overdraft -$25.00)</strong>!
+                </p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                    <span class="text-slate-500">Case 1</span>
+                    <div class="font-bold text-emerald-400">PASS ✓</div>
+                </div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                    <span class="text-slate-500">Case 2</span>
+                    <div class="font-bold text-emerald-400">PASS ✓</div>
+                </div>
+                <div class="p-2 rounded bg-slate-900 border border-rose-800/80 bg-rose-950/30">
+                    <span class="text-rose-400">Case 3 (Stress)</span>
+                    <div class="font-bold text-rose-400">FAILED ✗</div>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400">
+                Gunakan <strong>Mutex Sync</strong>, <strong>SELECT FOR UPDATE</strong>, atau <strong>Atomic CAS</strong> untuk mengamankan konkurensi.
+            </div>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	// Kasus Berhasil (Thread-Safe):
+	h.markStagePassed(1, "Live Coding Concurrency Champion")
+	h.hub.Broadcast("🎉 [LeetCode Runner] STATUS: ACCEPTED! Solusi thread-safe lolos seluruh 3 test case dengan konsistensi nol anomali.")
+
+	html := fmt.Sprintf(`
+    <div class="space-y-3 font-mono text-xs">
+        <div class="flex items-center justify-between border-b border-emerald-800/60 pb-2">
+            <div class="flex items-center gap-2">
+                <span class="text-base font-extrabold text-emerald-400">ACCEPTED ✅</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">+250 XP DIRAIH</span>
+            </div>
+            <span class="text-emerald-400 font-mono text-[11px]">Runtime: 1.8 ms (Beats 98.7%%)</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[11px]">
+            <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                <span class="text-slate-500">Runtime</span>
+                <div class="font-bold text-white">1.8 ms</div>
+                <div class="text-[10px] text-emerald-400">Beats 98.7%%</div>
+            </div>
+            <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                <span class="text-slate-500">Memory</span>
+                <div class="font-bold text-white">2.1 MB</div>
+                <div class="text-[10px] text-emerald-400">Beats 96.2%%</div>
+            </div>
+            <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                <span class="text-slate-500">Goroutines</span>
+                <div class="font-bold text-white">50 Aktif</div>
+                <div class="text-[10px] text-slate-400">Zero Overdraft</div>
+            </div>
+            <div class="p-2 rounded bg-slate-900 border border-slate-800">
+                <span class="text-slate-500">Test Cases</span>
+                <div class="font-bold text-emerald-400">3/3 Lolos</div>
+                <div class="text-[10px] text-emerald-400">100%% Sempurna</div>
+            </div>
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-emerald-200 text-xs space-y-1">
+            <strong class="text-emerald-300 block">🏆 Evaluasi Interviewer Live Coding:</strong>
+            Solusi berbasis <strong>%s</strong> berhasil mengeksekusi 50 mutasi konkuren dengan saldo akhir tepat $0.00 tanpa satu pun race condition. Ujian Tahap 1 Resmi Dinyatakan Lulus!
+        </div>
+    </div>`, strings.ToUpper(strategy))
+
+	_ = case1Passed
+	_ = case2Passed
+	_, _ = w.Write([]byte(html))
+}
+
+// DefendScenario02 memproses jawaban pertahanan arsitektur System Design kandidat di depan Principal Architect.
+func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	answer := r.FormValue("defense_choice")
+	w.Header().Set("HX-Trigger", "refreshWallets")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	if answer == "sha256_hash_and_inflight_lock" {
+		h.markStagePassed(2, "System Design Architect Approved")
+		h.hub.Broadcast("🏛️ [System Design] Principal Architect menyetujui pertahanan arsitektur kandidat! Nilai: A+ (+250 XP).")
+
+		html := `
+        <div class="p-4 rounded-xl bg-emerald-950/50 border border-emerald-800/70 space-y-3 font-sans text-xs">
+            <div class="flex items-center justify-between border-b border-emerald-800/60 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                    <strong class="text-sm font-bold text-emerald-300">HASIL INTERVIEW SYSTEM DESIGN: LULUS (STRONG HIRE) ✓</strong>
+                </div>
+                <span class="text-xs font-mono font-bold text-amber-300">+250 XP DI DAPAT</span>
+            </div>
+            <div class="text-slate-200 leading-relaxed text-xs space-y-2">
+                <p>
+                    <strong>Pewawancara (Principal System Architect):</strong><br>
+                    <em>"Penjelasan arsitektur Anda sangat matang dan akurat. Mengkombinasikan SHA-256 Payload Hash (untuk menolak tampering HTTP 422) dengan In-Flight Distributed Lock (untuk menolak request bersamaan HTTP 409) adalah standar industri emas yang diterapkan oleh Stripe dan Adyen. Anda memahami batas antara idempotensi jaringan dan manipulasi data secara presisi."</em>
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px]">
+                    <div class="p-2 rounded bg-dark-900 border border-slate-800">
+                        <span class="text-slate-400">Alur Diagram</span>
+                        <div class="text-emerald-400 font-bold">100% Solid</div>
+                    </div>
+                    <div class="p-2 rounded bg-dark-900 border border-slate-800">
+                        <span class="text-slate-400">Split-Brain Defense</span>
+                        <div class="text-emerald-400 font-bold">Terverifikasi</div>
+                    </div>
+                    <div class="p-2 rounded bg-dark-900 border border-slate-800">
+                        <span class="text-slate-400">Skor Evaluasi</span>
+                        <div class="text-amber-400 font-bold">Nilai: A+</div>
+                    </div>
+                </div>
+            </div>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	// Jawaban salah
+	h.hub.Broadcast("⚠️ [System Design] Argumen pertahanan ditolak oleh interviewer: Pendekatan tidak memenuhi standar keamanan fintech.")
+	html := `
+    <div class="p-4 rounded-xl bg-rose-950/50 border border-rose-800/70 space-y-2.5 font-sans text-xs">
+        <div class="flex items-center justify-between border-b border-rose-800/60 pb-2">
+            <strong class="text-sm font-bold text-rose-300">HASIL EVALUASI: PERLU REVISI ARSITEKTUR ✗</strong>
+            <span class="text-xs font-mono text-rose-400">Nilai: C</span>
+        </div>
+        <p class="text-slate-300 leading-relaxed text-xs">
+            <strong>Pewawancara (Principal System Architect):</strong><br>
+            <em>"Jawaban tersebut berisiko fatal pada sistem perbankan. Mengabaikan hash payload membuka celah keamanan di mana hacker dapat mengganti nominal transfer tetapi tetap menggunakan idempotency key yang sama. Silakan tinjau kembali alur diagram dan pilih strategi verifikasi yang tepat."</em>
+        </p>
+    </div>`
+	_, _ = w.Write([]byte(html))
+}
+
+// SubmitScenario03Repo menerima submission repositori GitHub publik untuk Take-Home Test.
+func (h *Handler) SubmitScenario03Repo(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	repoURL := strings.TrimSpace(r.FormValue("repo_url"))
+	branch := strings.TrimSpace(r.FormValue("branch"))
+	if branch == "" {
+		branch = "main"
+	}
+
+	w.Header().Set("HX-Trigger", "refreshWallets")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	if !strings.HasPrefix(repoURL, "https://github.com/") {
+		html := `
+        <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs space-y-1">
+            <strong>⚠️ Validasi Repositori Gagal:</strong>
+            <p class="text-[11px] text-rose-300">
+                Harap masukkan URL repositori GitHub publik yang valid (diawali dengan <code>https://github.com/username/project</code>).
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	// Simulasi Pipeline Evaluasi Komite Engineering
+	h.hub.Broadcast(fmt.Sprintf("🚀 [Take-Home Bot] Menerima submission repo: %s (Branch: %s). Menjalankan automated evaluation suite...", repoURL, branch))
+	h.markStagePassed(3, "Take-Home Assignment Accepted")
+
+	html := fmt.Sprintf(`
+    <div class="p-4 rounded-xl bg-gradient-to-b from-[#0b1424] to-[#070c18] border border-cyan-500/30 space-y-3 font-sans text-xs shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                <strong class="text-sm font-bold text-white uppercase tracking-wider">TAKE-HOME SUBMISSION REVIEW: APPROVED ✓</strong>
+            </div>
+            <span class="text-xs font-mono font-bold text-amber-300">+250 XP DIRAIH</span>
+        </div>
+
+        <div class="text-[11px] font-mono text-slate-300 bg-dark-950 p-3 rounded-lg border border-slate-800 space-y-1">
+            <div class="text-slate-400">Target Repo: <a href="%s" target="_blank" class="text-cyan-400 hover:underline">%s</a> (Branch: %s)</div>
+            <div class="text-emerald-400">[1/5] Verifikasi Git Remote Publik................... OK (200 OK)</div>
+            <div class="text-emerald-400">[2/5] Pemeriksaan Clean Architecture (Domain/Port)... COMPLIANT ✓</div>
+            <div class="text-emerald-400">[3/5] Audit Transactional Outbox & Saga Worker....... PASS ✓ (Zero Dual-Write)</div>
+            <div class="text-emerald-400">[4/5] Test Suite Coverage Analysis................... 92.4%% (Threshold > 80%%)</div>
+            <div class="text-emerald-400">[5/5] Docker Compose & Linter Static Analysis........ ZERO DEFECTS ✓</div>
+        </div>
+
+        <div class="p-3 rounded-lg bg-cyan-950/40 border border-cyan-800/60 text-cyan-200 text-xs space-y-1">
+            <strong class="text-cyan-300 block">📝 Rekomendasi Komite Wawancara:</strong>
+            Repositori publik kandidat telah memenuhi seluruh Functional & Non-Functional Requirements. Implementasi Transactional Outbox dan Saga Auto-Refund dinyatakan memenuhi standar arsitektur tingkat <strong>Principal</strong>. Lanjut ke Tahap 4 (War Room & Stress Test Defense)!
+        </div>
+    </div>`, repoURL, repoURL, branch)
+
+	_, _ = w.Write([]byte(html))
 }

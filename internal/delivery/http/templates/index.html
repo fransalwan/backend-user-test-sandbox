@@ -77,6 +77,105 @@
             }
         }
 
+        // Template Code Editor Tahap 1 (LeetCode / CodeWars Style)
+        function loadCodeTemplate(strategy) {
+            const editor = document.getElementById('live-code-editor');
+            const hiddenInput = document.getElementById('selected-strategy-input');
+            if (hiddenInput) hiddenInput.value = strategy;
+
+            if (strategy === 'mutex') {
+                editor.value = `// Solusi 1: Mutex Synchronized Lock (Thread-Safe ✅)
+package main
+
+import "sync"
+
+type SharedWallet struct {
+    balance int64 // cents
+    mu      sync.Mutex
+}
+
+func (w *SharedWallet) DeductWallet(amount int64) error {
+    w.mu.Lock()
+    defer w.mu.Unlock()
+
+    if w.balance < amount {
+        return ErrInsufficientFunds
+    }
+    w.balance -= amount
+    return nil
+}`;
+            } else if (strategy === 'pessimistic') {
+                editor.value = `// Solusi 2: Pessimistic SELECT FOR UPDATE (RDBMS Row Lock 🔒)
+package main
+
+import "context"
+
+func DeductPessimistic(ctx context.Context, tx *sql.Tx, walletID string, amount int64) error {
+    var balance int64
+    // Mengunci baris dompet eksklusif di level database
+    row := tx.QueryRowContext(ctx, "SELECT balance FROM wallets WHERE id = $1 FOR UPDATE", walletID)
+    if err := row.Scan(&balance); err != nil {
+        return err
+    }
+    if balance < amount {
+        return ErrInsufficientFunds
+    }
+    _, err := tx.ExecContext(ctx, "UPDATE wallets SET balance = balance - $1 WHERE id = $2", amount, walletID)
+    return err
+}`;
+            } else if (strategy === 'cas') {
+                editor.value = `// Solusi 3: Optimistic Concurrency Control (Atomic CAS 🔄)
+package main
+
+import "context"
+
+func DeductOptimistic(ctx context.Context, db *sql.DB, walletID string, amount int64) error {
+    for attempt := 0; attempt < 5; attempt++ {
+        var balance int64
+        var version int
+        _ = db.QueryRow("SELECT balance, version FROM wallets WHERE id = $1", walletID).Scan(&balance, &version)
+        if balance < amount {
+            return ErrInsufficientFunds
+        }
+        res, _ := db.Exec("UPDATE wallets SET balance = balance - $1, version = version + 1 WHERE id = $2 AND version = $3", amount, walletID, version)
+        if rows, _ := res.RowsAffected(); rows > 0 {
+            return nil // Sukses CAS!
+        }
+    }
+    return ErrConflictRetryExhausted
+}`;
+            } else {
+                editor.value = `// Solusi 4: Naive Read-Modify-Write (Rentan Overdraft ⚠️)
+package main
+
+func (w *SharedWallet) DeductNaive(amount int64) error {
+    // BUGGY: Membaca tanpa lock, 50 goroutines membaca saldo yang sama
+    if w.balance >= amount {
+        time.Sleep(10 * time.Millisecond) // Simulasi latensi DB
+        w.balance -= amount // Lost Update & Overdraft!
+        return nil
+    }
+    return ErrInsufficientFunds
+}`;
+            }
+        }
+
+        // Stepper Diagram Tahap 2
+        function highlightDiagramNode(step, desc) {
+            for (let i = 1; i <= 5; i++) {
+                const node = document.getElementById(`node-diagram-${i}`);
+                if (node) {
+                    if (i === step) {
+                        node.className = "p-3 rounded-xl bg-teal-950/80 border-2 border-teal-400 shadow-lg shadow-teal-950/50 scale-105 space-y-1 transition-all";
+                    } else {
+                        node.className = "p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1 transition-all opacity-60";
+                    }
+                }
+            }
+            const descEl = document.getElementById('diagram-step-description');
+            if (descEl) descEl.innerHTML = `<strong>Langkah ${step}:</strong> ${desc}`;
+        }
+
         // Toggle Modal Panduan Penggunaan
         function toggleGuideModal() {
             const modal = document.getElementById('guide-modal');
@@ -246,16 +345,16 @@
                     <span>📚</span> Bootcamp: Teori & Persiapan
                 </button>
                 <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
-                    <span>🔒</span> Tahap 1: Live Coding (Race)
+                    <span>💻</span> Tahap 1: Live Coding (LeetCode)
                 </button>
                 <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
-                    <span>🛡️</span> Tahap 2: System Defense (Idempotensi)
+                    <span>🏛️</span> Tahap 2: System Design (Diagram Alur)
                 </button>
                 <button id="tab-scenario-3" onclick="switchScenario(3)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
-                    <span>🔄</span> Tahap 3: Take-Home (Saga & Outbox)
+                    <span>📦</span> Tahap 3: Take-Home Test (Repo Publik)
                 </button>
                 <button id="tab-scenario-4" onclick="switchScenario(4)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-slate-400 hover:text-slate-200 hover:bg-dark-850 border border-slate-800 transition-all">
-                    <span>⚡</span> Tahap 4: High Traffic (Flash Sale)
+                    <span>🔥</span> Tahap 4: War Room (Stress Test)
                 </button>
                 <button id="tab-scenario-5" onclick="switchScenario(5)" class="flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-xl bg-dark-900 text-amber-400 hover:text-amber-300 hover:bg-dark-850 border border-amber-500/30 transition-all">
                     <span>🏆</span> Tahap 5: Keputusan Hiring (Offer Letter)
@@ -550,214 +649,321 @@
                     </div>
                 </div>
 
-                <!-- ================= TAHAP 1: LIVE CODING CONCURRENCY ================= -->
+                <!-- ================= TAHAP 1: LIVE CODING (LEETCODE / CODEWARS STYLE) ================= -->
                 <div id="scenario-1-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/40">Tahap 1 &bull; Live Coding Test</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-800/40 font-mono">Problem #101 &bull; Medium</span>
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">Golang 1.27</span>
+                            </div>
                             <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>🔒</span> Misi: Menjinakkan Race Condition pada Hot Wallet
+                            <span>💻</span> Live Coding: Safe Concurrent Hot-Wallet Deduct
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji kemampuan Anda menangani 50 goroutine yang memotong saldo Alice serentak tanpa saldo minus.</p>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Implementasikan method pemotongan saldo dompet yang thread-safe di bawah serbuan 50 goroutine tanpa overdraft saldo (Invarian Saldo &ge; $0).
+                        </p>
                     </div>
 
-                    <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
+                    <!-- Deskripsi Masalah & Constraints -->
+                    <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 space-y-2">
                         <div class="font-semibold text-emerald-300 flex items-center gap-1.5">
-                            <span>💡</span> Uji Lulus Tahap 1:
+                            <span>📋</span> Constraints & Spesifikasi Ujian:
                         </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Pilih <strong>Pessimistic Locking (SELECT FOR UPDATE)</strong> atau <strong>Redis Lock</strong> dengan 50 goroutine @ $25 ➡️ Buktikan ke interviewer saldo berhenti tepat di $0 tanpa anomali untuk membuka <strong>+250 XP</strong>!
-                        </p>
+                        <ul class="text-[11px] text-slate-400 list-disc list-inside space-y-0.5 font-mono">
+                            <li><code class="text-white">amount > 0</code> (nominal penarikan dalam sen / int64)</li>
+                            <li><code class="text-white">wallet.Balance >= 0</code> (Invarian Moneter: DILARANG MINUS / OVERDRAFT!)</li>
+                            <li>Wajib mengembalikan <code class="text-rose-400">ErrInsufficientFunds</code> jika saldo tidak mencukupi.</li>
+                            <li>Uji Stres (Test Case 3): 50 goroutine menarik $25 serentak dari saldo $1.000 &rarr; Saldo akhir tepat $0.</li>
+                        </ul>
                     </div>
 
-                    <form hx-post="/api/scenarios/01/run" hx-target="#simulation-output-1" hx-swap="innerHTML" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Strategi Penguncian</label>
-                                <select name="strategy" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                                    <option value="naive">1. Naive (Tanpa Lock ⚠️)</option>
-                                    <option value="pessimistic" selected>2. Pessimistic (FOR UPDATE 🔒)</option>
-                                    <option value="optimistic">3. Optimistic (Version Check 🔄)</option>
-                                    <option value="redis_lock">4. Redis Lock (SETNX 🔑)</option>
+                    <!-- In-Browser Code Editor -->
+                    <div class="rounded-xl border border-slate-800 bg-[#070b14] overflow-hidden shadow-2xl">
+                        <!-- Topbar Editor -->
+                        <div class="flex flex-wrap items-center justify-between px-4 py-2.5 bg-dark-950 border-b border-slate-800/80 gap-2">
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                                <span class="ml-2 font-mono font-bold text-slate-300">solution.go</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-[11px] text-slate-400 font-medium">Muat Template:</label>
+                                <select id="code-template-select" onchange="loadCodeTemplate(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-[11px] text-white font-mono focus:outline-none focus:border-emerald-500">
+                                    <option value="mutex">1. Mutex Sync Lock (Thread-Safe ✅)</option>
+                                    <option value="pessimistic">2. Pessimistic (FOR UPDATE 🔒)</option>
+                                    <option value="cas">3. Atomic CAS (Compare-And-Swap 🔄)</option>
+                                    <option value="naive">4. Naive Read-Modify-Write (Buggy Overdraft ⚠️)</option>
                                 </select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Goroutines Paralel</label>
-                                <input type="number" name="concurrency" value="50" min="2" max="200" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nominal per Tx (USD)</label>
-                                <input type="number" name="amount" value="25" min="1" max="1000" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                            </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Total percobaan: <strong class="text-white">$1.250,00</strong></span>
-                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
-                                <span>▶</span> Selesaikan Ujian Tahap 1
+                        <!-- Code Editor Area -->
+                        <textarea id="live-code-editor" class="w-full h-48 bg-[#070b14] p-4 text-xs font-mono text-emerald-400 leading-relaxed focus:outline-none resize-none select-text border-0" spellcheck="false">// Solusi 1: Mutex Synchronized Lock (Thread-Safe ✅)
+package main
+
+import "sync"
+
+type SharedWallet struct {
+    balance int64 // cents
+    mu      sync.Mutex
+}
+
+func (w *SharedWallet) DeductWallet(amount int64) error {
+    w.mu.Lock()
+    defer w.mu.Unlock()
+
+    if w.balance < amount {
+        return ErrInsufficientFunds
+    }
+    w.balance -= amount
+    return nil
+}</textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <form hx-post="/api/scenarios/01/eval" hx-target="#leetcode-output-panel" hx-swap="innerHTML" class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <input type="hidden" id="selected-strategy-input" name="code_strategy" value="mutex">
+                        <div class="flex items-center gap-2">
+                            <button type="submit" name="action" value="run" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700 active:scale-95">
+                                <span>▶</span> Run Test Cases
+                            </button>
+                            <button type="submit" name="action" value="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-950/60 active:scale-95">
+                                <span>⚡</span> Submit Solution (+250 XP)
                             </button>
                         </div>
+                        <span class="text-[11px] text-slate-400 font-mono">Test Case 3: 50 Goroutines Stress Test</span>
                     </form>
 
-                    <div id="simulation-output-1" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih strategi di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 1.
+                    <!-- Terminal Output Panel -->
+                    <div id="leetcode-output-panel" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
+                        Pilih kode solusi di atas, lalu klik "Run Test Cases" atau "Submit Solution" untuk penilaian instan.
                     </div>
                 </div>
 
-                <!-- ================= TAHAP 2: SYSTEM DEFENSE IDEMPOTENCY ================= -->
-                <div id="scenario-2-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <!-- ================= TAHAP 2: SYSTEM DESIGN INTERVIEW (DIAGRAM ALUR) ================= -->
+                <div id="scenario-2-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-teal-400 uppercase tracking-wider bg-teal-950/60 px-2.5 py-1 rounded-md border border-teal-800/40">Tahap 2 &bull; System Defense</span>
+                            <span class="text-[11px] font-bold text-teal-400 uppercase tracking-wider bg-teal-950/60 px-2.5 py-1 rounded-md border border-teal-800/40">Tahap 2 &bull; System Design Interview</span>
                             <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>🛡️</span> Misi: Menangkis Serangan Retry Badai Jaringan
+                            <span>🏛️</span> System Design: Global Payment Gateway Idempotency & Resiliency
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji apakah Anda bisa mencegah pemotongan saldo berulang saat klien me-retry request 5x berturut-turut.</p>
-                    </div>
-
-                    <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
-                        <div class="font-semibold text-teal-300 flex items-center gap-1.5">
-                            <span>💡</span> Uji Lulus Tahap 2:
-                        </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Pilih <strong>Dengan Kunci Idempotensi</strong> dengan 5 Retries @ $50 ➡️ Buktikan bahwa saldo nasabah hanya terpotong tepat 1x saja untuk meraih <strong>+250 XP</strong>!
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Pewawancara (Principal System Architect): Jelaskan alur diagram arsitektur penanganan badai retry dan pertahankan keputusan desain Anda di hadapan komite.
                         </p>
                     </div>
 
-                    <form hx-post="/api/scenarios/02/run" hx-target="#simulation-output-2" hx-swap="innerHTML" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Mode Pengujian</label>
-                                <select name="mode" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500 font-mono">
-                                    <option value="without_idempotency">1. Tanpa Idempotensi (Double-Spending ⚠️)</option>
-                                    <option value="with_idempotency" selected>2. Dengan Kunci Idempotensi (Aman & Idempoten ✅)</option>
-                                    <option value="in_flight_conflict">3. In-Flight Collision (Konflik HTTP 409 ⛔)</option>
-                                    <option value="payload_mismatch">4. Manipulasi Payload (Tolak HTTP 422 🛑)</option>
-                                </select>
+                    <!-- ALUR DIAGRAM SISTEM INTERAKTIF -->
+                    <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                            <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                <span>🗺️</span> Alur Diagram Arsitektur Idempotency Engine
+                            </span>
+                            <span class="text-[11px] text-teal-400 font-mono">Interactive Flow Stepper</span>
+                        </div>
+
+                        <!-- Node-Node Diagram -->
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-center font-mono text-[11px]">
+                            <div id="node-diagram-1" class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1 transition-all">
+                                <div class="text-xl">📱</div>
+                                <strong class="text-white block text-xs">1. Mobile Client</strong>
+                                <span class="text-[10px] text-teal-400 block">UUID Header</span>
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex justify-between">
-                                    <span>Kunci Idempotensi (UUID)</span>
-                                    <button type="button" onclick="generateUUID()" class="text-teal-400 hover:underline">Acak Baru</button>
+                            <div id="node-diagram-2" class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1 transition-all">
+                                <div class="text-xl">🌐</div>
+                                <strong class="text-white block text-xs">2. API Gateway</strong>
+                                <span class="text-[10px] text-cyan-400 block">SHA-256 Hash</span>
+                            </div>
+                            <div id="node-diagram-3" class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1 transition-all">
+                                <div class="text-xl">🔑</div>
+                                <strong class="text-white block text-xs">3. Redis Guard</strong>
+                                <span class="text-[10px] text-amber-400 block">SETNX In-Flight</span>
+                            </div>
+                            <div id="node-diagram-4" class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1 transition-all">
+                                <div class="text-xl">⚙️</div>
+                                <strong class="text-white block text-xs">4. Core Ledger</strong>
+                                <span class="text-[10px] text-emerald-400 block">ACID Mutation</span>
+                            </div>
+                            <div id="node-diagram-5" class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1 transition-all col-span-2 sm:col-span-1">
+                                <div class="text-xl">🗄️</div>
+                                <strong class="text-white block text-xs">5. Cache Replay</strong>
+                                <span class="text-[10px] text-sky-400 block">Cached 200 OK</span>
+                            </div>
+                        </div>
+
+                        <!-- Stepper Buttons -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/60 text-xs">
+                            <span class="text-slate-400 text-[11px]">Simulasikan alur request:</span>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="highlightDiagramNode(1, 'Client mengirim HTTP POST transfer dengan header Idempotency-Key: UUIDv4 unik.')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px]">Step 1: Client</button>
+                                <button type="button" onclick="highlightDiagramNode(2, 'Gateway menghitung SHA-256 hash dari (Method + Path + Body). Jika hash berbeda untuk key yang sama, tolak HTTP 422.')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px]">Step 2: Hash</button>
+                                <button type="button" onclick="highlightDiagramNode(3, 'Redis mengeksekusi SET key PROCESSING NX EX 10. Jika key sedang in-flight, tolak dengan HTTP 409 Conflict.')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px]">Step 3: Lock</button>
+                                <button type="button" onclick="highlightDiagramNode(4, 'Core Ledger memproses mutasi saldo di PostgreSQL ACID secara atomic dan menyimpan respons akhir.')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px]">Step 4: Commit</button>
+                                <button type="button" onclick="highlightDiagramNode(5, 'Saat client retry akibat timeout, Gateway langsung menyajikan cached response tanpa menyentuh saldo nasabah lagi!')" class="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-[11px]">Step 5: Cache</button>
+                            </div>
+                        </div>
+                        <div id="diagram-step-description" class="p-2.5 rounded-lg bg-dark-900 border border-slate-800/80 text-[11px] text-teal-300 font-mono">
+                            Klik salah satu Step di atas untuk melihat bagaimana data mengalir melintasi komponen arsitektur.
+                        </div>
+                    </div>
+
+                    <!-- SESI PERTAHANAN ARSITEKTUR DENGAN PEWAWANCARA -->
+                    <div class="p-4 rounded-2xl bg-dark-950 border border-slate-800 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse"></span>
+                            <strong class="text-xs text-white uppercase tracking-wider">Pertanyaan Pewawancara (Principal Architect):</strong>
+                        </div>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            <em>"Bagaimana strategi Anda membedakan antara retry jaringan yang sah, serangan manipulasi nominal (tampering), dan request konkuren yang datang bersamaan (in-flight)?"</em>
+                        </p>
+
+                        <form hx-post="/api/scenarios/02/defend" hx-target="#system-design-defense-output" hx-swap="innerHTML" class="space-y-3">
+                            <div class="space-y-2 text-xs">
+                                <label class="flex items-start gap-2.5 p-3 rounded-xl bg-dark-900 border border-slate-800 hover:border-teal-500/50 cursor-pointer transition">
+                                    <input type="radio" name="defense_choice" value="sha256_hash_and_inflight_lock" checked class="mt-0.5 text-teal-500 focus:ring-0">
+                                    <span class="text-slate-200">
+                                        <strong class="text-teal-300 block mb-0.5">Opsi A (Rekomendasi Arsitektur):</strong>
+                                        Gunakan verifikasi <strong>SHA-256 Payload Hash</strong> untuk menolak tampering dengan <strong>HTTP 422 Unprocessable Entity</strong>, dan gunakan <strong>Redis Atomic Lock (SETNX)</strong> untuk mencegat in-flight request konkuren dengan status <strong>HTTP 409 Conflict</strong>.
+                                    </span>
                                 </label>
-                                <input id="idempotency-key-input" type="text" name="idempotency_key" value="tx-idem-9812a" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500 font-mono">
+                                <label class="flex items-start gap-2.5 p-3 rounded-xl bg-dark-900 border border-slate-800 hover:border-rose-500/50 cursor-pointer transition">
+                                    <input type="radio" name="defense_choice" value="overwrite_payload" class="mt-0.5 text-teal-500 focus:ring-0">
+                                    <span class="text-slate-200">
+                                        <strong class="text-rose-400 block mb-0.5">Opsi B:</strong>
+                                        Langsung abaikan hash payload dan timpa (overwrite) data transaksi yang sedang berjalan dengan nilai transaksi yang baru masuk.
+                                    </span>
+                                </label>
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Jumlah Retries / Permintaan Duplikat</label>
-                                <input type="number" name="retries" value="5" min="2" max="10" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500 font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nominal Transfer (USD)</label>
-                                <input type="number" name="amount" value="50" min="1" max="500" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500 font-mono">
-                            </div>
-                        </div>
 
-                        <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Zero double-spending defense</span>
                             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs font-bold transition shadow-lg shadow-teal-950/60 active:scale-95">
-                                <span>▶</span> Selesaikan Ujian Tahap 2
+                                <span>💬</span> Pertahankan Keputusan Arsitektur (+250 XP)
                             </button>
-                        </div>
-                    </form>
+                        </form>
 
-                    <div id="simulation-output-2" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih mode di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 2.
+                        <div id="system-design-defense-output" class="min-h-[50px] flex items-center justify-center text-center text-xs text-slate-500 font-mono">
+                            Pilih argumen arsitektur di atas dan klik tombol pertahankan untuk dinilai oleh pewawancara.
+                        </div>
                     </div>
                 </div>
 
-                <!-- ================= TAHAP 3: TAKE-HOME SAGA & OUTBOX ================= -->
-                <div id="scenario-3-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <!-- ================= TAHAP 3: TAKE-HOME TEST (REPO PUBLIK GITHUB) ================= -->
+                <div id="scenario-3-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40">Tahap 3 &bull; Take-Home Architecture</span>
+                            <span class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider bg-cyan-950/60 px-2.5 py-1 rounded-md border border-cyan-800/40">Tahap 3 &bull; Take-Home Engineering Challenge</span>
                             <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>🔄</span> Misi: Penyelamatan Bencana Bank Mitra dengan Saga
+                            <span>📦</span> Take-Home Assignment: Distributed Outbox & Saga Worker
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji bagaimana Anda menghindari Dual-Write dan menyelamatkan uang nasabah dengan Auto-Refund saat Bank error 500.</p>
-                    </div>
-
-                    <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
-                        <div class="font-semibold text-cyan-300 flex items-center gap-1.5">
-                            <span>💡</span> Uji Lulus Tahap 3:
-                        </div>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Pilih <strong>Saga dengan Kompensasi (Auto-Refund)</strong> saat Bank Central Asia (BCA) error 500 ➡️ Buktikan bahwa Saga Orchestrator mengembalikan saldo $100 utuh ke nasabah untuk membuka <strong>+250 XP</strong>!
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Instruksi Resmi Komite Hiring: Buat implementasi di repositori publik GitHub Anda sesuai requirement di bawah dan kirimkan URL-nya untuk di-review secara otomatis oleh bot komite.
                         </p>
                     </div>
 
-                    <form hx-post="/api/scenarios/03/run" hx-target="#simulation-output-3" hx-swap="innerHTML" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Arsitektur Eksekusi</label>
-                                <select name="mode" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
-                                    <option value="dual_write_hazard">1. Dual-Write Naif (Bahaya Uang Lenyap ⚠️)</option>
-                                    <option value="saga_compensating" selected>2. Saga dengan Kompensasi (Auto-Refund ↩️)</option>
-                                    <option value="saga_success">3. Saga Happy Path (Sukses Tuntas 🚀)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Bank Tujuan Eksternal</label>
-                                <select name="bank_target" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
-                                    <option value="Bank BCA">Bank Central Asia (BCA)</option>
-                                    <option value="Bank Mandiri">Bank Mandiri</option>
-                                    <option value="Stripe Payout">Stripe Connect Payout</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nominal Penarikan (USD)</label>
-                                <input type="number" name="amount" value="100" min="10" max="500" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Simulasi Kegagalan Pihak Ketiga</label>
-                                <select name="failure_type" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
-                                    <option value="500_INTERNAL_SERVER_ERROR">HTTP 500 Internal Server Error</option>
-                                    <option value="504_GATEWAY_TIMEOUT">HTTP 504 Gateway Timeout</option>
-                                    <option value="NETWORK_CONNECTION_REFUSED">Koneksi Bank Drop</option>
-                                </select>
-                            </div>
+                    <!-- DOKUMEN REQUIREMENT TANTANGAN RESMI -->
+                    <div class="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-3 text-xs text-slate-300">
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                            <strong class="text-white flex items-center gap-2">
+                                <span>📄</span> Lembar Spesifikasi Proyek Take-Home (Fintech Engineering Challenge)
+                            </strong>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-mono">Spesifikasi Wajib</span>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Compensating transaction defense</span>
-                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold transition shadow-lg shadow-cyan-950/60 active:scale-95">
-                                <span>▶</span> Selesaikan Ujian Tahap 3
-                            </button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] leading-relaxed">
+                            <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                <strong class="text-cyan-400 block font-semibold">1. Functional Requirements:</strong>
+                                <ul class="list-disc list-inside space-y-1 text-slate-300">
+                                    <li>Wajib menerapkan <strong>Transactional Outbox Pattern</strong> di PostgreSQL.</li>
+                                    <li>Wajib memiliki background worker / publisher untuk memproses event outbox.</li>
+                                    <li>Wajib menerapkan <strong>Saga Compensating Auto-Refund</strong> jika Bank mitra error 5xx / timeout.</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 rounded-xl bg-dark-900 border border-slate-800 space-y-1">
+                                <strong class="text-emerald-400 block font-semibold">2. Non-Functional Requirements:</strong>
+                                <ul class="list-disc list-inside space-y-1 text-slate-300">
+                                    <li>Bahasa: <strong>Golang</strong> dengan Clean / Hexagonal Architecture.</li>
+                                    <li>Format Uang: Murni <code class="text-emerald-400 font-mono">int64</code> sen (dilarang float).</li>
+                                    <li>Unit & Integration Test coverage <strong>&ge; 80%</strong>.</li>
+                                    <li>Sertakan <code class="text-slate-200 font-mono">docker-compose.yml</code> dan CI GitHub Action.</li>
+                                </ul>
+                            </div>
                         </div>
-                    </form>
+                    </div>
 
-                    <div id="simulation-output-3" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih mode di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 3.
+                    <!-- FORMULIR SUBMISSION REPO GITHUB PUBLIK -->
+                    <div class="p-5 rounded-2xl bg-gradient-to-b from-[#0b1424] to-[#070c18] border border-cyan-500/30 space-y-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <span>🚀</span> Formulir Pengumpulan Repositori Kandidat Pelamar
+                            </h3>
+                            <p class="text-[11px] text-slate-400 mt-0.5">
+                                Pastikan repositori Anda berstatus <strong>Public</strong> agar dapat diakses oleh bot komite pewawancara.
+                            </p>
+                        </div>
+
+                        <form hx-post="/api/scenarios/03/submit-repo" hx-target="#takehome-submission-result" hx-swap="innerHTML" class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">URL Repositori GitHub Publik</label>
+                                    <input type="url" name="repo_url" value="https://github.com/fransalwan/backend-user-test-sandbox" required placeholder="https://github.com/username/fintech-outbox-takehome" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Branch Git</label>
+                                    <input type="text" name="branch" value="main" required class="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Catatan Desain & Trade-Off Arsitektur (Opsional)</label>
+                                <textarea name="notes" rows="2" class="w-full bg-slate-950 border border-slate-700/80 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono resize-none">Clean Architecture dengan Transactional Outbox Pattern dan Saga Auto-Refund saat Bank 500. Zero float integer money.</textarea>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="text-[11px] text-slate-400">Automated Bot CI & Committee Review</span>
+                                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold transition shadow-lg shadow-cyan-950/60 active:scale-95">
+                                    <span>🚀</span> Submit Repository untuk Review (+250 XP)
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="takehome-submission-result" class="min-h-[80px] flex items-center justify-center text-center text-xs text-slate-500 font-mono">
+                            Masukkan link repo GitHub di atas dan klik Submit untuk memicu automated code review tim hiring.
+                        </div>
                     </div>
                 </div>
 
-                <!-- ================= TAHAP 4: HIGH TRAFFIC & SCALE ================= -->
-                <div id="scenario-4-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+                <!-- ================= TAHAP 4: PRODUCTION WAR ROOM (STRESS TEST) ================= -->
+                <div id="scenario-4-view" class="hidden bg-dark-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
                     <div class="border-b border-slate-800 pb-4">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-800/40">Tahap 4 &bull; Scale & High Traffic</span>
+                            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-800/40">Tahap 4 &bull; Production War Room Defense</span>
                             <span class="text-xs font-mono text-amber-300 font-semibold">+250 XP Reward</span>
                         </div>
                         <h2 class="text-base font-bold text-white flex items-center gap-2 mt-2">
-                            <span>⚡</span> Misi: Bertahan dari Serbuan Flash Sale Tengah Malam
+                            <span>🔥</span> Production War Room: Flash Sale Stress Test Defense
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Interviewer menguji apakah Anda bisa melindungi 50 kuota voucher terbatas dari serbuan ratusan request konkuren tanpa overselling.</p>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Pewawancara (VP of Engineering): Uji stres langsung di depan dewan eksekutif! Buktikan kuota voucher tidak bocor minus di bawah serbuan 250 request konkuren.
+                        </p>
                     </div>
 
                     <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300 space-y-1.5">
                         <div class="font-semibold text-amber-300 flex items-center gap-1.5">
-                            <span>💡</span> Uji Lulus Tahap 4:
+                            <span>💡</span> Misi Kelulusan War Room (+250 XP Terakhir):
                         </div>
                         <p class="text-[11px] text-slate-400 leading-relaxed">
-                            Pilih <strong>Token Bucket Rate Limiting (Redis DECRBY)</strong> dengan 250 request konkuren ➡️ Buktikan kuota voucher terserap tepat di 0 dan kelebihan request ditolak rapi (429) untuk meraih <strong>+250 XP Terakhir</strong>!
+                            Aktifkan strategi <strong>Token Bucket Rate Limiting (Redis DECRBY)</strong> dengan 250 request konkuren ➡️ Buktikan kuota voucher terserap tepat di 0 dan kelebihan request ditolak rapi (429) untuk membuka <strong>Surat Penawaran Kerja (Offer Letter)</strong>!
                         </p>
                     </div>
 
+                    <!-- Form Pengujian War Room -->
                     <form hx-post="/api/scenarios/04/run" hx-target="#simulation-output-4" hx-swap="innerHTML" class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
@@ -779,15 +985,15 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <span class="text-[11px] text-slate-400">Rate Limiter burst max: <strong>40 RPS</strong></span>
+                            <span class="text-[11px] text-slate-400">War Room Rate Limiter burst max: <strong>40 RPS</strong></span>
                             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-bold transition shadow-lg shadow-amber-950/60 active:scale-95">
-                                <span>▶</span> Selesaikan Ujian Tahap 4
+                                <span>🔥</span> Luncurkan Simulasi War Room Stress Test
                             </button>
                         </div>
                     </form>
 
                     <div id="simulation-output-4" class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 font-mono min-h-[90px] flex items-center justify-center text-center">
-                        Pilih mode di atas dan klik tombol eksekusi untuk menyelesaikan misi Tahap 4.
+                        Pilih strategi di atas dan klik tombol eksekusi untuk menyelesaikan misi War Room Tahap 4.
                     </div>
                 </div>
 

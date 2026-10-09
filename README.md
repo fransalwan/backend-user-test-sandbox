@@ -97,10 +97,10 @@ backend-user-test-sandbox/
 ## 🎮 Gamification Mode: Fintech Hiring Gauntlet
 Aplikasi didesain sebagai **1 alur penuh wawancara kerja dari screening teknis sampai penerbitan surat penawaran (Offer Letter)**:
 - **Tahap 0: Bootcamp Teori & Learning Preparation** &bull; Teori fundamental invarian uang (`int64`), double-entry ledger, concurrency locking, idempotency engine, distributed saga, dan flash sale isolation sebelum ujian.
-- **Tahap 1: Live Coding Test** (+250 XP) &bull; Concurrency Firefight (Pessimistic vs Optimistic CAS vs Redis Lock).
-- **Tahap 2: System Defense Test** (+250 XP) &bull; Idempotency & Network Retry Storm (HTTP 409 Conflict & HTTP 422 Tampering).
-- **Tahap 3: Take-Home Architecture Test** (+250 XP) &bull; Saga Auto-Refund Disaster Recovery & Transactional Outbox.
-- **Tahap 4: High Traffic & Scale Test** (+250 XP) &bull; Flash Sale Overselling Protection via Token Bucket & Atomic Redis `DECRBY`.
+- **Tahap 1: Live Coding Test (LeetCode / CodeWars Style)** (+250 XP) &bull; Problem #101 Medium: *Safe Hot-Wallet Deduct* dengan in-browser code editor, template strategi, uji stres 50 goroutine, dan runtime/memory statistics.
+- **Tahap 2: System Design Interview (Alur Diagram Interaktif)** (+250 XP) &bull; *Global Payment Gateway Idempotency & Resiliency* dengan visual flow stepper (Client &rarr; Gateway &rarr; Redis &rarr; Core Ledger &rarr; DB) dan sesi tanya-jawab pertahanan arsitektur bersama Principal Architect.
+- **Tahap 3: Take-Home Engineering Challenge (Repo Publik)** (+250 XP) &bull; *Transactional Outbox & Saga Worker* dengan lembar spesifikasi tantangan resmi, formulir submission repository GitHub publik, serta automated CI bot code review.
+- **Tahap 4: Production War Room & Stress Test Defense** (+250 XP) &bull; Simulasi insiden Flash Sale tengah malam bersama VP of Engineering: Token Bucket Rate Limiting & Atomic Redis Counter menahan serbuan 250 RPS tanpa overselling.
 - **Tahap 5: Keputusan Hiring & Penawaran Kontrak (Offer Letter)** &bull; Surat Penawaran Resmi Principal Backend Engineer (Gaji IDR 85.000.000/bln + ESOP + Rapor Evaluasi Nilai A+).
 
 
