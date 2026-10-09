@@ -1,0 +1,45 @@
+services:
+  # =========================================================================
+  # 1. PostgreSQL 16: ACID Relational Persistence & Row Locks
+  # =========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: fintech-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: fintech_sandbox
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations/000001_init_schema.up.sql:/docker-entrypoint-initdb.d/000001_init_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fintech_sandbox"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # =========================================================================
+  # 2. Redis 7: In-Flight Lock & Token Bucket Rate Limiter
+  # =========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: fintech-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local

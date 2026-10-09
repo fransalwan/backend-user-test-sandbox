@@ -1,155 +1,166 @@
-# ⚡ Backend User Test Sandbox (Fintech Dojo)
+# 🏛️ Fintech Junior Backend Assessment Sandbox
 
-> A deliberate practice arena ("Dojo") designed specifically for backend engineers to prepare, simulate, and excel in rigorous Fintech technical interviews, live coding sessions, system design assessments, and take-home assignments.
+> **A Production-Grade Technical Interview Sandbox & Competency Pipeline tailored for Junior & Entry-Level Backend Engineers (Fintech & Core Banking Track).**
 
 ---
 
-## 🏛️ Architecture: Modular Monolith (Clean / Hexagonal)
+## 📌 Gambaran Umum & Fokus Entry-Level
 
-The sandbox strictly follows Clean Architecture / Hexagonal Architecture separation of concerns:
+Sandbox ini dirancang khusus untuk memvalidasi dan melatih kompetensi rekayasa perangkat lunak backend tingkat pemula (*Junior / Associate Backend Engineer*) dengan standar industri finansial nyata. Menghindari abstraksi teoritis semata, sandbox ini menyediakan pipeline evaluasi 5 tahap yang dapat dijalankan secara lokal dengan tumpukan teknologi modern: **Go (Golang)**, **PostgreSQL 16**, **Redis 7**, dan **Docker Compose**.
+
+### 🎯 4 Pilar Fundamental yang Diuji:
+1. **Zero-Float Money Invariant**: Representasi saldo dan mutasi finansial wajib menggunakan `int64` (satuan sen terkecil) untuk mengeliminasi kesalahan pembulatan biner IEEE-754.
+2. **ACID Transaction & Concurrency Locking**: Penguncian tingkat baris (*Row-Level Lock*: `SELECT FOR UPDATE`) pada PostgreSQL untuk mencegah *race condition* dan saldo minus (*negative balance overdraft*).
+3. **Idempotency Engine**: Penanganan request berulang dengan status *in-flight collision* (`HTTP 409 Conflict`) dan deteksi anomali mutasi parameter (`HTTP 422 Unprocessable Entity`).
+4. **Clean Architecture & Table-Driven Tests**: Pemisahan tanggung jawab yang terisolasi (*Handler* $\rightarrow$ *Service/Usecase* $\rightarrow$ *Repository*) serta pengujian unit berulang berbasis tabel (*table-driven unit testing*).
+
+---
+
+## 🏛️ Arsitektur Direktori Proyek
 
 ```text
 backend-user-test-sandbox/
-├── .agents/                    # Agent guidance, rules & workflow skills
-│   ├── rules/                  # Personal context, project rules, working rules
-│   └── skills/                 # Agent CLI skills suite
 ├── cmd/
 │   └── sandbox/                # Application entrypoint & HTTP server
 ├── internal/
-│   ├── core/                   # DOMAIN LAYER (Pure Go, ZERO external dependencies)
-│   │   ├── entity/             # Base domain models (Wallet, LedgerEntry, Transaction)
-│   │   ├── port/               # Ports: Repository, Cache, Broker, PaymentGateway
-│   │   └── service/            # Business service use-case interfaces
+│   ├── core/                   # DOMAIN LAYER (Pure Go, tanpa dependensi eksternal)
+│   │   ├── entity/             # Model domain: Wallet, LedgerEntry, Transaction
+│   │   ├── port/               # Interface Port: Repository, Cache, Idempotency
+│   │   └── service/            # Logika bisnis transfer & pembukuan berpasangan
 │   ├── adapter/                # INFRASTRUCTURE LAYER
-│   │   ├── postgres/           # PostgreSQL strict ACID persistence
-│   │   ├── redis/              # Distributed locking & cache engine
-│   │   └── mock/               # Mock external gateways (Payment, Notification)
+│   │   ├── postgres/           # Implementasi persistensi PostgreSQL ACID
+│   │   ├── redis/              # Distributed lock & token bucket engine
+│   │   └── mock/               # Mock external banking gateways
 │   └── delivery/               # PRESENTATION LAYER
-│       └── http/               # HTTP handlers, SSE Hub, embedded templates
-│           └── templates/      # HTMX + Tailwind CSS dashboard UI
-├── scenarios/                  # CORE TRAINING MODULES
-│   ├── 01_race_condition/      # Implemented: Pessimistic vs Optimistic Locking
-│   ├── 02_idempotency/         # Roadmap: Idempotency Keys, Handling Retries
-│   ├── 03_distributed/         # Roadmap: Transactional Outbox & Saga Pattern
-│   └── 04_high_traffic/        # Roadmap: Rate Limiting, Caching, Flash Sales
-├── chaos/                      # Fault injection tools (latency, DB connection drops)
-├── load_tests/                 # Concurrency stress tests with k6
+│       └── http/               # HTTP REST Handlers, SSE Event Stream, Template Views
+│           ├── handler.go      # Handlers & Simulation Business Logic
+│           ├── handler_test.go # Comprehensive Table-Driven Unit Tests
+│           └── templates/      # Dashboard antarmuka HTMX + Tailwind CSS
+├── migrations/                 # Skema DDL Database Terstruktur
+│   ├── 000001_init_schema.up.sql    # DDL Wallets, Transactions, & Ledger
+│   └── 000001_init_schema.down.sql  # Clean rollback script
 ├── docs/
-│   └── interview_qa.md         # Fintech interview questions & principal-level answers
-├── migrations/                 # PostgreSQL DDL migrations with strict constraints
-├── Makefile                    # Automation shortcuts (setup, run, test, lint)
+│   └── interview_qa.md         # Panduan tanya-jawab wawancara teknis backend entry-level
+├── docker-compose.yml          # Local container stack: PostgreSQL 16 & Redis 7
+├── Makefile                    # Perintah otomatisasi lint, test, dan run
 ├── go.mod
 └── README.md
 ```
 
 ---
 
-## 🛠️ Complete Tech Stack
+## 📋 Pipeline Evaluasi Kompetensi Kandidat
 
-| Layer | Technology | Details |
-| :--- | :--- | :--- |
-| **Language** | **Go (Golang 1.27+)** | Concurrency native (*goroutines* & *channels*), zero-allocation design. |
-| **Database** | **PostgreSQL** | Strict ACID compliance, check constraints (`balance >= 0`), row locks. |
-| **Cache & Lock** | **Redis** | Distributed locks (`SETNX`), atomic operations, sliding-window rate limiters. |
-| **Testing** | **Testify + Testcontainers-Go** | Automated integration tests against real Docker containers. |
-| **Load Testing** | **k6** | Concurrency stress testing with 50-500 virtual users. |
-| **Frontend** | **Go `html/template` + HTMX** | Embedded with `//go:embed`, zero Node.js / `node_modules` overhead. |
-| **Styling** | **Tailwind CSS** | Dark-mode fintech styling via lightweight CDN. |
-| **Live Stream** | **Server-Sent Events (SSE)** | Real-time browser streaming of lock acquisition, contention, and audits. |
+Sandbox ini membagi alur penilaian teknis kandidat ke dalam 5 tahapan berbobot standar rekrutmen engineering fintech:
 
----
-
-## 🥊 The 4 Training Scenarios
-
-### ✅ Scenario 01: Concurrency Control & Race Conditions (`scenarios/01_race_condition`)
-- **Fintech Problem**: Concurrent transactions targeting the same wallet at the exact same millisecond.
-- **Interactive Demonstrations**:
-  1. **Naive Read-Modify-Write (Race Hazard ⚠️)**: Demonstrates phantom balance updates and negative balance overdraft.
-  2. **Pessimistic Locking (`SELECT FOR UPDATE` 🔒)**: Strict database row serialization, zero overdraft, guaranteed consistency.
-  3. **Optimistic Locking (Version Check 🔄)**: Atomic compare-and-swap (`WHERE version = v`), exponential backoff retries.
-  4. **Redis Distributed Lock (SETNX 🔑)**: Offloading lock contention from PostgreSQL to Redis.
-
-### ✅ Scenario 02: Idempotency & Network Retries (`scenarios/02_idempotency`)
-- **Fintech Problem**: Network drops, gateway timeouts, and duplicate client retries leading to double-spending.
-- **Interactive Demonstrations**:
-  1. **Tanpa Kunci Idempotensi (Bahaya Double-Spending ⚠️)**: Membuktikan bagaimana retry memotong saldo berlipat ganda.
-  2. **Dengan Kunci Idempotensi (Aman & Idempoten ✅)**: Hanya memproses saldo 1 kali, menyajikan cached response untuk request duplikat.
-  3. **In-Flight Conflict (HTTP 409 ⛔)**: Mencegah collision saat request sebelumnya masih berstatus `PROCESSING`.
-  4. **Verifikasi Hash Payload (HTTP 422 🛑)**: Menggagalkan upaya manipulasi parameter pada kunci idempotensi yang sama.
-
-### ✅ Scenario 03: Distributed Transactions & Outbox Pattern (`scenarios/03_distributed`)
-- **Fintech Problem**: Bahaya Dual-Write saat penarikan dana ke Bank Mitra / Payment Gateway pihak ketiga.
-- **Interactive Demonstrations**:
-  1. **Dual-Write Naif (Bahaya Uang Lenyap ⚠️)**: Membuktikan bagaimana kegagalan API Bank menghilangkan uang nasabah jika tanpa rollback kompensasi.
-  2. **Saga dengan Kompensasi (Auto-Refund ↩️)**: Otomatis memicu *Compensating Transaction* mengembalikan saldo nasabah utuh saat API Bank error 5xx/timeout.
-  3. **Saga Happy Path (Sukses Tuntas 🚀)**: Mutasi saldo atomik bersamaan dengan pencatatan event ke tabel Outbox, hingga outbox event berstatus `PUBLISHED`.
-
-
-### ✅ Scenario 04: High Traffic & Flash Sales (`scenarios/04_high_traffic`)
-- **Fintech Problem**: Serbuan lonjakan request pada promo terbatas (Flash Sale).
-- **Interactive Demonstrations**:
-  1. **Tanpa Rate Limiter (Overselling ⚠️)**: Membuktikan bagaimana serbuan request menjebol kuota voucher menjadi minus.
-  2. **Token Bucket Rate Limiter + Atomic Cache (DECRBY ✅)**: Kuota terserap tepat di 0 dan kelebihan request ditolak rapi dengan HTTP 429 Too Many Requests.
-  3. **Worker Queue Leaky Bucket 📦**: Peredaman lonjakan traffic dengan antrean buffer teratur.
+| Tahap | Modul Evaluasi | Bobot | Fokus Penilaian & Deliverables |
+| :---: | :--- | :---: | :--- |
+| **0** | **Bootcamp Teori & Lab** | Persiapan | Fondasi invarian uang sen (`int64`), *double-entry bookkeeping*, dan lab coding interaktif. |
+| **1** | **Live Coding Algoritma DSA** | **20%** | Implementasi deteksi transaksi duplikat dalam kompleksitas waktu optimal $\mathcal{O}(N)$ Hash Map. |
+| **2** | **System Design Architecture Defense** | **20%** | Mempertahankan arsitektur *Idempotency Storage*, *Double-Entry Ledger*, dan *External Gateway Resiliency*. |
+| **3** | **Clean Architecture Take-Home Submission** | **20%** | Menyerahkan repositori terstruktur, skema SQL Migrations, Docker Compose lokal, dan *table-driven tests*. |
+| **4** | **Production War Room Incident Resiliency** | **20%** | Mengaktifkan *Token Bucket Rate Limiter* (40 RPS) untuk mencegah *thundering herd* dan *database pool exhaustion*. |
+| **5** | **Surat Penawaran Resmi (Offer Letter)** | **20%** | Penerbitan formal Surat Penawaran Kerja A4 resmi (*Junior Backend Engineer*) dengan verifikasi kelulusan 100%. |
 
 ---
 
-## 🎮 Gamification Mode: Fintech Hiring Gauntlet
-Aplikasi didesain sebagai **1 alur penuh wawancara kerja backend fintech dari persiapan teori hingga penawaran kerja resmi**:
-- **Tahap 0: Bootcamp Teori & Learning Lab** &bull; Teori invarian uang (`int64`), double-entry ledger, database row locks (`SELECT FOR UPDATE`), idempotency engine, dan distributed outbox dilengkapi dua lab coding mandiri (DSA Hash Map & State Machine).
-- **Tahap 1: Live Coding Test (Algoritma DSA Finansial)** (+250 XP) &bull; Problem #101: *Financial Transaction Deduplication & Sliding Window Matcher*. Evaluasi otomatis kompleksitas waktu $O(N)$ Hash Map amortized vs $O(N^2)$ TLE hazard.
-- **Tahap 2: System Design Architecture Board (Trade-Off Dilemma)** (+250 XP) &bull; Evaluasi multi-dimensi arsitektur sistem pembayaran: *Idempotency Storage* (Redis atomic lock vs PostgreSQL unique index), *Ledger Data Model* (Double-entry journal vs mutable balance), dan *External Partner Resiliency* (Circuit breaker + asynchronous DLQ).
-- **Tahap 3: Take-Home Engineering Challenge (Repo Publik & Clean Architecture)** (+250 XP) &bull; *Safe Payment Transfer API Service* dengan Clean Architecture (Handler, Service, Repository), Double-Entry Bookkeeping Ledger, transaksi database ACID berpasangan, tombol salin boilerplate otomatis, dan table-driven unit tests.
-- **Tahap 4: Production War Room & Stress Test Defense** (+250 XP) &bull; Skenario insiden mitigasi lonjakan traffic Flash Sale (250 RPS): Token Bucket Rate Limiting menahan thundering herd, melindungi database connection pool, dan menjamin zero overselling (kuota voucher tidak minus).
-- **Tahap 5: Keputusan Hiring & Penawaran Kontrak (Offer Letter)** &bull; Surat Penawaran Kerja Resmi *PT Integrasi Teknologi Pembayaran* untuk posisi **Junior / Associate Backend Engineer** (Gaji Pokok IDR 13.500.000/bln + Tunjangan + Mentorship 1-on-1 + Format Cetak Dokumen Legal Formal A4).
+## 🛠️ Persyaratan Sistem & Tech Stack
 
+- **Go (Golang)**: Versi 1.23+ (Disarankan 1.27)
+- **Docker & Docker Compose**: Untuk menjalankan PostgreSQL 16 & Redis 7 secara lokal
+- **Frontend Dashboard**: Go `html/template` + HTMX (tanpa perlu Node.js atau `npm`)
+- **Real-time Event**: Server-Sent Events (SSE) bawaan Go HTTP standard library
 
 ---
 
-## 🗺️ Roadmap Pengembangan Selanjutnya
+## 🚀 Panduan Menjalankan Sandbox
 
-1. **Fase 2**: Integrasi Real Database (PostgreSQL + Redis + Testcontainers-Go hermetic testing).
-2. **Fase 3**: Scenario 02 (`02_idempotency`) — Idempotency Key Engine, Request Lifecycle, & UI Simulation.
-3. **Fase 4**: Scenario 03 (`03_distributed`) — Transactional Outbox & Saga Orchestrator dengan Compensating Transactions.
-4. **Fase 5**: Scenario 04 (`04_high_traffic`) — Redis Lua Rate Limiting & Hot-Account Caching.
-5. **Fase 6**: Chaos Injection (`chaos/`) & k6 Concurrency Benchmarks (`load_tests/`).
-6. **Fase 7**: Interview Defense & System Design Guide (`docs/interview_qa.md`).
+### 1. Menjalankan Database & Cache Lokal (Docker Compose)
+Jalankan container PostgreSQL 16 dan Redis 7 dengan satu perintah:
 
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-- Go 1.27+ installed
-
-### 2. Run the Sandbox
 ```bash
-# Setup dependencies
-make setup
-
-# Run the server & interactive dashboard
-make run
+docker compose up -d
 ```
 
-Buka di browser:
-👉 **`http://localhost:8080`**
+- **PostgreSQL**: Port `5432` (`postgres:postgres@localhost:5432/fintech_db?sslmode=disable`)
+- **Redis**: Port `6379` (`redis://localhost:6379`)
 
-### 3. Run Automated Tests
+Untuk mematikan container:
 ```bash
-# Run unit & scenario tests
-make test
+docker compose down
+```
 
-# Run tests with Go Race Detector
-make test-race
+### 2. Menjalankan Aplikasi Sandbox
+Jalankan server HTTP lokal:
 
-# Run linter
-make lint
+```bash
+# Melalui Go CLI
+go run ./cmd/sandbox
+
+# Atau jika menggunakan binary yang sudah dikompilasi (Windows)
+.\sandbox.exe
+```
+
+Buka peramban (browser) di alamat:
+👉 **[http://localhost:8080](http://localhost:8080)**
+
+---
+
+## 🧪 Menjalankan Pengujian Otomatis (Unit & Race Tests)
+
+Seluruh pengujian unit mengadopsi pola **Table-Driven Tests** standar Go untuk menguji *edge cases*:
+
+```bash
+# Menjalankan seluruh pengujian unit
+go test -v ./...
+
+# Menjalankan pengujian paket HTTP handler
+go test -v ./internal/delivery/http
+
+# Menjalankan pengujian dengan Go Race Detector
+go test -race ./...
+```
+
+Contoh keluaran pengujian:
+```text
+=== RUN   TestFindDuplicateTransactions_TableDriven
+=== RUN   TestFindDuplicateTransactions_TableDriven/empty_slice
+=== RUN   TestFindDuplicateTransactions_TableDriven/no_duplicates_distinct_hashes
+=== RUN   TestFindDuplicateTransactions_TableDriven/duplicate_found_within_window
+--- PASS: TestFindDuplicateTransactions_TableDriven (0.00s)
+=== RUN   TestHTTP_Endpoints_TableDriven
+=== RUN   TestHTTP_Endpoints_TableDriven/root_dashboard_GET
+=== RUN   TestHTTP_Endpoints_TableDriven/gamification_status_GET
+=== RUN   TestHTTP_Endpoints_TableDriven/takehome_submission_valid_repo_POST
+--- PASS: TestHTTP_Endpoints_TableDriven (0.01s)
+PASS
+ok      github.com/your-username/backend-user-test-sandbox/internal/delivery/http       0.045s
 ```
 
 ---
 
-## 📜 Financial Invariants & Rules
+## 💼 Panduan Wawancara Teknis (Interview Q&A)
 
-1. **Integer Money Representation**: Balances and amounts are strictly stored as `int64` (in cents / smallest currency units). Floating-point arithmetic is forbidden.
-2. **Double-Entry Bookkeeping**: Every fund movement consists of balanced debit and credit entries.
-3. **Immutable Ledgers**: Ledger rows are append-only. Past records are never updated or deleted.
+Tersedia dokumen panduan tanya-jawab mendalam untuk persiapan wawancara teknis di:
+👉 **[`docs/interview_qa.md`](file:///c:/Users/Admin/Desktop/portfolio-opensource/backend-user-test-sandbox/docs/interview_qa.md)**
+
+Topik esensial yang dibahas mencakup:
+1. Alasan mutlak larangan `float64` untuk nominal uang dan representasi `int64` sen.
+2. Perbedaan *Pessimistic Row-Level Lock* (`SELECT FOR UPDATE`) vs *Optimistic Lock* (`version` check).
+3. Siklus *Idempotency Key* (`HTTP 409 Conflict` vs `HTTP 422 Unprocessable Entity`).
+4. Perilaku *Slices vs Arrays* di Go dan filosofi *Explicit Error Handling* (`if err != nil`).
+5. Batas tanggung jawab Clean Architecture (*Handler*, *Usecase/Service*, *Repository*).
+6. Algoritma *Token Bucket* vs *Leaky Bucket* dalam menangani *Thundering Herd*.
+
+---
+
+## 📄 Format Dokumen Cetak Surat Penawaran Kerja (Tahap 5)
+Ketika kandidat menyelesaikan 5 tahap evaluasi, sistem secara otomatis menerbitkan dokumen legal A4:
+- Standar tipografi resmi korporasi: **Times New Roman 12pt** dengan spasi teratur.
+- Kop surat formal, nomor surat keputusan rekrutmen, dan rincian kompensasi bulanan (*IDR 13.500.000* + tunjangan).
+- Fitur cetak langsung (`window.print()`) yang otomatis menyembunyikan navigasi web untuk hasil cetak PDF/kertas A4 bersih.
+
+---
+
+## 📜 Lisensi & Kontribusi
+Proyek ini bersifat open-source dan ditujukan untuk memajukan standar kesiapan teknis para kandidat *Junior Backend Engineer* di ekosistem rekayasa perangkat lunak finansial. Pull requests dan penyempurnaan skenario dipersilakan!

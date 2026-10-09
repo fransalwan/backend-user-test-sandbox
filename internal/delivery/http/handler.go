@@ -150,7 +150,7 @@ func (h *Handler) markStagePassed(stage int, title string) {
 	h.gamifyMu.Unlock()
 
 	if !already {
-		h.hub.Broadcast(fmt.Sprintf("🎖️ [GAMIFIKASI] TAHAP %d LULUS: '%s' (+250 XP Diperoleh!)", stage, title))
+		h.hub.Broadcast(fmt.Sprintf("🎖️ [EVALUASI TEKNIS] TAHAP %d TERVERIFIKASI: '%s' (Kompetensi Disetujui)", stage, title))
 	}
 }
 
@@ -537,23 +537,13 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 	s5 := s1 && s2 && s3 && s4
 	h.gamifyMu.RUnlock()
 
-	totalXP := 0
-	if s0 { totalXP += 150 }
-	if s1 { totalXP += 250 }
-	if s2 { totalXP += 250 }
-	if s3 { totalXP += 250 }
-	if s4 { totalXP += 250 }
-	if s5 { totalXP += 100 }
-
-	maxXP := 1250
-
-	levelTitle := "Tahap 0: Bootcamp Teori & Lab Persiapan"
-	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Persiapan Teori</span>`
+	levelTitle := "Tahap 0: Screening Awal & Lab Fondasi Moneter"
+	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Screening Awal</span>`
 	if s5 {
-		levelTitle = "🏆 LULUS SEMUA TAHAP - SURAT PENAWARAN RESMI TERBIT!"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">OFFER EXTENDED (STRONG HIRE) 🎉</span>`
+		levelTitle = "🏆 EVALUASI TUNTAS - SURAT PENAWARAN RESMI TERBIT!"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">STRONG HIRE APPROVED ✓</span>`
 	} else if s4 {
-		levelTitle = "Tahap 5: Peninjauan Tawaran Kerja (Offer Letter)"
+		levelTitle = "Tahap 5: Peninjauan Tawaran Kerja (Job Offer Letter)"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">Siap Review Penawaran</span>`
 	} else if s3 {
 		levelTitle = "Tahap 4: Production War Room (Flash Sale Rate Limiter & Concurrency Incident)"
@@ -566,7 +556,7 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Arsitektur Terbuka</span>`
 	} else if s0 {
 		levelTitle = "Tahap 1: Live Coding DSA (Financial Transaction Deduplication)"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Bootcamp Lulus ✓</span>`
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Fondasi Terverifikasi ✓</span>`
 	}
 
 	coreStepsCompleted := 0
@@ -585,12 +575,12 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 		passed    bool
 		isCurrent bool
 	}{
-		{0, "📚", "Bootcamp", "Teori & Lab", s0, !s0},
-		{1, "💻", "Tahap 1", "Live Coding", s1, s0 && !s1},
+		{0, "📚", "Tahap 0", "Teori & Lab", s0, !s0},
+		{1, "💻", "Tahap 1", "Live Coding DSA", s1, s0 && !s1},
 		{2, "🏛️", "Tahap 2", "System Design", s2, s1 && !s2},
-		{3, "📦", "Tahap 3", "Take-Home", s3, s2 && !s3},
-		{4, "🔥", "Tahap 4", "War Room", s4, s3 && !s4},
-		{5, "🏆", "Tahap 5", "Offer Letter", s5, s4 && !s5},
+		{3, "📦", "Tahap 3", "Take-Home API", s3, s2 && !s3},
+		{4, "🔥", "Tahap 4", "War Room Incident", s4, s3 && !s4},
+		{5, "📜", "Tahap 5", "Offer Letter", s5, s4 && !s5},
 	}
 
 	var stepperItems strings.Builder
@@ -602,13 +592,13 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 		if step.passed {
 			circleClass = "bg-emerald-600 text-white shadow-md shadow-emerald-950/20 ring-4 ring-emerald-500/20 border border-emerald-400 scale-105"
 			iconDisplay = "✓"
-			statusPill = `<span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">Lulus</span>`
+			statusPill = `<span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">Terverifikasi ✓</span>`
 		} else if step.isCurrent {
 			circleClass = "bg-gradient-to-tr from-teal-600 to-cyan-500 text-white shadow-md ring-4 ring-cyan-500/30 animate-pulse border border-cyan-400 scale-110"
-			statusPill = `<span class="text-[9px] font-bold text-cyan-600 dark:text-cyan-400">Aktif ●</span>`
+			statusPill = `<span class="text-[9px] font-bold text-cyan-600 dark:text-cyan-400">Sedang Dinilai ●</span>`
 		} else {
 			circleClass = "bg-slate-100 dark:bg-dark-850 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 ring-2 ring-slate-200/60 dark:ring-slate-800"
-			statusPill = `<span class="text-[9px] text-slate-400 dark:text-slate-500">Terkunci</span>`
+			statusPill = `<span class="text-[9px] text-slate-400 dark:text-slate-500">Antrean</span>`
 		}
 
 		stepperItems.WriteString(fmt.Sprintf(`
@@ -643,7 +633,7 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Kandidat: Frans Alwan</span>
-                        <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">&bull; Target: Junior / Associate Backend Engineer (Fintech Track)</span>
+                        <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">&bull; Jalur: Junior / Associate Backend Engineer (Fintech Track)</span>
                     </div>
                     <div class="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-0.5">%s</div>
                 </div>
@@ -651,20 +641,20 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 
             <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 border-slate-100 dark:border-slate-800/80 pt-2 sm:pt-0">
                 <div class="sm:text-right">
-                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Total Pengalaman (XP)</div>
-                    <div class="text-lg sm:text-xl font-mono font-extrabold text-slate-900 dark:text-white">%d / %d XP</div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Matriks Kompetensi</div>
+                    <div class="text-lg sm:text-xl font-mono font-extrabold text-slate-900 dark:text-white">%d / 5 Terverifikasi</div>
                 </div>
                 %s
             </div>
         </div>
 
-        <!-- Hiring Journey Stepper Bar (Tahap 0 s/d Tahap 5) -->
+        <!-- Professional Interview Assessment Pipeline Stepper (Tahap 0 s/d Tahap 5) -->
         <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80">
             <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-2 font-medium">
                 <span class="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
-                    <span>🗺️</span> <span>Hiring Journey Stepper (%d dari 5 Misi Wawancara Tuntas)</span>
+                    <span>🗺️</span> <span>Pipeline Penilaian Teknis (%d dari 5 Tahap Terpenuhi)</span>
                 </span>
-                <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">%d%% Menuju Tawaran Kerja</span>
+                <span class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">%d%% Selesai</span>
             </div>
 
             <div class="overflow-x-auto no-scrollbar py-1">
@@ -690,19 +680,19 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
                 });
             }
         </script>
-    </div>`, levelTitle, totalXP, maxXP, statusBadge, coreStepsCompleted, progressPct, stepperItems.String(), progressPct, s0, s1, s2, s3, s4, s5)
+    </div>`, levelTitle, coreStepsCompleted, statusBadge, coreStepsCompleted, progressPct, stepperItems.String(), progressPct, s0, s1, s2, s3, s4, s5)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(html))
 }
 
-// ResetGamification mereset skor dan pencapaian gamifikasi.
+// ResetGamification mereset status evaluasi teknis kandidat.
 func (h *Handler) ResetGamification(w http.ResponseWriter, r *http.Request) {
 	h.gamifyMu.Lock()
 	h.stagePassed = make(map[int]bool)
 	h.gamifyMu.Unlock()
 
-	h.hub.Broadcast("🔄 Progres gamifikasi wawancara telah di-reset kembali ke Tahap 0.")
+	h.hub.Broadcast("🔄 Status evaluasi teknis kandidat telah di-reset kembali ke Tahap 0 (Screening Awal).")
 	h.GetGamificationStatus(w, r)
 }
 
@@ -1040,7 +1030,7 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
             </div>
             <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] text-slate-300 flex items-center justify-between">
                 <span>Kompleksitas Terdeteksi: <strong>%s</strong></span>
-                <span class="text-amber-400">Klik "⚡ Submit (+250 XP)" untuk evaluasi komite resmi!</span>
+                <span class="text-emerald-400">Klik "⚡ Submit Solusi" untuk evaluasi komite resmi!</span>
             </div>
         </div>`, complexityText)
 		_, _ = w.Write([]byte(html))
@@ -1078,14 +1068,14 @@ func (h *Handler) EvalScenario01Code(w http.ResponseWriter, r *http.Request) {
 
 	// Solusi Optimal O(N) Hash Map:
 	h.markStagePassed(1, "Pragmatic DSA Master: Transaction Deduplication O(N)")
-	h.hub.Broadcast("🎉 [DSA Live Runner] STATUS: ACCEPTED! Solusi Deduplikasi Transaksi O(N) Hash Map lolos seluruh 4 test cases dengan runtime 0.7 ms (+250 XP).")
+	h.hub.Broadcast("🎉 [DSA Live Runner] STATUS: ACCEPTED! Solusi Deduplikasi Transaksi O(N) Hash Map lolos seluruh 4 test cases dengan runtime 0.7 ms (Kompetensi Algoritma Terverifikasi).")
 
 	html := `
     <div class="space-y-3 font-mono text-xs">
         <div class="flex items-center justify-between border-b border-emerald-800/60 pb-2">
             <div class="flex items-center gap-2">
                 <span class="text-base font-extrabold text-emerald-400">ACCEPTED ✅</span>
-                <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">+250 XP DIRAIH</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">KOMPETENSI TERVERIFIKASI ✓</span>
             </div>
             <span class="text-emerald-400 font-mono text-[11px]">Runtime: 0.7 ms (Beats 99.6%)</span>
         </div>
@@ -1175,7 +1165,7 @@ func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
 
 	if isStorageValid && isLedgerValid && isFailureValid {
 		h.markStagePassed(2, "Fintech Core System Design Approved")
-		h.hub.Broadcast("🏛️ [System Design] Dewan Arsitek menyetujui desain Core Banking & Idempotency Engine kandidat! Nilai: A+ (+250 XP).")
+		h.hub.Broadcast("🏛️ [System Design] Dewan Arsitek menyetujui desain Core Banking & Idempotency Engine kandidat! Hasil: Memenuhi Standar Kompetensi Arsitektur.")
 
 		html := `
         <div class="p-4 sm:p-5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/70 space-y-3 font-sans text-xs shadow-md">
@@ -1184,7 +1174,7 @@ func (h *Handler) DefendScenario02(w http.ResponseWriter, r *http.Request) {
                     <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
                     <strong class="text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">SYSTEM DESIGN DEFENSE: APPROVED (STRONG HIRE) ✓</strong>
                 </div>
-                <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-300">+250 XP DIRAIH</span>
+                <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">KOMPETENSI TERVERIFIKASI ✓</span>
             </div>
             <div class="text-slate-700 dark:text-slate-200 leading-relaxed text-xs space-y-2">
                 <p>
@@ -1268,7 +1258,7 @@ func (h *Handler) SubmitScenario03Repo(w http.ResponseWriter, r *http.Request) {
                 <span class="w-3 h-3 rounded-full bg-cyan-500 animate-pulse"></span>
                 <strong class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">TAKE-HOME CODE REVIEW: APPROVED (LEVEL ENTRY-READY) ✓</strong>
             </div>
-            <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-300">+250 XP DIRAIH</span>
+            <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">KOMPETENSI TERVERIFIKASI ✓</span>
         </div>
 
         <div class="text-[11px] font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-dark-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 space-y-1">
