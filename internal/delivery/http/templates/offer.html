@@ -220,39 +220,14 @@
                 background: transparent !important;
             }
 
-            /* Sembunyikan garis batas layar agar tidak menambah break halaman */
             .print-page-break {
                 display: none !important;
             }
 
-            /* LEMBAR 1: Persis 1 Lembar A4 Pertama (210mm x 297mm) */
-            .offer-page-1 {
+            /* LEMBAR TUNGGAL A4 RESMI (210mm x 297mm) */
+            .offer-page {
                 page-break-before: avoid !important;
                 break-before: avoid !important;
-                page-break-after: always !important;
-                break-after: page !important;
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
-                width: 210mm !important;
-                height: 296mm !important;
-                max-height: 296mm !important;
-                min-height: 296mm !important;
-                padding: 7mm 13mm 7mm 13mm !important;
-                box-sizing: border-box !important;
-                margin: 0 auto !important;
-                overflow: hidden !important;
-                border: none !important;
-                box-shadow: none !important;
-                background: #ffffff !important;
-            }
-
-            /* LEMBAR 2: Persis 1 Lembar A4 Kedua (210mm x 297mm) */
-            .offer-page-2 {
-                page-break-before: always !important;
-                break-before: page !important;
                 page-break-after: avoid !important;
                 break-after: avoid !important;
                 page-break-inside: avoid !important;
@@ -264,20 +239,15 @@
                 height: 296mm !important;
                 max-height: 296mm !important;
                 min-height: 296mm !important;
-                padding: 7mm 13mm 7mm 13mm !important;
+                padding: 8mm 13mm 6mm 13mm !important;
                 box-sizing: border-box !important;
                 margin: 0 auto !important;
                 overflow: hidden !important;
                 border: none !important;
                 box-shadow: none !important;
                 background: #ffffff !important;
-            }
-
-            /* SKALASI HURUF DINAMIS & PENGATURAN SPASI CETAK KOMPAK */
-            .offer-page {
-                font-size: 7.4pt !important;
-                line-height: 1.22 !important;
-                background: #ffffff !important;
+                font-size: 8.2pt !important;
+                line-height: 1.28 !important;
                 color: #0f172a !important;
             }
 
@@ -285,149 +255,179 @@
                 box-sizing: border-box !important;
             }
 
-            /* Kompresi Spacing Vertikal Print */
+            /* Kompresi Spacing Vertikal Print yang Rapi */
             .offer-page.space-y-4 > :not([hidden]) ~ :not([hidden]),
             .offer-page .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 2.5px !important;
+                margin-top: 3.5px !important;
+            }
+            .offer-page.space-y-3\.5 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-3\.5 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 3px !important;
             }
             .offer-page.space-y-3 > :not([hidden]) ~ :not([hidden]),
             .offer-page .space-y-3 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 2px !important;
+                margin-top: 2.8px !important;
+            }
+            .offer-page.space-y-2\.5 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-2\.5 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 2.2px !important;
             }
             .offer-page.space-y-2 > :not([hidden]) ~ :not([hidden]),
             .offer-page .space-y-2 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 1.5px !important;
+                margin-top: 1.8px !important;
             }
             .offer-page.space-y-1\.5 > :not([hidden]) ~ :not([hidden]),
             .offer-page .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 1.5px !important;
+            }
+            .offer-page.space-y-1 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-1 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 1.2px !important;
             }
+            .offer-page.space-y-0\.5 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 0.8px !important;
+            }
 
-            /* Kop Surat Compact */
+            /* Kop Surat Compact & Jelas */
             .offer-page h1 {
-                font-size: 9.8pt !important;
-                line-height: 1.15 !important;
+                font-size: 11pt !important;
+                line-height: 1.2 !important;
                 margin: 0 !important;
             }
-            .offer-page .w-12.h-12,
-            .offer-page .print\:w-11 {
-                width: 28px !important;
-                height: 28px !important;
-                font-size: 9pt !important;
-                border-radius: 5px !important;
+            .offer-page .company-sub {
+                font-size: 7.8pt !important;
+            }
+            .offer-page .company-addr {
+                font-size: 7pt !important;
+                line-height: 1.2 !important;
+            }
+            .offer-page .kop-logo {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 11pt !important;
+                border-radius: 6px !important;
+            }
+
+            /* Metadata & Nomor Surat */
+            .offer-page .meta-text {
+                font-size: 7.8pt !important;
+                line-height: 1.25 !important;
+            }
+            .offer-page .badge-status {
+                font-size: 7.2pt !important;
+                padding: 1.5px 6px !important;
             }
 
             /* Headings Seksi (I, II, III, IV, V) */
-            .offer-page .font-bold.uppercase {
-                font-size: 7.2pt !important;
-                letter-spacing: 0.04em !important;
+            .offer-page .section-heading {
+                font-size: 8.2pt !important;
+                font-weight: 800 !important;
+                letter-spacing: 0.03em !important;
                 padding-bottom: 1.5px !important;
-                margin-bottom: 1.5px !important;
+                margin-bottom: 2px !important;
+                border-bottom: 1px solid #cbd5e1 !important;
             }
 
-            /* Paragraf & Text */
-            .offer-page p {
-                font-size: 7.2pt !important;
-                line-height: 1.22 !important;
-                margin-bottom: 1.5px !important;
+            /* Paragraf & Text Pembuka */
+            .offer-page p, .offer-page .body-text {
+                font-size: 8pt !important;
+                line-height: 1.3 !important;
+                margin-bottom: 2px !important;
             }
 
             /* Box Card Ketentuan (Bagian I) */
-            .offer-page .grid-cols-2 .p-2.rounded-lg,
-            .offer-page .grid-cols-2 .print\:p-1\.5 {
-                padding: 1.8px 3.5px !important;
+            .offer-page .grid-terms > div {
+                padding: 2.2px 5px !important;
                 border-radius: 4px !important;
             }
-            .offer-page .grid-cols-2 .text-\[9\.5px\] {
-                font-size: 6pt !important;
-                line-height: 1.05 !important;
+            .offer-page .grid-terms .term-lbl {
+                font-size: 6.8pt !important;
+                line-height: 1.1 !important;
             }
-            .offer-page .grid-cols-2 .text-xs,
-            .offer-page .grid-cols-2 .print\:text-\[10\.5px\] {
-                font-size: 7pt !important;
-                line-height: 1.12 !important;
+            .offer-page .grid-terms .term-val {
+                font-size: 8pt !important;
+                line-height: 1.2 !important;
             }
 
             /* Tabel Remunerasi (Bagian II) */
             .offer-page table {
-                font-size: 6.8pt !important;
+                font-size: 7.8pt !important;
                 width: 100% !important;
+                border-collapse: collapse !important;
             }
-            .offer-page table th,
+            .offer-page table th {
+                padding: 2px 4px !important;
+                font-size: 7.6pt !important;
+                background-color: #f1f5f9 !important;
+            }
             .offer-page table td {
-                padding: 1.5px 3.5px !important;
-                line-height: 1.15 !important;
+                padding: 1.8px 4px !important;
+                line-height: 1.2 !important;
             }
 
             /* Scorecard 5 Card (Bagian III) */
-            .offer-page .grid-cols-2.sm\:grid-cols-5 .p-2,
-            .offer-page .grid-cols-2.sm\:grid-cols-5 .print\:p-1 {
-                padding: 1.5px 2px !important;
+            .offer-page .scorecard-grid > div {
+                padding: 2px 3px !important;
+                border-radius: 4px !important;
             }
-            .offer-page .grid-cols-2.sm\:grid-cols-5 .font-black {
-                font-size: 7.2pt !important;
+            .offer-page .scorecard-grid .sc-lbl {
+                font-size: 6.8pt !important;
             }
-            .offer-page .grid-cols-2.sm\:grid-cols-5 .text-\[9px\] {
-                font-size: 6pt !important;
+            .offer-page .scorecard-grid .sc-score {
+                font-size: 8.2pt !important;
+                font-weight: 900 !important;
             }
-            .offer-page .grid-cols-2.sm\:grid-cols-5 .text-\[8px\] {
-                font-size: 5.5pt !important;
+            .offer-page .scorecard-grid .sc-sub {
+                font-size: 6.5pt !important;
             }
 
             /* Tanda Tangan & Stempel (Bagian V) */
             .offer-page #signature-display-box {
-                height: 38px !important;
-                min-height: 38px !important;
+                height: 42px !important;
+                min-height: 42px !important;
             }
             .offer-page #candidate-signature-img {
-                max-height: 36px !important;
+                max-height: 40px !important;
             }
-            .offer-page .pt-6.border-t,
-            .offer-page .pt-2.border-t,
-            .offer-page .border-t.border-slate-400 {
-                padding-top: 1.5px !important;
+            .offer-page .sign-col {
+                font-size: 7.8pt !important;
             }
-            .offer-page .w-20.h-20,
-            .offer-page .print\:w-16 {
-                width: 38px !important;
-                height: 38px !important;
+            .offer-page .w-stamp {
+                width: 44px !important;
+                height: 44px !important;
                 margin-top: 1px !important;
                 margin-bottom: 1px !important;
                 border-width: 1.5px !important;
             }
-            .offer-page .w-20.h-20 div,
-            .offer-page .print\:text-\[6\.5px\] {
-                font-size: 4.5pt !important;
-                line-height: 1.05 !important;
+            .offer-page .w-stamp div {
+                font-size: 5.5pt !important;
+                line-height: 1.1 !important;
             }
-            .offer-page .w-44.mx-auto,
-            .offer-page .w-48.mx-auto,
-            .offer-page .print\:w-40,
-            .offer-page .print\:w-44 {
-                width: 120px !important;
+            .offer-page .sign-line {
+                width: 130px !important;
+                padding-top: 2px !important;
             }
 
             /* Disclaimer Box */
-            .offer-page .p-2\.5.rounded-lg,
-            .offer-page .print\:p-1\.5 {
-                padding: 2px 3.5px !important;
-                font-size: 6pt !important;
-                line-height: 1.15 !important;
+            .offer-page .disclaimer-box {
+                padding: 2.5px 5px !important;
+                font-size: 6.8pt !important;
+                line-height: 1.2 !important;
             }
-            .offer-page .p-2\.5.rounded-lg svg,
-            .offer-page .print\:w-8 {
-                width: 24px !important;
-                height: 24px !important;
+            .offer-page .disclaimer-box svg {
+                width: 26px !important;
+                height: 26px !important;
             }
-            .offer-page .p-2\.5.rounded-lg span {
-                font-size: 5.2pt !important;
+            .offer-page .disclaimer-box span {
+                font-size: 5.8pt !important;
             }
 
             /* Footer Lembar */
-            .offer-page .border-t.border-slate-200 {
-                padding-top: 1.5px !important;
-                margin-top: 1.5px !important;
-                font-size: 6pt !important;
+            .offer-page .page-footer {
+                padding-top: 2px !important;
+                margin-top: 2px !important;
+                font-size: 7.2pt !important;
             }
         }
     </style>
@@ -552,255 +552,224 @@
         </div>
 
         <!-- ================= LEMBAR DOKUMEN RESMI A4 ================= -->
-        <div id="official-offer-letter-doc" class="max-w-4xl mx-auto space-y-8 font-sans text-slate-900">
+        <div id="official-offer-letter-doc" class="max-w-4xl mx-auto font-sans text-slate-900">
             
-            <!-- ========================================================================= -->
-            <!-- ================= LEMBAR 1: KETENTUAN POKOK & KOMPENSASI ================= -->
-            <!-- ========================================================================= -->
-            <div class="offer-page offer-page-1 bg-white border border-slate-300 dark:border-slate-700 shadow-2xl rounded-2xl p-6 sm:p-10 space-y-4 print:p-0 print:border-none print:shadow-none print:rounded-none">
-                <div class="space-y-4 print:space-y-2 flex-1">
+            <!-- ================= LEMBAR TUNGGAL: DOKUMEN KONTRAK & SCORECARD RESMI ================= -->
+            <div class="offer-page bg-white border border-slate-300 dark:border-slate-700 shadow-2xl rounded-2xl p-6 sm:p-8 space-y-3.5 print:p-0 print:border-none print:shadow-none print:rounded-none">
+                <div class="space-y-2.5 print:space-y-1.5 flex-1">
                 
                 <!-- KOP SURAT RESMI PERUSAHAAN -->
-                <div class="border-b-2 border-slate-900 pb-3">
+                <div class="border-b-2 border-slate-900 pb-2">
                     <div class="flex justify-between items-center gap-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-xl shadow-md print:w-11 print:h-11 print:text-lg">
+                        <div class="flex items-center gap-2.5">
+                            <div class="kop-logo w-11 h-11 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-lg shadow-md flex-shrink-0">
                                 ITP
                             </div>
                             <div>
-                                <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase leading-snug print:text-base">
+                                <h1 class="text-base sm:text-lg font-black text-slate-900 tracking-wider uppercase leading-snug">
                                     PT INTEGRASI TEKNOLOGI PEMBAYARAN
                                 </h1>
-                                <div class="text-[11px] font-semibold text-slate-600 print:text-[10px]">
+                                <div class="company-sub text-[11px] font-semibold text-slate-600">
                                     Core Financial Infrastructure &amp; Licensed Payment Gateway
                                 </div>
                             </div>
                         </div>
-                        <div class="text-right text-[10px] text-slate-500 font-mono leading-tight hidden sm:block print:block">
+                        <div class="company-addr text-right text-[10px] text-slate-500 font-mono leading-tight hidden sm:block print:block flex-shrink-0">
                             <div>Treasury Tower Lt. 38, District 8 SCBD</div>
                             <div>Jl. Jend. Sudirman Kav. 52-53, Jakarta 12190</div>
                             <div>Telp: (021) 5088-2600 &bull; www.integrasiteknologi.co.id</div>
                         </div>
                     </div>
-                    <div class="w-full border-b border-slate-300 mt-2.5"></div>
+                    <div class="w-full border-b border-slate-300 mt-2"></div>
                 </div>
 
                 <!-- METADATA & NOMOR SURAT -->
-                <div class="flex justify-between items-start gap-2 text-xs font-mono pt-1">
-                    <div class="space-y-0.5 text-[11px] print:text-[10px]">
+                <div class="flex justify-between items-start gap-2 text-xs font-mono pt-0.5">
+                    <div class="space-y-0.5 text-[11px] meta-text">
                         <div><strong class="font-sans">Nomor:</strong> 042/HRD-OFFER/ITP/X/2026</div>
                         <div><strong class="font-sans">Lampiran:</strong> 1 (Satu) Berkas Rincian Kompensasi &amp; Scorecard</div>
                         <div><strong class="font-sans">Perihal:</strong> <strong class="font-sans">SURAT PENAWARAN KERJA (EMPLOYMENT OFFER LETTER)</strong></div>
                     </div>
-                    <div class="text-right text-[11px] print:text-[10px]">
+                    <div class="text-right text-[11px] meta-text flex-shrink-0">
                         <div>Jakarta, {{.LetterDate}}</div>
-                        <div class="text-[10px] font-sans text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded mt-1 border border-emerald-300 inline-block print:py-0 print:px-1.5">
+                        <div class="badge-status text-[10px] font-sans text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded mt-1 border border-emerald-300 inline-block">
                             STATUS: STRONG HIRE (APPROVED)
                         </div>
                     </div>
                 </div>
 
                 <!-- TUJUAN SURAT -->
-                <div class="pt-1 text-xs print:text-[11px]">
+                <div class="pt-0.5 text-xs">
                     <div>Kepada Yth.</div>
-                    <div class="font-bold text-sm text-slate-900 print:text-xs">Sdr. {{.CandidateName}}</div>
-                    <div class="text-slate-600">Kandidat Rekayasa Perangkat Lunak Backend</div>
-                    <div class="text-slate-600">Di Tempat</div>
+                    <div class="font-bold text-sm text-slate-900">Sdr. {{.CandidateName}}</div>
+                    <div class="text-slate-600 text-[11px]">Kandidat Rekayasa Perangkat Lunak Backend &bull; Di Tempat</div>
                 </div>
 
                 <!-- PARAGRAF PEMBUKA -->
-                <div class="leading-relaxed text-justify text-xs text-slate-700 print:text-[11px]">
-                    <p class="mb-1.5">Dengan hormat,</p>
+                <div class="leading-relaxed text-justify text-xs text-slate-700 body-text">
                     <p>
-                        Sehubungan dengan rangkaian evaluasi dan uji kompetensi teknis komprehensif pada program seleksi <strong>Fintech Technical Hiring Assessment</strong> yang telah Saudara selesaikan dengan predikat <strong>Sangat Memuaskan (Evaluasi Teknis 100% Terverifikasi)</strong>, Dewan Rekrutmen Engineering bersama Manajemen <strong>PT Integrasi Teknologi Pembayaran</strong> dengan sukacita menyampaikan penawaran kerja resmi kepada Saudara untuk bergabung bersama kami.
+                        Sehubungan dengan kelulusan seluruh tahapan evaluasi dan uji kompetensi teknis komprehensif pada program seleksi <strong>Fintech Technical Hiring Assessment</strong> dengan predikat <strong>Sangat Memuaskan (Evaluasi Teknis 100% Terverifikasi)</strong>, Dewan Rekrutmen Engineering bersama Manajemen <strong>PT Integrasi Teknologi Pembayaran</strong> dengan bangga menyampaikan penawaran kerja resmi kepada Saudara:
                     </p>
                 </div>
 
                 <!-- KETENTUAN POKOK PENUGASAN -->
-                <div class="space-y-1.5 pt-1">
-                    <div class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                <div class="space-y-1">
+                    <div class="section-heading font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
                         I. Ketentuan Pokok Jabatan &amp; Hubungan Kerja
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs print:text-[10.5px]">
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                            <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Posisi / Jabatan</span>
-                            <span class="font-bold text-slate-900 text-xs">{{.PositionTitle}}</span>
+                    <div class="grid grid-cols-2 gap-1.5 text-xs grid-terms">
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <span class="term-lbl text-slate-500 block text-[9.5px] uppercase font-semibold">Posisi / Jabatan</span>
+                            <span class="term-val font-bold text-slate-900 text-xs">{{.PositionTitle}}</span>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                            <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Unit Kerja / Divisi</span>
-                            <span class="font-bold text-slate-900 text-xs">Core Payment Platform &amp; Settlement</span>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <span class="term-lbl text-slate-500 block text-[9.5px] uppercase font-semibold">Unit Kerja / Divisi</span>
+                            <span class="term-val font-bold text-slate-900 text-xs">Core Payment Platform &amp; Settlement</span>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                            <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Status Hubungan Kerja</span>
-                            <span class="font-bold text-slate-900">Perjanjian Kerja Waktu Tidak Tertentu (PKWTT / Tetap)</span>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <span class="term-lbl text-slate-500 block text-[9.5px] uppercase font-semibold">Status Hubungan Kerja</span>
+                            <span class="term-val font-bold text-slate-900">PKWTT (Karyawan Tetap)</span>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                            <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Tanggal Efektif Masuk Kerja</span>
-                            <span class="font-bold text-slate-900 font-mono">{{.EffectiveDate}}</span>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <span class="term-lbl text-slate-500 block text-[9.5px] uppercase font-semibold">Tanggal Efektif Mulai</span>
+                            <span class="term-val font-bold text-slate-900 font-mono">{{.EffectiveDate}}</span>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 col-span-2 print:bg-white print:p-1.5">
-                            <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Lokasi &amp; Skema Kerja</span>
-                            <span class="font-bold text-slate-900">Hybrid Work (Kantor Pusat SCBD Jakarta / Fleksibel Remote) &bull; Laporan ke: Engineering Manager - Core Platform</span>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 col-span-2 print:bg-white">
+                            <span class="term-lbl text-slate-500 block text-[9.5px] uppercase font-semibold">Lokasi &amp; Skema Kerja</span>
+                            <span class="term-val font-bold text-slate-900">Hybrid Work (SCBD Jakarta / Remote Fleksibel) &bull; Laporan ke: Engineering Manager</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- RINCIAN PAKET KOMPENSASI & FASILITAS -->
-                <div class="space-y-1.5 pt-1">
-                    <div class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                <div class="space-y-1">
+                    <div class="section-heading font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
                         II. Paket Kompensasi &amp; Fasilitas Kesejahteraan
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden print:text-[10px]">
+                        <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
                             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 print:bg-slate-50">
                                 <tr>
-                                    <th class="p-2 print:py-1 print:px-2">Komponen Remunerasi</th>
-                                    <th class="p-2 print:py-1 print:px-2">Nominal / Ketentuan</th>
-                                    <th class="p-2 print:py-1 print:px-2">Keterangan</th>
+                                    <th class="p-1.5">Komponen Remunerasi</th>
+                                    <th class="p-1.5">Nominal / Ketentuan</th>
+                                    <th class="p-1.5">Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200">
                                 <tr>
-                                    <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">1. Gaji Pokok Bulanan (Gross)</td>
-                                    <td class="p-2 font-mono font-bold text-emerald-700 print:py-1 print:px-2">{{.BaseSalary}}</td>
-                                    <td class="p-2 text-slate-600 print:py-1 print:px-2">Dibayarkan setiap tanggal 25 per bulan</td>
+                                    <td class="p-1.5 font-semibold text-slate-900">1. Gaji Pokok Bulanan (Gross)</td>
+                                    <td class="p-1.5 font-mono font-bold text-emerald-700">{{.BaseSalary}}</td>
+                                    <td class="p-1.5 text-slate-600">Dibayarkan setiap tanggal 25 per bulan</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">2. Tunjangan Transport &amp; Komunikasi</td>
-                                    <td class="p-2 font-mono font-bold text-slate-900 print:py-1 print:px-2">{{.Allowance}}</td>
-                                    <td class="p-2 text-slate-600 print:py-1 print:px-2">Tunjangan tetap operasional bulanan</td>
+                                    <td class="p-1.5 font-semibold text-slate-900">2. Tunjangan Transport &amp; Komunikasi</td>
+                                    <td class="p-1.5 font-mono font-bold text-slate-900">{{.Allowance}}</td>
+                                    <td class="p-1.5 text-slate-600">Tunjangan tetap operasional bulanan</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">3. Tunjangan Hari Raya (THR)</td>
-                                    <td class="p-2 font-mono text-slate-900 print:py-1 print:px-2">1 (Satu) Bulan Gaji</td>
-                                    <td class="p-2 text-slate-600 print:py-1 print:px-2">Sesuai regulasi ketenagakerjaan RI</td>
+                                    <td class="p-1.5 font-semibold text-slate-900">3. Tunjangan Hari Raya (THR)</td>
+                                    <td class="p-1.5 font-mono text-slate-900">1 (Satu) Bulan Gaji</td>
+                                    <td class="p-1.5 text-slate-600">Sesuai regulasi ketenagakerjaan RI</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">4. Jaminan Sosial &amp; Asuransi</td>
-                                    <td class="p-2 text-slate-900 print:py-1 print:px-2">BPJS TK + BPJS Kes Kelas 1</td>
-                                    <td class="p-2 text-slate-600 print:py-1 print:px-2">Plus asuransi swasta rawat inap &amp; jalan</td>
+                                    <td class="p-1.5 font-semibold text-slate-900">4. Jaminan Sosial &amp; Asuransi</td>
+                                    <td class="p-1.5 text-slate-900">BPJS TK + Kesehatan Kelas 1</td>
+                                    <td class="p-1.5 text-slate-600">Plus asuransi swasta rawat inap &amp; jalan</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">5. Perangkat Kerja (Workstation)</td>
-                                    <td class="p-2 text-slate-900 print:py-1 print:px-2">MacBook Pro Apple Silicon M-Series</td>
-                                    <td class="p-2 text-slate-600 print:py-1 print:px-2">Inventaris kantor + budget home-office</td>
+                                    <td class="p-1.5 font-semibold text-slate-900">5. Perangkat Kerja (Workstation)</td>
+                                    <td class="p-1.5 text-slate-900">MacBook Pro Apple Silicon M-Series</td>
+                                    <td class="p-1.5 text-slate-600">Inventaris kantor + budget home-office</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">6. Pelatihan &amp; Mentorship Khusus</td>
-                                    <td class="p-2 text-slate-900 print:py-1 print:px-2">6 Bulan 1-on-1 Senior Mentorship</td>
-                                    <td class="p-2 text-slate-600 print:py-1 print:px-2">Budget pembelajaran Rp 10.000.000,- / thn</td>
+                                    <td class="p-1.5 font-semibold text-slate-900">6. Pelatihan &amp; Mentorship Khusus</td>
+                                    <td class="p-1.5 text-slate-900">6 Bulan 1-on-1 Mentorship</td>
+                                    <td class="p-1.5 text-slate-600">Budget pembelajaran Rp 10.000.000,- / thn</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                </div>
-
-                <!-- FOOTER LEMBAR 1 -->
-                <div class="border-t border-slate-200 pt-2 flex justify-between items-center text-[9.5px] text-slate-400 font-mono flex-shrink-0">
-                    <span>PT Integrasi Teknologi Pembayaran &bull; Dokumen Rahasia (Strictly Confidential)</span>
-                    <span class="font-bold">Halaman 1 dari 2</span>
-                </div>
-            </div>
-
-            <!-- PEMISAH HALAMAN UNTUK LAYAR WEB & CETAK -->
-            <div class="print-page-break my-4 border-b-2 border-dashed border-slate-300 dark:border-slate-700 text-center text-[11px] text-slate-400 font-mono py-1 print:border-none print:py-0 print:my-0">
-                <span class="no-print bg-white dark:bg-dark-850 px-3 py-1 rounded-full border border-slate-300 dark:border-slate-700 shadow-sm">
-                    📄 Batas Halaman 1 &bull; Bersambung ke Halaman 2 (Scorecard &amp; Pengesahan)
-                </span>
-            </div>
-
-            <!-- ========================================================================= -->
-            <!-- ================= LEMBAR 2: SCORECARD & PENGESAHAN RESMI ================= -->
-            <!-- ========================================================================= -->
-            <div class="offer-page offer-page-2 bg-white border border-slate-300 dark:border-slate-700 shadow-2xl rounded-2xl p-6 sm:p-10 space-y-4 print:p-0 print:border-none print:shadow-none print:rounded-none">
-                <div class="space-y-3.5 print:space-y-1.5 flex-1">
-                
-                <!-- HEADER LEMBAR 2 -->
-                <div class="border-b border-slate-300 pb-2 flex justify-between items-center text-[10px] text-slate-500 font-mono">
-                    <span class="font-bold uppercase tracking-wider text-slate-800">PT INTEGRASI TEKNOLOGI PEMBAYARAN</span>
-                    <span>Lampiran Surat No: 042/HRD-OFFER/ITP/X/2026</span>
-                </div>
 
                 <!-- RAPOR EVALUASI TEKNIS KOMITE -->
-                <div class="space-y-2 pt-1">
-                    <div class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
-                        III. Lampiran Rapor Evaluasi Teknis (Engineering Committee Scorecard)
+                <div class="space-y-1">
+                    <div class="section-heading font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
+                        III. Lampiran Rapor Evaluasi Teknis (Engineering Scorecard)
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-center text-xs print:text-[9.5px]">
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
-                            <div class="text-[9px] text-slate-500 font-medium">Tahap 1: Online DSA</div>
-                            <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                            <div class="text-[8px] text-slate-500 mt-0.5">Deduplication O(N)</div>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-center text-xs scorecard-grid">
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <div class="sc-lbl text-[9px] text-slate-500 font-medium">Tahap 1: DSA</div>
+                            <div class="sc-score font-black text-emerald-700 text-xs mt-0.5">NILAI: A (100)</div>
+                            <div class="sc-sub text-[8px] text-slate-500 mt-0.5">Deduplication O(N)</div>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
-                            <div class="text-[9px] text-slate-500 font-medium">Tahap 2: System Design</div>
-                            <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                            <div class="text-[8px] text-slate-500 mt-0.5">Idempotency &amp; Ledger</div>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <div class="sc-lbl text-[9px] text-slate-500 font-medium">Tahap 2: Sys Design</div>
+                            <div class="sc-score font-black text-emerald-700 text-xs mt-0.5">NILAI: A (100)</div>
+                            <div class="sc-sub text-[8px] text-slate-500 mt-0.5">Idempotency Ledger</div>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
-                            <div class="text-[9px] text-slate-500 font-medium">Tahap 3: Take-Home API</div>
-                            <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                            <div class="text-[8px] text-slate-500 mt-0.5">ACID DB &amp; Table Tests</div>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <div class="sc-lbl text-[9px] text-slate-500 font-medium">Tahap 3: Take-Home</div>
+                            <div class="sc-score font-black text-emerald-700 text-xs mt-0.5">NILAI: A (100)</div>
+                            <div class="sc-sub text-[8px] text-slate-500 mt-0.5">ACID DB &amp; Tests</div>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
-                            <div class="text-[9px] text-slate-500 font-medium">Tahap 4: War Room</div>
-                            <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                            <div class="text-[8px] text-slate-500 mt-0.5">Zero Overselling (429)</div>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white">
+                            <div class="sc-lbl text-[9px] text-slate-500 font-medium">Tahap 4: War Room</div>
+                            <div class="sc-score font-black text-emerald-700 text-xs mt-0.5">NILAI: A (100)</div>
+                            <div class="sc-sub text-[8px] text-slate-500 mt-0.5">Zero Overselling</div>
                         </div>
-                        <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1 col-span-2 sm:col-span-1">
-                            <div class="text-[9px] text-slate-500 font-medium">Tahap 5: Observability</div>
-                            <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                            <div class="text-[8px] text-slate-500 mt-0.5">RCA &amp; Index Scan</div>
+                        <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-200 print:bg-white col-span-2 sm:col-span-1">
+                            <div class="sc-lbl text-[9px] text-slate-500 font-medium">Tahap 5: Observability</div>
+                            <div class="sc-score font-black text-emerald-700 text-xs mt-0.5">NILAI: A (100)</div>
+                            <div class="sc-sub text-[8px] text-slate-500 mt-0.5">RCA &amp; Index Scan</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- KLAUSUL PERSETUJUAN & BATAS WAKTU -->
-                <div class="space-y-2 pt-2">
-                    <div class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
+                <div class="space-y-0.5">
+                    <div class="section-heading font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">
                         IV. Ketentuan Persetujuan &amp; Batas Waktu Penerimaan
                     </div>
-                    <p class="leading-relaxed text-justify text-xs text-slate-700 print:text-[10.5px]">
-                        Surat penawaran kerja ini berlaku selama 7 (tujuh) hari kerja terhitung sejak tanggal diterbitkan. Mohon untuk membubuhkan tanda tangan persetujuan dan mengembalikan salinan dokumen ini kepada Departemen Talent Acquisition sebelum tanggal <strong>{{.ValidUntil}}</strong>. Penawaran ini menjadi batal demi hukum apabila konfirmasi penerimaan tidak diterima melampaui batas waktu tersebut, kecuali disepakati perpanjangan secara tertulis.
+                    <p class="leading-relaxed text-justify text-xs text-slate-700 body-text">
+                        Surat penawaran ini berlaku selama 7 hari kerja. Mohon bubuhkan tanda tangan persetujuan dan kembalikan salinan ini sebelum tanggal <strong>{{.ValidUntil}}</strong>. Penawaran batal demi hukum bila konfirmasi tidak diterima melampaui batas waktu tanpa persetujuan tertulis.
                     </p>
                 </div>
 
                 <!-- PENGESAHAN & TANDA TANGAN RESMI -->
-                <div class="pt-3">
-                    <div class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1 mb-4">
+                <div class="pt-1">
+                    <div class="section-heading font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5 mb-2">
                         V. Pengesahan Dokumen &amp; Pernyataan Persetujuan
                     </div>
 
-                    <div class="grid grid-cols-2 gap-8 text-xs print:text-[10.5px]">
+                    <div class="grid grid-cols-2 gap-6 text-xs">
                         <!-- Kolom Kiri: Calon Karyawan -->
-                        <div class="text-center space-y-2 relative">
-                            <div class="text-[11px] font-semibold text-slate-700 print:text-[10px]">
+                        <div class="text-center space-y-1 relative sign-col">
+                            <div class="text-[11px] font-semibold text-slate-700">
                                 Disetujui dan Diterima Oleh,<br>
                                 <strong class="text-slate-900">Calon Karyawan</strong>
                             </div>
-                            <div id="signature-display-box" class="h-16 flex flex-col items-center justify-center">
-                                <img id="candidate-signature-img" src="" alt="Tanda Tangan" class="hidden max-h-14 max-w-full object-contain mx-auto" />
-                                <button type="button" id="btn-open-sign" onclick="openSignatureModal()" class="no-print text-[10.5px] text-cyan-600 hover:text-cyan-700 font-semibold border border-dashed border-cyan-400 px-3 py-1.5 rounded-lg hover:bg-cyan-50 transition active:scale-95">
+                            <div id="signature-display-box" class="h-12 flex flex-col items-center justify-center">
+                                <img id="candidate-signature-img" src="" alt="Tanda Tangan" class="hidden max-h-11 max-w-full object-contain mx-auto" />
+                                <button type="button" id="btn-open-sign" onclick="openSignatureModal()" class="no-print text-[10px] text-cyan-600 hover:text-cyan-700 font-semibold border border-dashed border-cyan-400 px-2.5 py-1 rounded-lg hover:bg-cyan-50 transition active:scale-95">
                                     ✍️ Bubuhkan Tanda Tangan
                                 </button>
                             </div>
-                            <div class="pt-1 border-t border-slate-400 w-44 mx-auto print:w-40">
-                                <div class="font-bold text-slate-900 text-xs print:text-[11px]" id="candidate-signature-name">{{.CandidateName}}</div>
+                            <div class="border-t border-slate-400 w-44 mx-auto sign-line">
+                                <div class="font-bold text-slate-900 text-xs" id="candidate-signature-name">{{.CandidateName}}</div>
                                 <div class="text-[9.5px] text-slate-500" id="candidate-signature-date">Tanggal: ........................................</div>
                             </div>
                         </div>
 
                         <!-- Kolom Kanan: Pihak Perusahaan -->
-                        <div class="text-center space-y-2 relative">
-                            <div class="text-[11px] font-semibold text-slate-700 print:text-[10px]">
+                        <div class="text-center space-y-1 relative sign-col">
+                            <div class="text-[11px] font-semibold text-slate-700">
                                 Atas Nama Manajemen &amp; Komite Direksi,<br>
                                 <strong class="text-slate-900">PT Integrasi Teknologi Pembayaran</strong>
                             </div>
                             
                             <!-- Stempel Resmi Digital Korporasi -->
-                            <div class="w-20 h-20 mx-auto rounded-full border-2 border-emerald-600/70 flex items-center justify-center text-center p-1 transform -rotate-12 select-none print:w-16 print:h-16">
-                                <div class="text-[7.5px] font-black uppercase text-emerald-700 leading-tight print:text-[6.5px]">
+                            <div class="w-stamp w-14 h-14 mx-auto rounded-full border-2 border-emerald-600/70 flex items-center justify-center text-center p-1 transform -rotate-12 select-none">
+                                <div class="text-[6.5px] font-black uppercase text-emerald-700 leading-tight">
                                     ★ PT ITP ★<br>
                                     TALENT ACQUISITION<br>
                                     OFFICIALLY<br>
@@ -808,8 +777,8 @@
                                 </div>
                             </div>
 
-                            <div class="border-t border-slate-400 w-48 mx-auto pt-1 print:w-44">
-                                <div class="font-bold text-slate-900 text-xs print:text-[11px]">Dr. Ir. Hendra Gunawan, M.T.</div>
+                            <div class="border-t border-slate-400 w-48 mx-auto sign-line">
+                                <div class="font-bold text-slate-900 text-xs">Dr. Ir. Hendra Gunawan, M.T.</div>
                                 <div class="text-[9.5px] text-slate-600 font-medium">Head of People &amp; VP of Engineering</div>
                             </div>
                         </div>
@@ -817,12 +786,12 @@
                 </div>
 
                 <!-- DISCLAIMER & QR CODE VERIFIKASI RESMI -->
-                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[9.5px] text-slate-500 leading-relaxed text-justify print:bg-white print:p-1.5 print:text-[8.5px] flex items-center justify-between gap-3">
+                <div class="disclaimer-box p-2 rounded-lg bg-slate-50 border border-slate-200 text-[9.5px] text-slate-500 leading-relaxed text-justify print:bg-white flex items-center justify-between gap-2.5">
                     <div class="flex-1">
-                        <strong>Catatan Legalitas &amp; Kerahasiaan:</strong> Dokumen ini diterbitkan secara sah dan dilindungi oleh peraturan perundang-undangan ketenagakerjaan Republik Indonesia. Segala rincian paket remunerasi, kompensasi, dan klausul yang tercantum di dalamnya bersifat sangat rahasia (strictly confidential) dan hanya ditujukan kepada pihak penerima yang disebutkan di atas.
+                        <strong>Catatan Legalitas &amp; Kerahasiaan:</strong> Dokumen ini diterbitkan secara sah dan dilindungi regulasi ketenagakerjaan RI. Segala rincian paket kompensasi bersifat sangat rahasia (strictly confidential) dan hanya ditujukan kepada penerima resmi.
                     </div>
-                    <div class="flex-shrink-0 flex flex-col items-center justify-center text-center p-1.5 bg-white border border-slate-300 rounded-lg shadow-sm">
-                        <svg class="w-10 h-10 print:w-8 print:h-8 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center text-center p-1 bg-white border border-slate-300 rounded shadow-sm">
+                        <svg class="w-8 h-8 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <rect x="3" y="3" width="7" height="7" rx="1"></rect>
                             <rect x="14" y="3" width="7" height="7" rx="1"></rect>
                             <rect x="3" y="14" width="7" height="7" rx="1"></rect>
@@ -834,15 +803,15 @@
                             <path d="M14 19h3"></path>
                             <path d="M19 19h2v2h-2z" fill="currentColor"></path>
                         </svg>
-                        <span class="text-[6.5px] font-mono font-bold text-slate-600 block mt-0.5">VERIFIED ASSESSMENT</span>
+                        <span class="text-[6px] font-mono font-bold text-slate-600 block mt-0.5">VERIFIED</span>
                     </div>
                 </div>
                 </div>
 
-                <!-- FOOTER LEMBAR 2 -->
-                <div class="border-t border-slate-200 pt-2 flex justify-between items-center text-[9.5px] text-slate-400 font-mono flex-shrink-0">
+                <!-- FOOTER LEMBAR RESMI -->
+                <div class="page-footer border-t border-slate-300 pt-1.5 flex justify-between items-center text-[9.5px] text-slate-500 font-mono flex-shrink-0">
                     <span>PT Integrasi Teknologi Pembayaran &bull; Dokumen Rahasia (Strictly Confidential)</span>
-                    <span class="font-bold">Halaman 2 dari 2</span>
+                    <span class="font-bold">Halaman 1 dari 1 (Dokumen Sah)</span>
                 </div>
             </div>
 
