@@ -58,26 +58,143 @@
             }
         })();
 
-        // ================= DEDICATED TAB SWITCHER (1 s/d 5) =================
-        function switchScenario(tab) {
+        // ================= PROGRESSION GUARD & DEDICATED TAB SWITCHER =================
+        window.currentPassedStages = { 1: false, 2: false, 3: false, 4: false, 5: false };
+        window.currentActiveTab = 1;
+        window.isReviewerMode = (localStorage.getItem('gauntlet_reviewer_mode') === 'true');
+
+        // Pengecekan apakah tahapan tertentu sudah terbuka untuk diakses
+        function isStageUnlocked(t) {
+            if (window.isReviewerMode) return true;
+            if (t <= 1) return true;
+            // Tahap t terbuka jika tahap sebelumnya (t-1) sudah lulus
+            return !!window.currentPassedStages[t - 1];
+        }
+
+        // Toggle Mode Penguji (Reviewer Mode) untuk membuka seluruh tahapan tanpa syarat
+        function toggleReviewerMode() {
+            window.isReviewerMode = !window.isReviewerMode;
+            localStorage.setItem('gauntlet_reviewer_mode', window.isReviewerMode ? 'true' : 'false');
+            updateReviewerToggleUI();
+            renderNavTabs();
+            showProgressionToast(
+                window.isReviewerMode
+                    ? "🔓 Mode Penguji Aktif: Seluruh tahap ujian dibuka tanpa syarat untuk inspeksi & demonstrasi."
+                    : "🔒 Mode Seleksi Kandidat Aktif: Tahap kembali dikunci berurutan sesuai bukti kelulusan.",
+                window.isReviewerMode ? "info" : "neutral"
+            );
+        }
+
+        function updateReviewerToggleUI() {
+            const btn = document.getElementById('btn-reviewer-mode');
+            if (!btn) return;
+            if (window.isReviewerMode) {
+                btn.className = "text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/50 hover:bg-amber-500/30 transition flex items-center gap-1.5 ml-auto whitespace-nowrap shadow-sm";
+                btn.innerHTML = "<span>🔓 Mode Penguji: Aktif</span>";
+                btn.title = "Klik untuk kembali ke Mode Seleksi Ketat Kandidat";
+            } else {
+                btn.className = "text-[11px] font-semibold px-2.5 py-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-slate-700 transition flex items-center gap-1.5 ml-auto whitespace-nowrap";
+                btn.innerHTML = "<span>🔒 Mode Seleksi: Ketat</span>";
+                btn.title = "Klik untuk mengaktifkan Mode Penguji (Buka semua tahap tanpa syarat)";
+            }
+        }
+
+        // Tampilkan pesan toast interaktif
+        function showProgressionToast(msg, type = 'info') {
+            let container = document.getElementById('gauntlet-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'gauntlet-toast-container';
+                container.className = 'fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            let colorClasses = "bg-slate-900 text-slate-100 border-slate-700 shadow-slate-950/50";
+            if (type === 'warning') {
+                colorClasses = "bg-amber-950/95 text-amber-200 border-amber-600/50 shadow-amber-950/50";
+            } else if (type === 'info') {
+                colorClasses = "bg-emerald-950/95 text-emerald-200 border-emerald-600/50 shadow-emerald-950/50";
+            }
+
+            toast.className = `p-3 rounded-xl border text-xs shadow-lg backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-start gap-2.5 ${colorClasses}`;
+            toast.innerHTML = `<span class="text-base flex-shrink-0">${type === 'warning' ? '⚠️' : (type === 'info' ? '💡' : 'ℹ️')}</span><span class="flex-1 leading-snug">${msg}</span><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white ml-1 font-bold text-sm leading-none">&times;</button>`;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 350);
+            }, 4500);
+        }
+
+        // Render status visual tombol tab navigasi (Aktif / Lulus / Kunci / Siap)
+        function renderNavTabs() {
             const tabs = [1, 2, 3, 4, 5];
             tabs.forEach(t => {
                 const tabBtn = document.getElementById(`tab-scenario-${t}`);
+                const badge = document.getElementById(`tab-badge-${t}`);
                 const view = document.getElementById(`scenario-${t}-view`);
-                if (tabBtn && view) {
-                    if (t === tab) {
-                        tabBtn.className = "flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-md shadow-emerald-950/40 border border-emerald-500/50 transition-all scale-[1.02] whitespace-nowrap flex-shrink-0";
+                const isPassed = !!window.currentPassedStages[t];
+                const isUnlocked = isStageUnlocked(t);
+                const isActive = (t === window.currentActiveTab);
+
+                if (tabBtn) {
+                    if (isActive) {
+                        tabBtn.className = "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-md shadow-emerald-950/40 border border-emerald-500/50 transition-all scale-[1.02] whitespace-nowrap flex-shrink-0 cursor-pointer";
+                    } else if (!isUnlocked) {
+                        // Desain tab terkunci
+                        tabBtn.className = "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-medium rounded-xl bg-slate-100 dark:bg-dark-950/60 text-slate-400 dark:text-slate-600 border border-slate-200/60 dark:border-slate-800/60 transition-all whitespace-nowrap flex-shrink-0 opacity-70 cursor-not-allowed";
+                    } else {
+                        // Desain tab terbuka namun sedang tidak aktif
+                        if (t === 5) {
+                            tabBtn.className = "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-cyan-600 dark:text-cyan-400 hover:bg-slate-100 dark:hover:bg-dark-850 border border-cyan-300 dark:border-cyan-500/30 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer";
+                        } else {
+                            tabBtn.className = "flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0 cursor-pointer";
+                        }
+                    }
+
+                    // Sinkronisasi badge
+                    if (badge) {
+                        if (isPassed) {
+                            badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-0.5 ml-1";
+                            badge.innerHTML = "✓ Lulus";
+                            badge.classList.remove('hidden');
+                        } else if (!isUnlocked) {
+                            badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700 inline-flex items-center gap-0.5 ml-1";
+                            badge.innerHTML = "🔒 Kunci";
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.className = "hidden";
+                            badge.innerHTML = "";
+                        }
+                    }
+                }
+
+                if (view) {
+                    if (isActive) {
                         view.classList.remove('hidden');
                     } else {
-                        if (t === 5) {
-                            tabBtn.className = "flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-amber-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-dark-850 border border-amber-300 dark:border-amber-500/30 transition-all whitespace-nowrap flex-shrink-0";
-                        } else {
-                            tabBtn.className = "flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0";
-                        }
                         view.classList.add('hidden');
                     }
                 }
             });
+        }
+
+        function switchScenario(tab) {
+            if (!isStageUnlocked(tab)) {
+                showProgressionToast(
+                    `🔒 Tahap ${tab} masih terkunci! Anda wajib lulus Tahap ${tab - 1} terlebih dahulu, atau aktifkan 'Mode Penguji' untuk membuka seluruh tahap ujian.`,
+                    'warning'
+                );
+                return;
+            }
+
+            window.currentActiveTab = tab;
+            renderNavTabs();
 
             // Smooth scroll ke atas view jika di mobile
             if (window.innerWidth < 768) {
@@ -88,18 +205,14 @@
 
         // ================= PROGRESS BADGES SINKRONISASI PADA TAB NAVIGASI =================
         function updateNavTabBadges(statusMap) {
-            for (let t = 1; t <= 5; t++) {
-                const badge = document.getElementById(`tab-badge-${t}`);
-                if (!badge) continue;
-                if (statusMap && statusMap[t]) {
-                    badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-0.5 ml-1";
-                    badge.innerHTML = "✓ Lulus";
-                    badge.classList.remove('hidden');
-                } else {
-                    badge.className = "hidden";
-                    badge.innerHTML = "";
-                }
+            if (statusMap) {
+                window.currentPassedStages = statusMap;
             }
+            // Jika tab aktif saat ini tiba-tiba menjadi terkunci (misal setelah tombol reset)
+            if (!isStageUnlocked(window.currentActiveTab)) {
+                window.currentActiveTab = 1;
+            }
+            renderNavTabs();
         }
 
         // Filter Topik Teori di Tahap 0
@@ -702,6 +815,8 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            updateReviewerToggleUI();
+            renderNavTabs();
             setupCodeEditor('live-code-editor', 'livecode-gutter', 'livecode-save-status', 'code_draft_livecode', STARTER_CODE_SKELETON, 'form-live-code');
             setupCodeEditor('bootcamp-livecode-editor', 'bootcamp-livecode-gutter', 'bootcamp-livecode-save-status', 'code_draft_bootcamp_live', BOOTCAMP_STARTER_LIVECODE, 'form-bootcamp-livecode');
             setupCodeEditor('bootcamp-sysdesign-editor', 'bootcamp-sysdesign-gutter', 'bootcamp-sysdesign-save-status', 'code_draft_bootcamp_sys', BOOTCAMP_STARTER_SYSDESIGN, 'form-bootcamp-sysdesign');
@@ -1038,7 +1153,10 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                     <span>📊</span> <span>Tahap 5: Observability &amp; RCA</span>
                     <span id="tab-badge-5" class="hidden"></span>
                 </button>
-                <button hx-post="/api/gamification/reset" hx-target="#gamification-hud-container" class="text-xs text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-3 py-1.5 transition ml-auto whitespace-nowrap">
+                <button id="btn-reviewer-mode" onclick="toggleReviewerMode()" type="button" class="text-[11px] font-semibold px-2.5 py-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-slate-700 transition flex items-center gap-1.5 ml-auto whitespace-nowrap">
+                    <span>🔒 Mode Seleksi: Ketat</span>
+                </button>
+                <button hx-post="/api/gamification/reset" hx-target="#gamification-hud-container" class="text-xs text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-3 py-1.5 transition whitespace-nowrap">
                     Reset Evaluasi
                 </button>
             </div>

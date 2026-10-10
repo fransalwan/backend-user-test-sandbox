@@ -48,6 +48,11 @@
             const icon = document.getElementById('theme-toggle-icon');
             if (icon) icon.textContent = isDark ? '🌙' : '☀️';
         }
+
+        function toggleCustomizeModal() {
+            const modal = document.getElementById('customize-modal');
+            if (modal) modal.classList.toggle('hidden');
+        }
     </script>
     <style>
         /* ================= FORMAT CETAK DOKUMEN RESMI A4 (OFFER LETTER) ================= */
@@ -57,6 +62,7 @@
             footer,
             nav,
             .no-print,
+            #customize-modal,
             button {
                 display: none !important;
             }
@@ -303,6 +309,35 @@
     <!-- Konten Halaman Penawaran Kerja -->
     <main id="main-offer-workspace" class="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-6 space-y-6">
 
+        <!-- ================= LOCK SCREEN BANNER (JIKA BELUM SELESAI 5 TAHAP) ================= -->
+        {{if .IsLocked}}
+        <div class="no-print bg-gradient-to-r from-amber-950/80 via-slate-900 to-amber-950/80 border-2 border-amber-500/80 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3 font-sans text-amber-200">
+            <div class="flex items-center justify-between flex-wrap gap-2 border-b border-amber-500/30 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">🔒</span>
+                    <div>
+                        <strong class="text-sm sm:text-base font-extrabold text-white tracking-wide uppercase">STATUS DOKUMEN: BELUM DITERBITKAN SECARA RESMI</strong>
+                        <div class="text-[11px] text-amber-300">Selesaikan seluruh 5 pengujian teknis untuk membuka pengesahan komite.</div>
+                    </div>
+                </div>
+                <span class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    Progres Anda: {{.StagesPassed}} / {{.TotalStages}} Tahap Lolos
+                </span>
+            </div>
+            <p class="text-xs text-amber-200/90 leading-relaxed">
+                Surat Penawaran Kerja resmi PT Integrasi Teknologi Pembayaran berstatus terkunci untuk menjaga integritas standar kelulusan. Setelah Anda menyelesaikan Tahap 1 s/d Tahap 5 di <strong>Hiring Gauntlet</strong>, dokumen ini akan terbuka otomatis dengan stempel digital resmi.
+            </p>
+            <div class="flex items-center gap-2 pt-1 flex-wrap">
+                <a href="/#scenario-1-view" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs transition shadow-md active:scale-95">
+                    <span>🚀</span> <span>Lanjutkan Hiring Gauntlet (Selesaikan Tahap)</span>
+                </a>
+                <a href="/offer?preview=true" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition active:scale-95">
+                    <span>👁️</span> <span>Mode Penguji: Buka Pratinjau Dokumen (Bypass)</span>
+                </a>
+            </div>
+        </div>
+        {{end}}
+
         <!-- ================= BAR KONTROL & PANDUAN CETAK (NO PRINT) ================= -->
         <div class="no-print bg-white dark:bg-dark-900 border border-emerald-500/40 dark:border-emerald-500/30 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="space-y-1">
@@ -313,20 +348,28 @@
                     <span class="px-2.5 py-1 text-[11px] font-bold rounded-md bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
                         Format Standar A4 (2 Lembar)
                     </span>
+                    {{if .IsPreview}}
+                    <span class="px-2.5 py-1 text-[11px] font-mono font-bold rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/30">
+                        👁️ Mode Pratinjau Penguji (Reviewer Active)
+                    </span>
+                    {{end}}
                 </div>
                 <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                     <span>📜</span> Surat Penawaran Kerja Resmi (Job Offer Letter)
                 </h2>
                 <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Dokumen legal ini diterbitkan secara resmi setelah Saudara <strong>Frans Alwan</strong> menyelesaikan 5 tahapan teknis Fintech Gauntlet dengan skor 100%. Anda dapat langsung mencetaknya atau menyimpannya sebagai file PDF resolusi tinggi.
+                    Dokumen legal ini diterbitkan secara resmi untuk Saudara <strong>{{.CandidateName}}</strong> atas posisi <strong>{{.PositionTitle}}</strong>. Anda dapat mencetaknya langsung, menyimpan ke PDF, atau mengkustomisasi data via tombol di kanan.
                 </p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-                <a href="/#scenario-5-view" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition active:scale-95">
-                    <span>⬅️</span> <span>Kembali ke Gauntlet</span>
+                <button onclick="toggleCustomizeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition active:scale-95">
+                    <span>⚙️</span> <span>Kustomisasi Data</span>
+                </button>
+                <a href="/#scenario-5-view" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-dark-850 hover:bg-slate-200 dark:hover:bg-dark-800 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-300 dark:border-slate-700 transition active:scale-95">
+                    <span>⬅️</span> <span>Gauntlet</span>
                 </a>
                 <button onclick="window.print()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-950/40 active:scale-95">
-                    <span>🖨️</span> <span>Cetak Dokumen Resmi (Print / Save PDF)</span>
+                    <span>🖨️</span> <span>Cetak Dokumen (Print / PDF)</span>
                 </button>
             </div>
         </div>
@@ -372,7 +415,7 @@
                         <div><strong class="font-sans">Perihal:</strong> <strong class="font-sans">SURAT PENAWARAN KERJA (EMPLOYMENT OFFER LETTER)</strong></div>
                     </div>
                     <div class="text-right text-[11px] print:text-[10px]">
-                        <div>Jakarta, 10 Oktober 2026</div>
+                        <div>Jakarta, {{.LetterDate}}</div>
                         <div class="text-[10px] font-sans text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded mt-1 border border-emerald-300 inline-block print:py-0 print:px-1.5">
                             STATUS: STRONG HIRE (APPROVED)
                         </div>
@@ -382,7 +425,7 @@
                 <!-- TUJUAN SURAT -->
                 <div class="pt-1 text-xs print:text-[11px]">
                     <div>Kepada Yth.</div>
-                    <div class="font-bold text-sm text-slate-900 print:text-xs">Sdr. Frans Alwan</div>
+                    <div class="font-bold text-sm text-slate-900 print:text-xs">Sdr. {{.CandidateName}}</div>
                     <div class="text-slate-600">Kandidat Rekayasa Perangkat Lunak Backend</div>
                     <div class="text-slate-600">Di Tempat</div>
                 </div>
@@ -403,7 +446,7 @@
                     <div class="grid grid-cols-2 gap-2 text-xs print:text-[10.5px]">
                         <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
                             <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Posisi / Jabatan</span>
-                            <span class="font-bold text-slate-900 text-xs">Junior / Associate Backend Engineer</span>
+                            <span class="font-bold text-slate-900 text-xs">{{.PositionTitle}}</span>
                         </div>
                         <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
                             <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Unit Kerja / Divisi</span>
@@ -415,7 +458,7 @@
                         </div>
                         <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
                             <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Tanggal Efektif Masuk Kerja</span>
-                            <span class="font-bold text-slate-900 font-mono">1 November 2026</span>
+                            <span class="font-bold text-slate-900 font-mono">{{.EffectiveDate}}</span>
                         </div>
                         <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 col-span-2 print:bg-white print:p-1.5">
                             <span class="text-slate-500 block text-[9.5px] uppercase font-semibold">Lokasi &amp; Skema Kerja</span>
@@ -441,12 +484,12 @@
                             <tbody class="divide-y divide-slate-200">
                                 <tr>
                                     <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">1. Gaji Pokok Bulanan (Gross)</td>
-                                    <td class="p-2 font-mono font-bold text-emerald-700 print:py-1 print:px-2">Rp 13.500.000,-</td>
+                                    <td class="p-2 font-mono font-bold text-emerald-700 print:py-1 print:px-2">{{.BaseSalary}}</td>
                                     <td class="p-2 text-slate-600 print:py-1 print:px-2">Dibayarkan setiap tanggal 25 per bulan</td>
                                 </tr>
                                 <tr>
                                     <td class="p-2 font-semibold text-slate-900 print:py-1 print:px-2">2. Tunjangan Transport &amp; Komunikasi</td>
-                                    <td class="p-2 font-mono font-bold text-slate-900 print:py-1 print:px-2">Rp 1.500.000,-</td>
+                                    <td class="p-2 font-mono font-bold text-slate-900 print:py-1 print:px-2">{{.Allowance}}</td>
                                     <td class="p-2 text-slate-600 print:py-1 print:px-2">Tunjangan tetap operasional bulanan</td>
                                 </tr>
                                 <tr>
@@ -539,7 +582,7 @@
                         IV. Ketentuan Persetujuan &amp; Batas Waktu Penerimaan
                     </div>
                     <p class="leading-relaxed text-justify text-xs text-slate-700 print:text-[10.5px]">
-                        Surat penawaran kerja ini berlaku selama 7 (tujuh) hari kerja terhitung sejak tanggal diterbitkan. Mohon untuk membubuhkan tanda tangan persetujuan dan mengembalikan salinan dokumen ini kepada Departemen Talent Acquisition sebelum tanggal <strong>17 Oktober 2026</strong>. Penawaran ini menjadi batal demi hukum apabila konfirmasi penerimaan tidak diterima melampaui batas waktu tersebut, kecuali disepakati perpanjangan secara tertulis.
+                        Surat penawaran kerja ini berlaku selama 7 (tujuh) hari kerja terhitung sejak tanggal diterbitkan. Mohon untuk membubuhkan tanda tangan persetujuan dan mengembalikan salinan dokumen ini kepada Departemen Talent Acquisition sebelum tanggal <strong>{{.ValidUntil}}</strong>. Penawaran ini menjadi batal demi hukum apabila konfirmasi penerimaan tidak diterima melampaui batas waktu tersebut, kecuali disepakati perpanjangan secara tertulis.
                     </p>
                 </div>
 
@@ -557,7 +600,7 @@
                                 <strong class="text-slate-900">Calon Karyawan</strong>
                             </div>
                             <div class="pt-2 border-t border-slate-400 w-44 mx-auto print:w-40">
-                                <div class="font-bold text-slate-900 text-xs print:text-[11px]">Frans Alwan</div>
+                                <div class="font-bold text-slate-900 text-xs print:text-[11px]">{{.CandidateName}}</div>
                                 <div class="text-[9.5px] text-slate-500">Tanggal: ........................................</div>
                             </div>
                         </div>
@@ -603,6 +646,53 @@
 
     </main>
 
+    <!-- ================= MODAL KUSTOMISASI DATA SURAT ================= -->
+    <div id="customize-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 no-print">
+        <div class="relative bg-white dark:bg-dark-900 border border-slate-300 dark:border-slate-700 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>⚙️</span> <span>Kustomisasi Data Surat Penawaran Kerja</span>
+                </h3>
+                <button type="button" onclick="toggleCustomizeModal()" class="text-slate-400 hover:text-slate-600 text-xs">✕ Tutup</button>
+            </div>
+            <form method="GET" action="/offer" class="space-y-3 text-xs">
+                {{if .IsPreview}}<input type="hidden" name="preview" value="true">{{end}}
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Calon Karyawan:</label>
+                    <input type="text" name="name" value="{{.CandidateName}}" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Posisi / Jabatan:</label>
+                    <input type="text" name="title" value="{{.PositionTitle}}" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Gaji Pokok (Gross):</label>
+                        <input type="text" name="salary" value="{{.BaseSalary}}" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tunjangan Operasional:</label>
+                        <input type="text" name="allowance" value="{{.Allowance}}" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Surat Terbit:</label>
+                        <input type="text" name="date" value="{{.LetterDate}}" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Tanggal Efektif Masuk:</label>
+                        <input type="text" name="effective" value="{{.EffectiveDate}}" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-mono text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="toggleCustomizeModal()" class="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow">Simpan &amp; Terapkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer Standalone -->
     <footer class="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#070b14] py-4 text-center text-xs text-slate-500 transition-colors duration-200 no-print">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -619,4 +709,3 @@
 
 </body>
 </html>
-

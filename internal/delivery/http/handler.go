@@ -1409,10 +1409,88 @@ func (h *Handler) Exercise(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// OfferLetterData menyimpan parameter dinamis surat penawaran kerja resmi.
+type OfferLetterData struct {
+	CandidateName string
+	PositionTitle string
+	BaseSalary    string
+	Allowance     string
+	EffectiveDate string
+	ValidUntil    string
+	LetterDate    string
+	IsLocked      bool
+	StagesPassed  int
+	TotalStages   int
+	IsPreview     bool
+}
+
 // OfferLetter menampilkan surat penawaran kerja resmi pada halaman tersendiri yang siap cetak (A4 printable).
 func (h *Handler) OfferLetter(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := h.offerTmpl.Execute(w, nil); err != nil {
+
+	h.gamifyMu.RLock()
+	passedCount := 0
+	for i := 1; i <= 5; i++ {
+		if h.stagePassed[i] {
+			passedCount++
+		}
+	}
+	allPassed := passedCount == 5
+	h.gamifyMu.RUnlock()
+
+	query := r.URL.Query()
+	isPreview := query.Get("preview") == "true" || query.Get("bypass") == "true" || query.Get("unlocked") == "1"
+
+	candidateName := query.Get("name")
+	if strings.TrimSpace(candidateName) == "" {
+		candidateName = "Frans Alwan"
+	}
+
+	positionTitle := query.Get("title")
+	if strings.TrimSpace(positionTitle) == "" {
+		positionTitle = "Junior / Associate Backend Engineer"
+	}
+
+	baseSalary := query.Get("salary")
+	if strings.TrimSpace(baseSalary) == "" {
+		baseSalary = "Rp 13.500.000,-"
+	}
+
+	allowance := query.Get("allowance")
+	if strings.TrimSpace(allowance) == "" {
+		allowance = "Rp 1.500.000,-"
+	}
+
+	effectiveDate := query.Get("effective")
+	if strings.TrimSpace(effectiveDate) == "" {
+		effectiveDate = "1 November 2026"
+	}
+
+	validUntil := query.Get("valid_until")
+	if strings.TrimSpace(validUntil) == "" {
+		validUntil = "17 Oktober 2026"
+	}
+
+	letterDate := query.Get("date")
+	if strings.TrimSpace(letterDate) == "" {
+		letterDate = "10 Oktober 2026"
+	}
+
+	data := OfferLetterData{
+		CandidateName: candidateName,
+		PositionTitle: positionTitle,
+		BaseSalary:    baseSalary,
+		Allowance:     allowance,
+		EffectiveDate: effectiveDate,
+		ValidUntil:    validUntil,
+		LetterDate:    letterDate,
+		IsLocked:      !allPassed && !isPreview,
+		StagesPassed:  passedCount,
+		TotalStages:   5,
+		IsPreview:     isPreview,
+	}
+
+	if err := h.offerTmpl.Execute(w, data); err != nil {
 		http.Error(w, "Gagal merender surat penawaran kerja", http.StatusInternalServerError)
 	}
 }
