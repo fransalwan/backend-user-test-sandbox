@@ -1,6 +1,31 @@
 services:
   # =========================================================================
-  # 1. PostgreSQL 16: ACID Relational Persistence & Row Locks
+  # 1. Fintech Sandbox Go Web Application (Backend & Assessment Engine)
+  # =========================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintech-app
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgrespassword
+      - DB_NAME=fintech_sandbox
+      - REDIS_ADDR=redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # =========================================================================
+  # 2. PostgreSQL 16: ACID Relational Persistence & Row Locks
   # =========================================================================
   postgres:
     image: postgres:16-alpine
@@ -22,7 +47,7 @@ services:
       retries: 5
 
   # =========================================================================
-  # 2. Redis 7: In-Flight Lock & Token Bucket Rate Limiter
+  # 3. Redis 7: In-Flight Lock & Token Bucket Rate Limiter
   # =========================================================================
   redis:
     image: redis:7-alpine
@@ -43,4 +68,3 @@ volumes:
     driver: local
   redisdata:
     driver: local
-

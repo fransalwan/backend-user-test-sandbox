@@ -215,6 +215,104 @@
             renderNavTabs();
         }
 
+        // ================= INTERVIEW PRESSURE COUNTDOWN TIMER =================
+        const DEFAULT_COUNTDOWN_SECONDS = 45 * 60; // 45 Menit SLA
+        let interviewTimerSeconds = parseInt(localStorage.getItem('gauntlet_timer_seconds') || DEFAULT_COUNTDOWN_SECONDS, 10);
+        let interviewTimerRunning = (localStorage.getItem('gauntlet_timer_running') === 'true');
+        let interviewTimerInterval = null;
+        let hintsUsedCount = parseInt(localStorage.getItem('gauntlet_hints_used') || '0', 10);
+
+        function formatTimer(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerUI() {
+            const display = document.getElementById('interview-countdown-display');
+            const badge = document.getElementById('timer-badge');
+            const btn = document.getElementById('timer-btn-toggle');
+            if (!display) return;
+
+            display.innerText = formatTimer(interviewTimerSeconds);
+
+            // Perubahan visual tekanan mental berdasarkan sisa waktu
+            if (interviewTimerSeconds <= 300) { // < 5 Menit: Merah & Berkedip Kritis
+                display.className = "font-mono text-xl sm:text-2xl font-black tracking-widest text-rose-500 animate-pulse";
+                if (badge) {
+                    badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse";
+                    badge.innerText = "CRITICAL (< 5m)";
+                }
+            } else if (interviewTimerSeconds <= 900) { // < 15 Menit: Kuning Peringatan
+                display.className = "font-mono text-xl sm:text-2xl font-black tracking-widest text-amber-400";
+                if (badge) {
+                    badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40";
+                    badge.innerText = "WARNING (< 15m)";
+                }
+            } else {
+                display.className = "font-mono text-xl sm:text-2xl font-black tracking-widest text-emerald-400";
+                if (badge) {
+                    badge.className = "text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40";
+                    badge.innerText = interviewTimerRunning ? "ACTIVE" : "STANDBY";
+                }
+            }
+
+            if (btn) {
+                if (interviewTimerRunning) {
+                    btn.innerHTML = "<span>⏸ Jeda</span>";
+                    btn.className = "px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-sm active:scale-95";
+                } else {
+                    btn.innerHTML = "<span>▶ Mulai</span>";
+                    btn.className = "px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm active:scale-95";
+                }
+            }
+        }
+
+        function toggleInterviewTimer() {
+            if (interviewTimerRunning) {
+                interviewTimerRunning = false;
+                clearInterval(interviewTimerInterval);
+                localStorage.setItem('gauntlet_timer_running', 'false');
+                showProgressionToast("Timer simulasi wawancara dijeda.", "neutral");
+            } else {
+                interviewTimerRunning = true;
+                localStorage.setItem('gauntlet_timer_running', 'true');
+                startTimerInterval();
+                showProgressionToast("⏱️ Simulasi wawancara dimulai! Targetkan selesai dalam 45 menit.", "info");
+            }
+            updateTimerUI();
+        }
+
+        function startTimerInterval() {
+            clearInterval(interviewTimerInterval);
+            interviewTimerInterval = setInterval(() => {
+                if (interviewTimerSeconds > 0) {
+                    interviewTimerSeconds--;
+                    localStorage.setItem('gauntlet_timer_seconds', interviewTimerSeconds.toString());
+                    updateTimerUI();
+
+                    if (interviewTimerSeconds === 300) {
+                        showProgressionToast("⚠️ Peringatan: Sisa waktu ujian tinggal 5 menit! Segera rampungkan solusi Anda.", "warning");
+                    } else if (interviewTimerSeconds === 0) {
+                        clearInterval(interviewTimerInterval);
+                        interviewTimerRunning = false;
+                        localStorage.setItem('gauntlet_timer_running', 'false');
+                        showProgressionToast("🚨 Waktu wawancara habis! Segera kirimkan hasil kode Anda untuk evaluasi komite.", "warning");
+                    }
+                }
+            }, 1000);
+        }
+
+        function resetInterviewTimer() {
+            interviewTimerRunning = false;
+            clearInterval(interviewTimerInterval);
+            interviewTimerSeconds = DEFAULT_COUNTDOWN_SECONDS;
+            localStorage.setItem('gauntlet_timer_seconds', DEFAULT_COUNTDOWN_SECONDS.toString());
+            localStorage.setItem('gauntlet_timer_running', 'false');
+            updateTimerUI();
+            showProgressionToast("Timer simulasi wawancara di-reset kembali ke 45:00.", "neutral");
+        }
+
         // Filter Topik Teori di Tahap 0
         function filterTheory(topic) {
             const cards = document.querySelectorAll('.theory-card');
@@ -274,6 +372,14 @@ func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string 
                 if (el.classList.contains('hidden')) {
                     el.classList.remove('hidden');
                     if (btn) btn.classList.add('bg-amber-100', 'dark:bg-amber-950/80', 'text-amber-800', 'dark:text-amber-300', 'border-amber-400', 'dark:border-amber-500/50');
+                    hintsUsedCount++;
+                    localStorage.setItem('gauntlet_hints_used', hintsUsedCount.toString());
+                    const badge = document.getElementById('hint-penalty-badge');
+                    if (badge) {
+                        badge.innerText = `⚠️ Penalti Integritas: -${hintsUsedCount * 10}% (${hintsUsedCount} hint dibuka)`;
+                        badge.classList.remove('hidden');
+                    }
+                    showProgressionToast(`💡 Hint ${hintNum} dibuka. Di interview teknis sungguhan, terlalu banyak meminta bantuan mengurangi skor problem solving mandiri.`, 'warning');
                 } else {
                     el.classList.add('hidden');
                     if (btn) btn.classList.remove('bg-amber-100', 'dark:bg-amber-950/80', 'text-amber-800', 'dark:text-amber-300', 'border-amber-400', 'dark:border-amber-500/50');
@@ -817,6 +923,18 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
         document.addEventListener('DOMContentLoaded', function() {
             updateReviewerToggleUI();
             renderNavTabs();
+            updateTimerUI();
+            if (interviewTimerRunning) {
+                startTimerInterval();
+            }
+            // Restore hint penalty badge if hints were used
+            if (hintsUsedCount > 0) {
+                const badge = document.getElementById('hint-penalty-badge');
+                if (badge) {
+                    badge.innerText = `⚠️ Penalti Integritas: -${hintsUsedCount * 10}% (${hintsUsedCount} hint dibuka)`;
+                    badge.classList.remove('hidden');
+                }
+            }
             setupCodeEditor('live-code-editor', 'livecode-gutter', 'livecode-save-status', 'code_draft_livecode', STARTER_CODE_SKELETON, 'form-live-code');
             setupCodeEditor('bootcamp-livecode-editor', 'bootcamp-livecode-gutter', 'bootcamp-livecode-save-status', 'code_draft_bootcamp_live', BOOTCAMP_STARTER_LIVECODE, 'form-bootcamp-livecode');
             setupCodeEditor('bootcamp-sysdesign-editor', 'bootcamp-sysdesign-gutter', 'bootcamp-sysdesign-save-status', 'code_draft_bootcamp_sys', BOOTCAMP_STARTER_SYSDESIGN, 'form-bootcamp-sysdesign');
@@ -1107,26 +1225,86 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
             </div>
         </section>
 
-        <!-- ================= BANNER PANDUAN EKOSISTEM HIRING GAUNTLET ================= -->
-        <div id="banner-ecosystem" class="no-print bg-gradient-to-r from-emerald-950/40 via-teal-950/30 to-slate-900/60 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div class="space-y-1">
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
-                        🏆 Simulasi Ujian Seleksi Resmi (5 Tahapan Teknis)
-                    </span>
-                    <span class="text-xs text-slate-400 hidden sm:inline">Bobot 20% per tahap menuju Surat Penawaran Kerja</span>
+        <!-- ================= PRESSURE TIMER BAR (SIMULASI TEKANAN REAL INTERVIEW) ================= -->
+        <div class="no-print bg-slate-900 border border-slate-800 text-slate-100 rounded-2xl p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-lg">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-lg flex-shrink-0" id="timer-icon">
+                    ⏱️
                 </div>
-                <p class="text-xs text-slate-300">
-                    Selesaikan seluruh 5 pengujian teknis (DSA, Arsitektur, API, Concurrency, hingga Observability &amp; RCA) untuk membuka <strong>Surat Penawaran Kerja (Offer Letter)</strong> resmi di Tahap 5!
-                </p>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">Simulasi Tekanan Waktu Interview</span>
+                        <span id="timer-badge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono">STANDBY</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400">Targetkan lulus seluruh 5 tahap teknis dalam batas SLA 45 Menit sebelum waktu habis.</div>
+                </div>
             </div>
-            <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
-                <a href="/bootcamp" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-semibold border border-cyan-500/30 transition flex items-center gap-1.5">
-                    <span>📚</span> <span>Pelajari Teori di Bootcamp</span>
-                </a>
-                <a href="/exercise" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold border border-amber-500/30 transition flex items-center gap-1.5">
-                    <span>⚡</span> <span>Latih Mental di Exercise Lab</span>
-                </a>
+            <div class="flex items-center gap-3 self-end md:self-center flex-shrink-0">
+                <div class="font-mono text-2xl sm:text-3xl font-black tracking-widest text-emerald-400" id="interview-countdown-display">
+                    45:00
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="timer-btn-toggle" onclick="toggleInterviewTimer()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-sm active:scale-95 flex items-center gap-1.5">
+                        <span>▶ Mulai</span>
+                    </button>
+                    <button type="button" onclick="resetInterviewTimer()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition active:scale-95">
+                        <span>↺ Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 3 PILAR JALUR PEMBELAJARAN & MENTAL PREP ================= -->
+        <div id="learning-track-hub" class="no-print grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Jalur 1 -->
+            <a href="/bootcamp" class="group p-4 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-cyan-500/60 dark:hover:border-cyan-500/60 shadow-sm transition hover:shadow-md flex flex-col justify-between space-y-2">
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 font-mono">JALUR 1 &bull; FOUNDATION</span>
+                        <span class="text-base group-hover:scale-110 transition">📚</span>
+                    </div>
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Fintech Engineering Bootcamp</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Pelajari teori arsitektur core banking, komparasi pola Good vs Bad Practice, dan multi-snippet playground tanpa tekanan waktu.
+                    </p>
+                </div>
+                <div class="text-[11px] font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-1 pt-1">
+                    <span>Masuk Kelas Teori &amp; Bedah Kasus</span> <span>&rarr;</span>
+                </div>
+            </a>
+
+            <!-- Jalur 2 -->
+            <a href="/exercise" class="group p-4 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500/60 dark:hover:border-amber-500/60 shadow-sm transition hover:shadow-md flex flex-col justify-between space-y-2">
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono">JALUR 2 &bull; DRILL REFLEKS</span>
+                        <span class="text-base group-hover:scale-110 transition">⚡</span>
+                    </div>
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Exercise Lab &amp; Refactoring</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Latih refleks perbaikan bug nyata: presisi uang IEEE-754 float ke int64, Redis cache-aside, dan mitigasi goroutine leak.
+                    </p>
+                </div>
+                <div class="text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 pt-1">
+                    <span>Mulai Latihan Refactoring</span> <span>&rarr;</span>
+                </div>
+            </a>
+
+            <!-- Jalur 3 -->
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-dark-900 to-teal-950/30 border border-emerald-500/50 shadow-sm flex flex-col justify-between space-y-2">
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">JALUR 3 &bull; THE REAL GAUNTLET</span>
+                        <span class="text-base">🏆</span>
+                    </div>
+                    <h3 class="text-xs sm:text-sm font-bold text-white">Simulasi Ujian Interview Penuh</h3>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">
+                        Uji mental dan kompetensi Anda di 5 tahapan berurutan di bawah ini untuk membuka Surat Penawaran Kerja (Offer Letter) resmi.
+                    </p>
+                </div>
+                <div class="text-[11px] font-bold text-emerald-400 flex items-center gap-1 pt-1">
+                    <span>Sedang Berlangsung di Bawah Ini</span> <span>&darr;</span>
+                </div>
             </div>
         </div>
 
@@ -1268,7 +1446,10 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                         <!-- Progressive Hints Accordion -->
                         <div class="space-y-2">
                             <div class="flex items-center justify-between gap-1 flex-wrap">
-                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Butuh Bantuan?</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">Butuh Bantuan?</span>
+                                    <span id="hint-penalty-badge" class="hidden text-[10px] font-bold text-amber-600 dark:text-amber-400 font-mono px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 animate-pulse"></span>
+                                </div>
                                 <div class="flex items-center gap-1">
                                     <button type="button" id="hint-btn-1" onclick="toggleHint(1)" class="px-2 py-1 text-[10px] rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition">
                                         💡 Hint 1
@@ -1920,6 +2101,61 @@ func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string 
 
                     <!-- Tempat Output Hasil Evaluasi RCA -->
                     <div id="rca-result-container"></div>
+                </div>
+
+                <!-- ================= RAPOR DEBRIEF KOMPETENSI TECH LEAD ================= -->
+                <div class="no-print bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-7 shadow-lg space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-2xl">📋</span>
+                            <div>
+                                <h3 class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">Rapor Evaluasi Wawancara (Tech Lead Engineering Scorecard)</h3>
+                                <p class="text-[11px] text-slate-500">Hasil verifikasi 5 pilar kompetensi teknis sebelum pengesahan surat penawaran kerja.</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-mono font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">
+                            Status: Strong Hire ★★★★★
+                        </span>
+                    </div>
+
+                    <!-- 5 Competency Pillars Matrix -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs font-mono">
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] text-slate-400 font-sans">1. Algoritma &amp; DSA</div>
+                            <div class="font-bold text-emerald-600 dark:text-emerald-400">O(N) Hash Map</div>
+                            <div class="text-[10px] text-slate-500 font-sans">Zero TLE &bull; Dedup Lolos</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] text-slate-400 font-sans">2. System Design</div>
+                            <div class="font-bold text-teal-600 dark:text-teal-400">Idempotent Core</div>
+                            <div class="text-[10px] text-slate-500 font-sans">Double-entry ledger safe</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] text-slate-400 font-sans">3. Clean API &amp; ACID</div>
+                            <div class="font-bold text-cyan-600 dark:text-cyan-400">Pessimistic Lock</div>
+                            <div class="text-[10px] text-slate-500 font-sans">Zero race condition</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] text-slate-400 font-sans">4. Concurrency Limit</div>
+                            <div class="font-bold text-amber-600 dark:text-amber-400">Token Bucket 40 RPS</div>
+                            <div class="text-[10px] text-slate-500 font-sans">DB pool starvation safe</div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] text-slate-400 font-sans">5. Observability RCA</div>
+                            <div class="font-bold text-purple-600 dark:text-purple-400">Composite Index</div>
+                            <div class="text-[10px] text-slate-500 font-sans">Singleflight stampede cut</div>
+                        </div>
+                    </div>
+
+                    <!-- Catatan Wawancara dari Hiring Manager -->
+                    <div class="p-3.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-300 dark:border-emerald-800/40 text-xs text-slate-700 dark:text-slate-300 space-y-1.5 leading-relaxed font-sans">
+                        <strong class="text-emerald-800 dark:text-emerald-300 block font-bold text-[11px] uppercase tracking-wider font-mono">
+                            💬 Catatan Evaluasi Hiring Manager &amp; Tech Lead:
+                        </strong>
+                        <p>
+                            &ldquo;Kandidat menunjukkan penguasaan kuat terhadap <em>defensive programming</em> pada transaksi moneter, mampu membedakan kebutuhan <em>Pessimistic vs Optimistic Locking</em>, serta memiliki insting investigasi performa database yang terstruktur. Direkomendasikan penuh untuk posisi <strong>Junior / Associate Backend Engineer</strong> di divisi Core Banking &amp; Settlement.&rdquo;
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Dokumen Resmi Kelulusan & Akses Standalone Offer Letter Page -->

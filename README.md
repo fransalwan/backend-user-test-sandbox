@@ -132,6 +132,30 @@ go run ./cmd/sandbox
 Buka peramban (browser) di alamat:
 👉 **[http://localhost:8080](http://localhost:8080)**
 
+### 3. Menjalankan Online via Laptop Sendiri + Cloudflare Tunnel (100% Gratis & Publik)
+Jika Anda ingin membagikan sandbox ini ke interviewer, teman belajar, atau mencobanya langsung dari smartphone tanpa biaya sewa VPS:
+
+1. **Pastikan aplikasi aktif di port 8080**:
+   ```bash
+   .\sandbox.exe
+   # atau via Docker Compose lengkap:
+   docker compose up -d --build
+   ```
+
+2. **Jalankan Cloudflare Tunnel**:
+   ```bash
+   # Melalui Windows Batch Script:
+   .\scripts\tunnel.bat
+
+   # Atau melalui PowerShell:
+   .\scripts\tunnel.ps1
+
+   # Atau langsung melalui CLI:
+   cloudflared tunnel --url http://localhost:8080
+   ```
+
+3. **Akses Publik**: Tautan publik HTTPS (contoh: `https://fintech-sandbox.trycloudflare.com`) akan digenerate secara instan dengan enkripsi SSL resmi dan streaming SSE real-time aktif tanpa perlu registrasi domain atau membuka port router!
+
 ---
 
 ## 🧪 Menjalankan Pengujian Otomatis (Unit & Race Tests)

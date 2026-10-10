@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	deliveryHttp "github.com/fransalwan/backend-user-test-sandbox/internal/delivery/http"
 )
@@ -24,6 +26,7 @@ func main() {
 	mux.HandleFunc("/offer", handler.OfferLetter)
 	mux.HandleFunc("/offer-letter", handler.OfferLetter)
 	mux.HandleFunc("/health", handler.HealthCheck)
+	mux.HandleFunc("/healthz", handler.HealthCheck)
 	mux.HandleFunc("/api/events", handler.EventsStream)
 	mux.HandleFunc("/api/wallets", handler.GetWallets)
 	mux.HandleFunc("/api/wallets/reset", handler.ResetWallets)
@@ -45,8 +48,15 @@ func main() {
 	mux.HandleFunc("/api/exercise/quiz-check", handler.CheckExerciseQuiz)
 	mux.HandleFunc("/api/docs/postman", handler.DownloadPostmanCollection)
 
-	port := ":8080"
-	fmt.Printf("Dashboard aktif di http://localhost%s\n", port)
+	port := os.Getenv("PORT")
+	if strings.TrimSpace(port) == "" {
+		port = "8080"
+	}
+	if !strings.HasPrefix(port, ":") {
+		port = ":" + port
+	}
+
+	fmt.Printf("Dashboard aktif di http://localhost%s (Siap diakses lokal maupun lewat Cloudflare Tunnel)\n", port)
 	if err := http.ListenAndServe(port, mux); err != nil {
 		log.Fatalf("Server gagal berjalan: %v", err)
 	}
