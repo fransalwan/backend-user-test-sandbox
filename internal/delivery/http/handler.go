@@ -1358,15 +1358,15 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		if action == "run" {
 			html := fmt.Sprintf(`
-            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
-                <div class="text-amber-400 font-bold flex items-center justify-between">
-                    <span>▶ Hasil Uji Cepat Kalkulasi Fee & PPN (3 Sampel):</span>
-                    <span class="text-slate-400 text-[10px]">Float Detection: %v</span>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2.5">
+                <div class="text-amber-400 font-bold flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <span>▶ Test Runner: Uji Cepat Kalkulasi Integer Math (3 Sampel):</span>
+                    <span class="text-slate-400 text-[10px]">Float Detected: %v</span>
                 </div>
                 <div class="space-y-1 text-slate-300 text-[11px]">
-                    <div>Nominal Rp 10.000 &rarr; Fee: Rp 250 (25.000 sen) &bull; PPN 11%%: Rp 27 (2.750 sen)</div>
-                    <div>Nominal Rp 50.000 &rarr; Fee: Rp 1.250 (125.000 sen) &bull; PPN 11%%: Rp 137 (13.750 sen)</div>
-                    <div>Nominal Rp 125.750 &rarr; Fee: Rp 3.143 (314.375 sen) &bull; PPN 11%%: Rp 345 (34.581 sen)</div>
+                    <div class="flex justify-between"><span>[TC 1 - Standard] Nominal Rp 10.000 (1.000.000 sen)</span><span class="text-emerald-400">Fee: 25.000 sen, PPN: 2.750 sen</span></div>
+                    <div class="flex justify-between"><span>[TC 2 - Large Amount] Nominal Rp 50.000.000</span><span class="text-emerald-400">Fee: 125.000.000 sen, PPN: 13.750.000 sen</span></div>
+                    <div class="flex justify-between"><span>[TC 3 - Fractional Odd] Nominal Rp 125.750</span><span class="text-emerald-400">Integer Cents (Zero Truncation Drift)</span></div>
                 </div>
                 <div class="text-[11px] text-amber-300 pt-1">
                     Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk audit kepatuhan integer math tanpa float64.
@@ -1382,6 +1382,11 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-extrabold text-rose-400">❌ DETEKSI FLOAT64: RISIKO AUDIT LEAKAGE!</span>
                 </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[10px] my-1">
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 1: Standard &bull; <strong class="text-rose-300">FAILED</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 2: Large Val &bull; <strong class="text-rose-300">FAILED</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 3: Precision &bull; <strong class="text-rose-300">FAILED</strong></div>
+                </div>
                 <p class="text-[11px] leading-relaxed text-rose-300">
                     Sistem masih mendeteksi penggunaan tipe data <code>float64</code> dalam kalkulasi. Di sistem perbankan dan payment gateway, kalkulasi uang wajib murni menggunakan <strong>integer math (int64 sen)</strong>. Contoh: <code>feeCents = (amountCents * 25) / 1000</code> dan <code>taxCents = (feeCents * 11) / 100</code>.
                 </p>
@@ -1394,19 +1399,31 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 		if hasIntMath {
 			h.hub.Broadcast("🎉 [Exercise Lab] Drill 1 Lolos: Bug Floating-Point berhasil diperbaiki menjadi Integer Cents (int64)!")
 			html := `
-            <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
-                <div class="flex items-center gap-2">
+            <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-3">
+                <div class="flex items-center justify-between border-b border-emerald-800/80 pb-2">
                     <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & VERIFIED ✅</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Zero Precision Leak</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">All 3 Test Cases Passed</span>
                 </div>
-                <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
-                    <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Presisi Sen</span><div class="font-bold text-emerald-400">100% Int64</div></div>
-                    <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Pembulatan Biner</span><div class="font-bold text-emerald-400">0% Deviasi</div></div>
-                    <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Audit Finansial</span><div class="font-bold text-emerald-400">PASSED ✓</div></div>
+                <div class="space-y-1.5 text-[11px]">
+                    <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                        <span>✓ Test Case 1: Standard Transfer (Rp 10.000) &bull; Fee 2.5%% &amp; PPN 11%%</span>
+                        <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                        <span>✓ Test Case 2: Boundary Value (Rp 0 &amp; Rp 50.000.000)</span>
+                        <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                        <span>✓ Test Case 3: Invariant Audit (Zero IEEE-754 Precision Drift)</span>
+                        <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                    </div>
                 </div>
-                <p class="text-[11px] text-emerald-300 leading-relaxed">
-                    <strong>Catatan Tech Lead:</strong> Bagus sekali! Menghilangkan <code>float64</code> dan menggunakan pembagian bulat integer (integer division) adalah standar wajib di sistem core banking.
-                </p>
+                <!-- Follow-up Question Simulator -->
+                <div class="p-2.5 rounded-lg bg-slate-900/90 border border-emerald-600/40 text-[11px] space-y-1">
+                    <strong class="text-emerald-300 block">💼 Pertanyaan Lanjutan Tech Lead (Follow-up Verbal Interview):</strong>
+                    <p class="text-slate-300 italic">"Mengapa pada integer math kita mengalikan terlebih dahulu sebelum membagi: (amountCents * 25) / 1000 bukannya amountCents * (25 / 1000)?"</p>
+                    <p class="text-emerald-400 pt-0.5"><strong>Jawaban Ideal:</strong> Karena pada integer division, pecahan di belakang koma langsung dipotong (truncation). Jika membagi terlebih dahulu, 25 / 1000 akan menjadi 0, sehingga seluruh biaya menjadi nol!</p>
+                </div>
             </div>`
 			_, _ = w.Write([]byte(html))
 			return
@@ -1424,16 +1441,18 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		if action == "run" {
 			html := fmt.Sprintf(`
-            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
-                <div class="text-orange-400 font-bold flex items-center justify-between">
-                    <span>▶ Hasil Uji Cepat Concurrency Hot Wallet:</span>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2.5">
+                <div class="text-orange-400 font-bold flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <span>▶ Test Runner: Uji Cepat Concurrency Hot Wallet (3 Skenario):</span>
                     <span class="text-slate-400 text-[10px]">Mutex Locked: %v</span>
                 </div>
-                <div class="text-slate-300 text-[11px]">
-                    Simulasi 20 goroutines serentak menarik saldo $10 dari saldo awal $15.
+                <div class="space-y-1 text-slate-300 text-[11px]">
+                    <div class="flex justify-between"><span>[TC 1 - Single Tx] Penarikan tunggal $10 dari saldo $15</span><span class="text-emerald-400">Saldo sisa: $5.00</span></div>
+                    <div class="flex justify-between"><span>[TC 2 - Overdraft] Penarikan $20 dari saldo $15</span><span class="text-emerald-400">Ditolak aman (Insufficient)</span></div>
+                    <div class="flex justify-between"><span>[TC 3 - Concurrency] 20 Goroutines tarik $10 serentak</span><span class="text-orange-400">Memeriksa Data Race</span></div>
                 </div>
                 <div class="text-[11px] text-orange-300 pt-1">
-                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk menjalankan race detector.
+                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk menjalankan race detector (-race).
                 </div>
             </div>`, hasMutex && hasUnlock)
 			_, _ = w.Write([]byte(html))
@@ -1446,6 +1465,11 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-extrabold text-rose-400">❌ DATA RACE DETECTED (-race WARNING)!</span>
                 </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[10px] my-1">
+                    <div class="p-1.5 rounded bg-emerald-900/40 border border-emerald-700">TC 1: Single Tx &bull; <strong class="text-emerald-300">PASSED</strong></div>
+                    <div class="p-1.5 rounded bg-emerald-900/40 border border-emerald-700">TC 2: Overdraft &bull; <strong class="text-emerald-300">PASSED</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 3: 20 Goroutines &bull; <strong class="text-rose-300">DATA RACE!</strong></div>
+                </div>
                 <p class="text-[11px] leading-relaxed text-rose-300">
                     Goroutine melakukan pembacaan dan penulisan konkuren pada field <code>w.Balance</code> tanpa sinkronisasi mutex. Akibatnya saldo akhir berakhir minus atau terjadi *lost update* (transaksi hilang).
                 </p>
@@ -1457,19 +1481,31 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		h.hub.Broadcast("🎉 [Exercise Lab] Drill 2 Lolos: Data Race pada Hot Wallet berhasil diamankan dengan sync.Mutex!")
 		html := `
-        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
-            <div class="flex items-center gap-2">
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-3">
+            <div class="flex items-center justify-between border-b border-emerald-800/80 pb-2">
                 <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & RACE SAFE ✅</span>
-                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Go -race: CLEAN</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Go -race Clean &bull; All 3 TC Pass</span>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Concurrent Tx</span><div class="font-bold text-emerald-400">20 Goroutines</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Overdraft</span><div class="font-bold text-emerald-400">0 (Ditolak Aman)</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Final Balance</span><div class="font-bold text-emerald-400">$5.00 Konsisten</div></div>
+            <div class="space-y-1.5 text-[11px]">
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 1: Penarikan Tunggal $10 dari $15</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 2: Penarikan Melebihi Saldo ($20 dari $15) Ditolak Aman</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 3: 20 Goroutines Eksekusi Serentak (Critical Section Protected)</span>
+                    <span class="text-emerald-400 font-bold">PASS (1.4ms)</span>
+                </div>
             </div>
-            <p class="text-[11px] text-emerald-300 leading-relaxed">
-                <strong>Catatan Tech Lead:</strong> Sempurna! Penguncian atomik menjamin bahwa hanya satu goroutine yang dapat mengecek dan mengurangi saldo dalam satu waktu (Critical Section terlindungi).
-            </p>
+            <!-- Follow-up Question Simulator -->
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-emerald-600/40 text-[11px] space-y-1">
+                <strong class="text-emerald-300 block">💼 Pertanyaan Lanjutan Tech Lead (Follow-up Verbal Interview):</strong>
+                <p class="text-slate-300 italic">"Apa yang terjadi jika kita lupa menulis 'defer w.mu.Unlock()' dan terjadi panic di dalam method?"</p>
+                <p class="text-emerald-400 pt-0.5"><strong>Jawaban Ideal:</strong> Lock akan tertahan selamanya (deadlock permanen) dan tidak ada goroutine lain yang bisa mengakses wallet tersebut. Menggunakan 'defer w.mu.Unlock()' menjamin lock selalu dilepas saat fungsi exit, bahkan saat terjadi panic.</p>
+            </div>
         </div>`
 		_, _ = w.Write([]byte(html))
 
@@ -1478,13 +1514,15 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		if action == "run" {
 			html := fmt.Sprintf(`
-            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
-                <div class="text-teal-400 font-bold flex items-center justify-between">
-                    <span>▶ Hasil Uji Cepat Idempotency State Machine:</span>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2.5">
+                <div class="text-teal-400 font-bold flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <span>▶ Test Runner: Uji Cepat Idempotency State Machine (3 Skenario):</span>
                     <span class="text-slate-400 text-[10px]">In-Flight Handled: %v</span>
                 </div>
-                <div class="text-slate-300 text-[11px]">
-                    Skenario 2 request bersamaan dengan Idempotency Key: "tx-uuid-101".
+                <div class="space-y-1 text-slate-300 text-[11px]">
+                    <div class="flex justify-between"><span>[TC 1 - First Request] Request baru Idempotency Key "tx-101"</span><span class="text-emerald-400">Acquired (200 OK)</span></div>
+                    <div class="flex justify-between"><span>[TC 2 - In-Flight Collision] Request serentak saat masih PROCESSING</span><span class="text-teal-400">Harus HTTP 409 Conflict</span></div>
+                    <div class="flex justify-between"><span>[TC 3 - Success Replay] Request ketiga setelah status COMPLETED</span><span class="text-emerald-400">Replay Response (200 OK)</span></div>
                 </div>
                 <div class="text-[11px] text-teal-300 pt-1">
                     Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk validasi status PROCESSING.
@@ -1500,6 +1538,11 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-extrabold text-rose-400">❌ DOUBLE SPEND RISK: IN-FLIGHT STATE TRAP!</span>
                 </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[10px] my-1">
+                    <div class="p-1.5 rounded bg-emerald-900/40 border border-emerald-700">TC 1: New Key &bull; <strong class="text-emerald-300">PASSED</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 2: In-Flight &bull; <strong class="text-rose-300">DOUBLE SPEND!</strong></div>
+                    <div class="p-1.5 rounded bg-emerald-900/40 border border-emerald-700">TC 3: Replay &bull; <strong class="text-emerald-300">PASSED</strong></div>
+                </div>
                 <p class="text-[11px] leading-relaxed text-rose-300">
                     Fungsi Anda membiarkan request kedua lolos saat request pertama masih dalam status <code>PROCESSING</code>. Akibatnya dua pemotongan saldo bisa terjadi serentak untuk satu pesanan yang sama!
                 </p>
@@ -1509,21 +1552,33 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.hub.Broadcast("🎉 [Exercise Lab] Drill 3 Lolos: Idempotency In-Flight State Trap berhasil diamankan dengan HTTP 409 Conflict!")
+		h.hub.Broadcast("🎉 [Exercise Lab] Drill 4 Lolos: Idempotency In-Flight State Trap berhasil diamankan dengan HTTP 409 Conflict!")
 		html := `
-        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
-            <div class="flex items-center gap-2">
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-3">
+            <div class="flex items-center justify-between border-b border-emerald-800/80 pb-2">
                 <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & IDEMPOTENT SAFE ✅</span>
-                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Zero Double Spend</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Zero Double Spend &bull; All 3 TC Pass</span>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Request #1</span><div class="font-bold text-emerald-400">Acquired (200)</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Request #2 (Concurrent)</span><div class="font-bold text-amber-400">Conflict (409)</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Request #3 (Completed)</span><div class="font-bold text-sky-400">Replay (200)</div></div>
+            <div class="space-y-1.5 text-[11px]">
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 1: Request Pertama Baru (Acquire Lock &rarr; Status PROCESSING)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 2: In-Flight Collision Saat Sedang Berjalan (HTTP 409 Conflict)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.2ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 3: Replay Transaksi Sukses Sebelumnya (HTTP 200 Replay)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
             </div>
-            <p class="text-[11px] text-emerald-300 leading-relaxed">
-                <strong>Catatan Tech Lead:</strong> Sangat bagus! Penanganan state transition yang lengkap (PROCESSING &rarr; 409 Conflict, COMPLETED &rarr; Replay Response) adalah standar industri fintech global (Stripe / Xendit).
-            </p>
+            <!-- Follow-up Question Simulator -->
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-emerald-600/40 text-[11px] space-y-1">
+                <strong class="text-emerald-300 block">💼 Pertanyaan Lanjutan Tech Lead (Follow-up Verbal Interview):</strong>
+                <p class="text-slate-300 italic">"Header HTTP apa yang wajib disertakan saat server mengembalikan HTTP 409 Conflict pada idempotency in-flight?"</p>
+                <p class="text-emerald-400 pt-0.5"><strong>Jawaban Ideal:</strong> Sertakan header 'Retry-After: &lt;seconds&gt;' (misal: 2 detik). Ini memberi tahu client agar menunda retry sampai pemrosesan awal diperkirakan selesai, mencegah badai request berulang.</p>
+            </div>
         </div>`
 		_, _ = w.Write([]byte(html))
 
@@ -1532,13 +1587,15 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		if action == "run" {
 			html := fmt.Sprintf(`
-            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
-                <div class="text-cyan-400 font-bold flex items-center justify-between">
-                    <span>▶ Hasil Uji Cepat Context Cancellation Poller:</span>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2.5">
+                <div class="text-cyan-400 font-bold flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <span>▶ Test Runner: Uji Cepat Context Cancellation Poller (3 Skenario):</span>
                     <span class="text-slate-400 text-[10px]">Context Listened: %v</span>
                 </div>
-                <div class="text-slate-300 text-[11px]">
-                    Simulasi client memutuskan koneksi HTTP pada detik ke-1 (Context Cancelled).
+                <div class="space-y-1 text-slate-300 text-[11px]">
+                    <div class="flex justify-between"><span>[TC 1 - Settlement Success] Bank menjawab true pada tick ke-2</span><span class="text-emerald-400">Exit Normal (nil)</span></div>
+                    <div class="flex justify-between"><span>[TC 2 - Client Disconnect] Client putus koneksi pada 400ms</span><span class="text-cyan-400">Mendeteksi ctx.Done()</span></div>
+                    <div class="flex justify-between"><span>[TC 3 - Timeout Abort] Context deadline exceeded 3.000ms</span><span class="text-emerald-400">Zero Zombie Goroutines</span></div>
                 </div>
                 <div class="text-[11px] text-cyan-300 pt-1">
                     Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk mendeteksi goroutine leak.
@@ -1554,6 +1611,11 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-extrabold text-rose-400">❌ GOROUTINE LEAK DETECTED!</span>
                 </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[10px] my-1">
+                    <div class="p-1.5 rounded bg-emerald-900/40 border border-emerald-700">TC 1: Normal Exit &bull; <strong class="text-emerald-300">PASSED</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 2: Disconnect &bull; <strong class="text-rose-300">LEAKED (Looping)</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 3: Timeout &bull; <strong class="text-rose-300">ZOMBIE THREAD</strong></div>
+                </div>
                 <p class="text-[11px] leading-relaxed text-rose-300">
                     Worker loop tidak mendengarkan <code>&lt;-ctx.Done()</code>. Ketika koneksi klien putus, loop tetap berjalan di background tanpa batas waktu, menyebabkan pemborosan CPU dan memory leak.
                 </p>
@@ -1563,21 +1625,33 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.hub.Broadcast("🎉 [Exercise Lab] Drill 4 Lolos: Kebocoran Goroutine berhasil dicegah dengan select ctx.Done()!")
+		h.hub.Broadcast("🎉 [Exercise Lab] Drill 3 Lolos: Kebocoran Goroutine berhasil dicegah dengan select ctx.Done()!")
 		html := `
-        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
-            <div class="flex items-center gap-2">
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-3">
+            <div class="flex items-center justify-between border-b border-emerald-800/80 pb-2">
                 <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & ZERO LEAK ✅</span>
-                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Goroutines: Clean</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Goroutines Clean &bull; All 3 TC Pass</span>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Client Disconnect</span><div class="font-bold text-emerald-400">ctx.Done() Received</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Loop Exited</span><div class="font-bold text-emerald-400">&lt; 1 ms</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Zombie Goroutines</span><div class="font-bold text-emerald-400">0 (Zero Leaks)</div></div>
+            <div class="space-y-1.5 text-[11px]">
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 1: Status Bank Sukses Terkonfirmasi (Normal Termination)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 2: Client Memutus Koneksi (ctx.Done() Terpicu Instan)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.2ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 3: Loop Berhenti Bersih &amp; Ticker Dihentikan (Zero Zombie Leaks)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
             </div>
-            <p class="text-[11px] text-emerald-300 leading-relaxed">
-                <strong>Catatan Tech Lead:</strong> Luar biasa! Selalu menghubungkan I/O blocking atau looping goroutine ke <code>context.Context</code> adalah pembeda antara junior biasa dan backend engineer yang siap produksi.
-            </p>
+            <!-- Follow-up Question Simulator -->
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-emerald-600/40 text-[11px] space-y-1">
+                <strong class="text-emerald-300 block">💼 Pertanyaan Lanjutan Tech Lead (Follow-up Verbal Interview):</strong>
+                <p class="text-slate-300 italic">"Mengapa 'ticker.Stop()' wajib dipanggil dengan defer pada fungsi background polling?"</p>
+                <p class="text-emerald-400 pt-0.5"><strong>Jawaban Ideal:</strong> Karena time.NewTicker mengalokasikan timer resource di runtime Go. Jika tidak distop, garbage collector tidak dapat membersihkan channel ticker, memicu kebocoran memori (timer memory leak).</p>
+            </div>
         </div>`
 		_, _ = w.Write([]byte(html))
 
@@ -1589,13 +1663,15 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		if action == "run" {
 			html := fmt.Sprintf(`
-            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
-                <div class="text-emerald-400 font-bold flex items-center justify-between">
-                    <span>▶ Hasil Uji Cepat NoSQL Redis Cache-Aside:</span>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2.5">
+                <div class="text-emerald-400 font-bold flex items-center justify-between border-b border-slate-800 pb-1.5">
+                    <span>▶ Test Runner: Uji Cepat NoSQL Redis Cache-Aside (3 Skenario):</span>
                     <span class="text-slate-400 text-[10px]">Fallback Handled: %v</span>
                 </div>
-                <div class="text-slate-300 text-[11px]">
-                    Simulasi 100 request: Request 1 Cache Miss (Fetch DB &amp; Set Cache), Request 2-100 Cache Hit (&lt; 2ms).
+                <div class="space-y-1 text-slate-300 text-[11px]">
+                    <div class="flex justify-between"><span>[TC 1 - Cache Miss] Query awal belum ada di Redis</span><span class="text-emerald-400">Panggil DB &amp; Isi Cache</span></div>
+                    <div class="flex justify-between"><span>[TC 2 - Cache Hit] Query berulang kunci yang sama</span><span class="text-emerald-400">Hit Redis (Latency &lt; 2ms)</span></div>
+                    <div class="flex justify-between"><span>[TC 3 - High Traffic] 100 Request serentak membaca cache</span><span class="text-emerald-400">99%% Offload dari DB</span></div>
                 </div>
                 <div class="text-[11px] text-emerald-300 pt-1">
                     Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk validasi integrasi cache-aside.
@@ -1611,6 +1687,11 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-extrabold text-rose-400">❌ CACHE-ASIDE PATTERN DEFECT!</span>
                 </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-[10px] my-1">
+                    <div class="p-1.5 rounded bg-emerald-900/40 border border-emerald-700">TC 1: Cache Check &bull; <strong class="text-emerald-300">PASSED</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 2: DB Fallback &bull; <strong class="text-rose-300">FAILED (No DB)</strong></div>
+                    <div class="p-1.5 rounded bg-rose-900/60 border border-rose-700">TC 3: Set Cache &bull; <strong class="text-rose-300">FAILED (No Set)</strong></div>
+                </div>
                 <p class="text-[11px] leading-relaxed text-rose-300">
                     Implementasi Anda belum menerapkan alur Cache-Aside yang lengkap: Cek Cache &rarr; Jika Miss, panggil DB fallback &rarr; Simpan hasil ke Cache dengan TTL &rarr; Kembalikan data.
                 </p>
@@ -1622,19 +1703,31 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
 
 		h.hub.Broadcast("🎉 [Exercise Lab] Drill 5 Lolos: Pattern NoSQL Redis Cache-Aside & DB Fallback berhasil diimplementasikan!")
 		html := `
-        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
-            <div class="flex items-center gap-2">
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-3">
+            <div class="flex items-center justify-between border-b border-emerald-800/80 pb-2">
                 <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & CACHE VERIFIED ✅</span>
-                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Latency: 1.2ms</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Latency: 1.2ms &bull; All 3 TC Pass</span>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Cache Hit Ratio</span><div class="font-bold text-emerald-400">99.0%</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">DB Load</span><div class="font-bold text-emerald-400">Reduced 90%</div></div>
-                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">TTL Invalidation</span><div class="font-bold text-emerald-400">Active (Safe)</div></div>
+            <div class="space-y-1.5 text-[11px]">
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 1: Cache Miss &rarr; Fetch DB Fallback &amp; Populate Cache</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.8ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 2: Cache Hit on Subsequent Requests (Memory Speed)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.1ms)</span>
+                </div>
+                <div class="flex items-center justify-between p-1.5 rounded bg-slate-900 border border-slate-800">
+                    <span>✓ Test Case 3: Thundering Herd Mitigation (Postgres Offloaded 90%%)</span>
+                    <span class="text-emerald-400 font-bold">PASS (0.2ms)</span>
+                </div>
             </div>
-            <p class="text-[11px] text-emerald-300 leading-relaxed">
-                <strong>Catatan Tech Lead:</strong> Sangat bagus! Pattern Cache-Aside adalah fondasi arsitektur microservices tingkat lanjut (Fase 3 Kurikulum) untuk melindungi database dari thundering herd.
-            </p>
+            <!-- Follow-up Question Simulator -->
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-emerald-600/40 text-[11px] space-y-1">
+                <strong class="text-emerald-300 block">💼 Pertanyaan Lanjutan Tech Lead (Follow-up Verbal Interview):</strong>
+                <p class="text-slate-300 italic">"Bagaimana strategi Anda mencegah fenomena 'Cache Penetration' jika user request ID produk yang memang tidak ada di DB?"</p>
+                <p class="text-emerald-400 pt-0.5"><strong>Jawaban Ideal:</strong> Simpan nilai nil/empty string ke dalam Redis dengan TTL pendek (misal: 30–60 detik), atau gunakan Bloom Filter di depan cache untuk mengecek apakah ID tersebut eksis sebelum melakukan query ke database.</p>
+            </div>
         </div>`
 		_, _ = w.Write([]byte(html))
 

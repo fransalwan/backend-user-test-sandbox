@@ -237,10 +237,73 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
             });
         }
 
+        // ================= STUDY TRACKER & CHECKLIST LOGIC =================
+        const CHECKLIST_STORAGE_KEY = 'bootcamp_mastery_checklist';
+
+        function initChecklist() {
+            const saved = JSON.parse(localStorage.getItem(CHECKLIST_STORAGE_KEY) || '{}');
+            const checkboxes = document.querySelectorAll('.topic-check');
+            checkboxes.forEach(cb => {
+                const id = cb.dataset.topicId;
+                if (saved[id]) {
+                    cb.checked = true;
+                }
+                cb.addEventListener('change', () => {
+                    saved[id] = cb.checked;
+                    localStorage.setItem(CHECKLIST_STORAGE_KEY, JSON.stringify(saved));
+                    updateProgressUI();
+                });
+            });
+            updateProgressUI();
+        }
+
+        function updateProgressUI() {
+            const checkboxes = document.querySelectorAll('.topic-check');
+            let completed = 0;
+            checkboxes.forEach(cb => { if (cb.checked) completed++; });
+            const total = checkboxes.length || 12;
+            const pct = Math.round((completed / total) * 100);
+
+            const bar = document.getElementById('checklist-progress-bar');
+            const countText = document.getElementById('checklist-count-text');
+            const pctText = document.getElementById('checklist-pct-text');
+            const badge = document.getElementById('checklist-status-badge');
+
+            if (bar) bar.style.width = `${pct}%`;
+            if (countText) countText.textContent = `${completed}/${total} Modul`;
+            if (pctText) pctText.textContent = `${pct}% Selesai`;
+
+            if (badge) {
+                if (pct === 100) {
+                    badge.innerHTML = '🏆 100% Menguasai Silabus &bull; Siap Latihan Mental!';
+                    badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
+                } else if (pct > 50) {
+                    badge.innerHTML = '⚡ Progres Belajar Mantap!';
+                    badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+                } else if (pct > 0) {
+                    badge.innerHTML = '🌱 Sedang Berjalan';
+                    badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+                } else {
+                    badge.innerHTML = '🌱 Belum Dimulai';
+                    badge.className = 'text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700';
+                }
+            }
+        }
+
+        function resetChecklist() {
+            if (confirm('Reset seluruh progres checklist modul belajar?')) {
+                localStorage.removeItem(CHECKLIST_STORAGE_KEY);
+                const checkboxes = document.querySelectorAll('.topic-check');
+                checkboxes.forEach(cb => { cb.checked = false; });
+                updateProgressUI();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setupEditor('bootcamp-editor-phase-1', 'bootcamp-gutter-phase-1', 'bootcamp-status-phase-1', 'draft_bootcamp_fase1', CODE_FASE_1);
             setupEditor('bootcamp-editor-phase-2', 'bootcamp-gutter-phase-2', 'bootcamp-status-phase-2', 'draft_bootcamp_fase2', CODE_FASE_2);
             setupEditor('bootcamp-editor-phase-3', 'bootcamp-gutter-phase-3', 'bootcamp-status-phase-3', 'draft_bootcamp_fase3', CODE_FASE_3);
+            initChecklist();
         });
     </script>
 </head>
@@ -308,6 +371,30 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
                         <span>🏆 Masuk ke Ujian Hiring Gauntlet</span>
                     </a>
                 </div>
+        <!-- ================= STUDY TRACKER & PROGRESS CHECKLIST BANNER ================= -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">📊</span>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                            Study Tracker: Checklist Penguasaan Silabus (12 Modul Terpadu)
+                        </h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Centang setiap modul setelah Anda memahami teorinya untuk mengukur kesiapan teknis.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <span id="checklist-count-text" class="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">0/12 Modul</span>
+                    <span id="checklist-pct-text" class="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400">0% Selesai</span>
+                    <span id="checklist-status-badge" class="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700">🌱 Belum Dimulai</span>
+                    <button onclick="resetChecklist()" class="text-slate-400 hover:text-rose-500 text-[10px] underline ml-1" title="Reset semua checklist">Reset</button>
+                </div>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700/60">
+                <div id="checklist-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
         </div>
 
@@ -362,51 +449,75 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 <!-- Modul 1: Function & Packages -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide">Modul 1 &bull; Function &amp; Packages</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono">Syntax &amp; Scope</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide">Modul 1 &bull; Function &amp; Packages</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono">Syntax &amp; Scope</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Organisasi Package, Exported Identifier &amp; Error Return</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Go menggunakan kapitalisasi huruf untuk menentukan visibility: huruf depan kapital (<code class="font-mono text-cyan-500">CalculateFee</code>) bersifat publik (exported), sedangkan huruf kecil (<code class="font-mono text-cyan-500">parseCents</code>) bersifat privat di package lokal. Fungsi mendukung multiple return value untuk mengembalikan error secara eksplisit.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Organisasi Package, Exported Identifier &amp; Error Return</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Go menggunakan kapitalisasi huruf untuk menentukan visibility: huruf depan kapital (<code class="font-mono text-cyan-500">CalculateFee</code>) bersifat publik (exported), sedangkan huruf kecil (<code class="font-mono text-cyan-500">parseCents</code>) bersifat privat di package lokal. Fungsi mendukung multiple return value untuk mengembalikan error secara eksplisit.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-cyan-600 focus:ring-cyan-500" data-topic-id="p1_m1">
+                        <span class="font-medium">Tandai Modul 1 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 2: Pointers, Structures & Methods -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wide">Modul 2 &bull; Pointers, Struct &amp; Methods</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">Memory Reference</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wide">Modul 2 &bull; Pointers, Struct &amp; Methods</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">Memory Reference</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Pointer Receiver vs Value Receiver &amp; Interface Duck Typing</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Pahami kapan menggunakan pointer (<code class="font-mono text-teal-500">*User</code>) agar mutasi state tidak membuat salinan memori baru. Interface di Go diimplementasikan secara implisit tanpa keyword <code class="font-mono text-teal-500">implements</code>, memungkinkan dependensi yang longgar dan mudah diuji dengan mock.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Pointer Receiver vs Value Receiver &amp; Interface Duck Typing</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Pahami kapan menggunakan pointer (<code class="font-mono text-teal-500">*User</code>) agar mutasi state tidak membuat salinan memori baru. Interface di Go diimplementasikan secara implisit tanpa keyword <code class="font-mono text-teal-500">implements</code>, memungkinkan dependensi yang longgar dan mudah diuji dengan mock.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-teal-600 focus:ring-teal-500" data-topic-id="p1_m2">
+                        <span class="font-medium">Tandai Modul 2 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 3: Go-Routines & Channel -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Modul 3 &bull; Go-Routines &amp; Channel</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">Concurrent CSP</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Modul 3 &bull; Go-Routines &amp; Channel</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">Concurrent CSP</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Pengenalan Konsep Concurrent, Buffered Channel, Select &amp; Mutex</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Eksekusi fungsi di thread ringan goroutine (<code class="font-mono text-emerald-500">go worker()</code>). Komunikasikan data antar-goroutine melalui unbuffered/buffered channel, multiplexing dengan <code class="font-mono text-emerald-500">select</code>, serta lindungi shared memory dengan <code class="font-mono text-emerald-500">sync.Mutex</code> agar bebas data race.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Pengenalan Konsep Concurrent, Buffered Channel, Select &amp; Mutex</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Eksekusi fungsi di thread ringan goroutine (<code class="font-mono text-emerald-500">go worker()</code>). Komunikasikan data antar-goroutine melalui unbuffered/buffered channel, multiplexing dengan <code class="font-mono text-emerald-500">select</code>, serta lindungi shared memory dengan <code class="font-mono text-emerald-500">sync.Mutex</code> agar bebas data race.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500" data-topic-id="p1_m3">
+                        <span class="font-medium">Tandai Modul 3 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 4: Database Design RDBMS -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Modul 4 &bull; Database Design RDBMS</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono">DDL &amp; DML</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Modul 4 &bull; Database Design RDBMS</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono">DDL &amp; DML</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Normalisasi Relasional, Advanced Query &amp; Transaksi ACID</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Mengeksplorasi skema database relasional (RDBMS) menggunakan DDL (<code class="font-mono text-amber-500">CREATE TABLE</code>, <code class="font-mono text-amber-500">ALTER</code>) dan DML (<code class="font-mono text-amber-500">SELECT</code>, <code class="font-mono text-amber-500">INSERT</code>, <code class="font-mono text-amber-500">UPDATE</code>). Kuasai integritas transaksi ACID dan Row-Level Locking (<code class="font-mono text-amber-500">FOR UPDATE</code>).
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Normalisasi Relasional, Advanced Query &amp; Transaksi ACID</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Mengeksplorasi skema database relasional (RDBMS) menggunakan DDL (<code class="font-mono text-amber-500">CREATE TABLE</code>, <code class="font-mono text-amber-500">ALTER</code>) dan DML (<code class="font-mono text-amber-500">SELECT</code>, <code class="font-mono text-amber-500">INSERT</code>, <code class="font-mono text-amber-500">UPDATE</code>). Kuasai integritas transaksi ACID dan Row-Level Locking (<code class="font-mono text-amber-500">FOR UPDATE</code>).
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-amber-600 focus:ring-amber-500" data-topic-id="p1_m4">
+                        <span class="font-medium">Tandai Modul 4 Sudah Dikuasai</span>
+                    </label>
                 </div>
             </div>
 
@@ -531,51 +642,75 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 <!-- Modul 1: Concurrency Pattern di Go -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide">Modul 1 &bull; Concurrency Pattern</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono">Worker Pool &bull; Pipeline</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wide">Modul 1 &bull; Concurrency Pattern</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono">Worker Pool &bull; Pipeline</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Worker Pool, Fan-Out / Fan-In &amp; Context Propagation</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Mempelajari step konsep concurrency pattern. Membatasi alokasi goroutine aktif menggunakan Worker Pool agar tidak menenggelamkan database, serta menghubungkan <code class="font-mono text-cyan-500">context.WithTimeout</code> untuk mencegah kebocoran goroutine (goroutine leak) saat klien HTTP memutus koneksi.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Worker Pool, Fan-Out / Fan-In &amp; Context Propagation</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Mempelajari step konsep concurrency pattern. Membatasi alokasi goroutine aktif menggunakan Worker Pool agar tidak menenggelamkan database, serta menghubungkan <code class="font-mono text-cyan-500">context.WithTimeout</code> untuk mencegah kebocoran goroutine (goroutine leak) saat klien HTTP memutus koneksi.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-cyan-600 focus:ring-cyan-500" data-topic-id="p2_m1">
+                        <span class="font-medium">Tandai Modul 1 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 2: Fundamental API Programming -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">Modul 2 &bull; Fundamental API Programming</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-mono">REST &bull; Swagger &bull; k6</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wide">Modul 2 &bull; Fundamental API Programming</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-mono">REST &bull; Swagger &bull; k6</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">RESTful Standards, Swagger OpenAPI &amp; Pengujian Beban k6</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Pengenalan API programming: implementasi REST API standar, dokumentasi otomatis dengan Swagger, serta pengujian performa dan ketahanan API (RPS &amp; p95 latency) menggunakan tools modern bertenaga k6 Grafana.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">RESTful Standards, Swagger OpenAPI &amp; Pengujian Beban k6</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Pengenalan API programming: implementasi REST API standar, dokumentasi otomatis dengan Swagger, serta pengujian performa dan ketahanan API (RPS &amp; p95 latency) menggunakan tools modern bertenaga k6 Grafana.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-purple-600 focus:ring-purple-500" data-topic-id="p2_m2">
+                        <span class="font-medium">Tandai Modul 2 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 3: Database PostgreSQL -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wide">Modul 3 &bull; Database PostgreSQL</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-mono">Indexing &bull; Migrations</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wide">Modul 3 &bull; Database PostgreSQL</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-mono">Indexing &bull; Migrations</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Skema Enterprise, B-Tree Indexing &amp; Tips Migrasi SQL</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Mempelajari database PostgreSQL untuk skala produksi: penentuan indexing strategy yang efisien, manajemen connection pool, serta praktik terbaik versioning schema migrations SQL tanpa downtime.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Skema Enterprise, B-Tree Indexing &amp; Tips Migrasi SQL</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Mempelajari database PostgreSQL untuk skala produksi: penentuan indexing strategy yang efisien, manajemen connection pool, serta praktik terbaik versioning schema migrations SQL tanpa downtime.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-sky-600 focus:ring-sky-500" data-topic-id="p2_m3">
+                        <span class="font-medium">Tandai Modul 3 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 4: Web Server dan Go Routing -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wide">Modul 4 &bull; Web Server &amp; Go Routing</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">Echo / Gin &bull; JWT Auth</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wide">Modul 4 &bull; Web Server &amp; Go Routing</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">Echo / Gin &bull; JWT Auth</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Routing Handlers, Middleware Chaining &amp; Token Security</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Memahami Web Server dan Go Routing untuk membuat antarmuka API, mengamankan endpoint dengan otentikasi token (JWT Bearer Token), menerapkan middleware chain (Logger, CORS, Recover), hingga kesiapan deployment.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Routing Handlers, Middleware Chaining &amp; Token Security</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Memahami Web Server dan Go Routing untuk membuat antarmuka API, mengamankan endpoint dengan otentikasi token (JWT Bearer Token), menerapkan middleware chain (Logger, CORS, Recover), hingga kesiapan deployment.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-teal-600 focus:ring-teal-500" data-topic-id="p2_m4">
+                        <span class="font-medium">Tandai Modul 4 Sudah Dikuasai</span>
+                    </label>
                 </div>
             </div>
 
@@ -696,51 +831,75 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 <!-- Modul 1: Microservices Architectures & gRPC -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wide">Modul 1 &bull; Microservices &amp; gRPC</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">Protobuf &bull; RPC Call</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wide">Modul 1 &bull; Microservices &amp; gRPC</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-mono">Protobuf &bull; RPC Call</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Protocol Buffers (.proto), Binary Serialization &amp; Inter-Service RPC</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Mempelajari konsep microservices terdistribusi dengan framework gRPC. Mendefinisikan kontrak data binary menggunakan Protocol Buffers (.proto) yang 7–10x lebih hemat bandwidth dan cepat dibanding representasi JSON teks pada REST HTTP.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Protocol Buffers (.proto), Binary Serialization &amp; Inter-Service RPC</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Mempelajari konsep microservices terdistribusi dengan framework gRPC. Mendefinisikan kontrak data binary menggunakan Protocol Buffers (.proto) yang 7–10x lebih hemat bandwidth dan cepat dibanding representasi JSON teks pada REST HTTP.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-teal-600 focus:ring-teal-500" data-topic-id="p3_m1">
+                        <span class="font-medium">Tandai Modul 1 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 2: Database NoSQL -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">Modul 2 &bull; Database NoSQL</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-mono">Redis &bull; Cache-Aside</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide">Modul 2 &bull; Database NoSQL</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-mono">Redis &bull; Cache-Aside</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Redis Key-Value, Strategi Cache-Aside &amp; Cache Invalidation (TTL)</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Memahami database NoSQL (Redis) untuk read-heavy optimization. Terapkan strategi Cache-Aside (Cek Cache &rarr; Fallback DB &rarr; Set Cache), kelola kedaluwarsa TTL, dan cegah insiden Cache Stampede / Thundering Herd saat traffic melonjak.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Redis Key-Value, Strategi Cache-Aside &amp; Cache Invalidation (TTL)</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Memahami database NoSQL (Redis) untuk read-heavy optimization. Terapkan strategi Cache-Aside (Cek Cache &rarr; Fallback DB &rarr; Set Cache), kelola kedaluwarsa TTL, dan cegah insiden Cache Stampede / Thundering Herd saat traffic melonjak.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-rose-600 focus:ring-rose-500" data-topic-id="p3_m2">
+                        <span class="font-medium">Tandai Modul 2 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 3: Handling Serverless, Deployment & DevOps -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Modul 3 &bull; Serverless &amp; DevOps</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono">Docker &bull; CI/CD &bull; VPS</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wide">Modul 3 &bull; Serverless &amp; DevOps</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono">Docker &bull; CI/CD &bull; VPS</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Docker Multi-Stage Build, CI/CD Pipeline &amp; VPS Deployment</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Mempelajari konsep containerization Docker multi-stage build (binary ramping &lt; 25MB), orkestrasi Kubernetes dasar, pipeline otomatis CI/CD, antrean asinkron (Queue-ing / Caching), serta deployment ke VPS production Linux.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Docker Multi-Stage Build, CI/CD Pipeline &amp; VPS Deployment</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Mempelajari konsep containerization Docker multi-stage build (binary ramping &lt; 25MB), orkestrasi Kubernetes dasar, pipeline otomatis CI/CD, antrean asinkron (Queue-ing / Caching), serta deployment ke VPS production Linux.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-amber-600 focus:ring-amber-500" data-topic-id="p3_m3">
+                        <span class="font-medium">Tandai Modul 3 Sudah Dikuasai</span>
+                    </label>
                 </div>
 
                 <!-- Modul 4: Final Projek Real-Time Web API -->
-                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Modul 4 &bull; Final Projek Real-Time</span>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">WebSockets &bull; SSE</span>
+                <div class="p-5 rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Modul 4 &bull; Final Projek Real-Time</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">WebSockets &bull; SSE</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Real-Time Data Streaming, WebSockets, &amp; Server-Sent Events</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                            Membuat web API production-ready dengan konsep real-time streaming menggunakan Server-Sent Events (SSE) atau WebSockets, sehingga status settlement transaksi bank atau notifikasi dapat diperbarui instan di antarmuka klien.
+                        </p>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">Real-Time Data Streaming, WebSockets, &amp; Server-Sent Events</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Membuat web API production-ready dengan konsep real-time streaming menggunakan Server-Sent Events (SSE) atau WebSockets, sehingga status settlement transaksi bank atau notifikasi dapat diperbarui instan di antarmuka klien.
-                    </p>
+                    <label class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                        <input type="checkbox" class="topic-check rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500" data-topic-id="p3_m4">
+                        <span class="font-medium">Tandai Modul 4 Sudah Dikuasai</span>
+                    </label>
                 </div>
             </div>
 

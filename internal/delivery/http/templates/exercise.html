@@ -424,6 +424,60 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
                     <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-200 space-y-1">
                         <strong>Tugas Debugging:</strong> Hapus konversi ke <code class="font-mono">float64</code>! Hitung fee sebagai <code class="font-mono">(amountCents * 25) / 1000</code> dan PPN sebagai <code class="font-mono">(feeCents * 11) / 100</code> murni dengan integer math.
                     </div>
+
+                    <!-- 3-Tier Progressive Hint System -->
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/70 dark:bg-slate-950/40">
+                        <div class="px-3 py-2 bg-slate-100 dark:bg-slate-850/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <span>💡</span> Sistem Bantuan Berjenjang (3-Tier Hints)
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Buka bertahap jika buntu</span>
+                        </div>
+                        <div class="p-2 sm:p-2.5 space-y-2">
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-amber-600 dark:text-amber-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔍 Hint 1: Clue Konseptual</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Hindari semua konversi ke <code class="font-mono text-amber-500">float64</code>. Pecahan biner IEEE-754 menghasilkan rounding error tak terduga. Operasi moneter fintech wajib diselesaikan dalam basis terkecil (sen/cents) dengan integer math murni.
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-orange-600 dark:text-orange-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🧩 Hint 2: Pseudocode / Kerangka Logika</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    <pre class="bg-slate-900 text-slate-200 p-2.5 rounded font-mono text-[11px] overflow-x-auto">feeCents = (amountCents * 25) / 1000
+taxCents = (feeCents * 11) / 100
+totalDeduction = feeCents + taxCents
+return feeCents, taxCents, totalDeduction</pre>
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔑 Hint 3: Solusi Standar Tech Lead + Penjelasan</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                                    <pre class="bg-[#070b14] text-emerald-400 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px] overflow-x-auto"><code>func CalculateTransactionFee(amountCents int64, feePercent float64) (feeCents int64, taxCents int64, totalDeduction int64) {
+    // 2.5% fee = 25 / 1000
+    feeCents = (amountCents * 25) / 1000
+    // 11% PPN tax dari fee
+    taxCents = (feeCents * 11) / 100
+    totalDeduction = feeCents + taxCents
+    return feeCents, taxCents, totalDeduction
+}</code></pre>
+                                    <p class="text-[11px] text-slate-500 italic">
+                                        💡 <strong>Tech Lead Note:</strong> Selalu terapkan integer arithmetic untuk ledger moneter. Pembulatan integer division di Go konsisten dan mencegah selisih pecahan yang dapat merugikan perusahaan saat rekonsiliasi jutaan transaksi.
+                                    </p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-3">
@@ -473,6 +527,73 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
                     </p>
                     <div class="p-3 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/60 text-xs text-orange-800 dark:text-orange-200 space-y-1">
                         <strong>Tugas Debugging:</strong> Tambahkan <code class="font-mono">mu sync.Mutex</code> di dalam struct <code class="font-mono">HotWallet</code>, dan gunakan <code class="font-mono">w.mu.Lock()</code> dan <code class="font-mono">defer w.mu.Unlock()</code> di fungsi <code class="font-mono">Withdraw</code>.
+                    </div>
+
+                    <!-- 3-Tier Progressive Hint System -->
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/70 dark:bg-slate-950/40">
+                        <div class="px-3 py-2 bg-slate-100 dark:bg-slate-850/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <span>💡</span> Sistem Bantuan Berjenjang (3-Tier Hints)
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Buka bertahap jika buntu</span>
+                        </div>
+                        <div class="p-2 sm:p-2.5 space-y-2">
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-amber-600 dark:text-amber-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔍 Hint 1: Clue Konseptual</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Operasi pengecekan saldo (<code class="font-mono text-orange-500">w.Balance &gt;= amount</code>) dan pengurangan saldo (<code class="font-mono text-orange-500">w.Balance -= amount</code>) adalah operasi multi-langkah di memori. Tanpa mutual exclusion lock, goroutine lain dapat menyusup di antara langkah tersebut (Time-of-Check to Time-of-Use bug).
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-orange-600 dark:text-orange-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🧩 Hint 2: Pseudocode / Kerangka Logika</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    <pre class="bg-slate-900 text-slate-200 p-2.5 rounded font-mono text-[11px] overflow-x-auto">type HotWallet struct {
+    mu sync.Mutex
+    Balance int64
+}
+
+func (w *HotWallet) Withdraw(amount int64) bool {
+    w.mu.Lock()
+    defer w.mu.Unlock()
+    // cek saldo dan kurangi...
+}</pre>
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔑 Hint 3: Solusi Standar Tech Lead + Penjelasan</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                                    <pre class="bg-[#070b14] text-emerald-400 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px] overflow-x-auto"><code>type HotWallet struct {
+    mu      sync.Mutex
+    Balance int64
+}
+
+func (w *HotWallet) Withdraw(amount int64) bool {
+    w.mu.Lock()
+    defer w.mu.Unlock()
+
+    if w.Balance >= amount {
+        w.Balance -= amount
+        return true
+    }
+    return false
+}</code></pre>
+                                    <p class="text-[11px] text-slate-500 italic">
+                                        💡 <strong>Tech Lead Note:</strong> Selalu posisikan <code class="font-mono">defer w.mu.Unlock()</code> tepat setelah pemanggilan <code class="font-mono">Lock()</code> untuk mencegah *mutex leak* atau kebuntuan (deadlock) jika terjadi branching logika atau panic.
+                                    </p>
+                                </div>
+                            </details>
+                        </div>
                     </div>
                 </div>
 
@@ -524,6 +645,73 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
                     <div class="p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-900/60 text-xs text-cyan-800 dark:text-cyan-200 space-y-1">
                         <strong>Tugas Debugging:</strong> Di dalam loop, gunakan konstruksi <code class="font-mono">select { case &lt;-ctx.Done(): return ctx.Err(); case &lt;-ticker.C: ... }</code> untuk segera keluar begitu context selesai.
                     </div>
+
+                    <!-- 3-Tier Progressive Hint System -->
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/70 dark:bg-slate-950/40">
+                        <div class="px-3 py-2 bg-slate-100 dark:bg-slate-850/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <span>💡</span> Sistem Bantuan Berjenjang (3-Tier Hints)
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Buka bertahap jika buntu</span>
+                        </div>
+                        <div class="p-2 sm:p-2.5 space-y-2">
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-amber-600 dark:text-amber-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔍 Hint 1: Clue Konseptual</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Loop tidak boleh memblokir sepihak hanya pada saluran ticker (<code class="font-mono text-cyan-500">&lt;-ticker.C</code>). Gunakan statement <code class="font-mono text-cyan-500">select</code> untuk mendengarkan dua event serentak: sinyal pembatalan / timeout dari context, atau ketukan interval ticker berikutnya.
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-orange-600 dark:text-orange-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🧩 Hint 2: Pseudocode / Kerangka Logika</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    <pre class="bg-slate-900 text-slate-200 p-2.5 rounded font-mono text-[11px] overflow-x-auto">for {
+    select {
+    case &lt;-ctx.Done():
+        return ctx.Err()
+    case &lt;-ticker.C:
+        if checkBankStatus() {
+            return nil
+        }
+    }
+}</pre>
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔑 Hint 3: Solusi Standar Tech Lead + Penjelasan</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                                    <pre class="bg-[#070b14] text-emerald-400 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px] overflow-x-auto"><code>func PollPaymentSettlement(ctx context.Context, checkBankStatus func() bool) error {
+    ticker := time.NewTicker(500 * time.Millisecond)
+    defer ticker.Stop()
+
+    for {
+        select {
+        case &lt;-ctx.Done():
+            return ctx.Err()
+        case &lt;-ticker.C:
+            if checkBankStatus() {
+                return nil
+            }
+        }
+    }
+}</code></pre>
+                                    <p class="text-[11px] text-slate-500 italic">
+                                        💡 <strong>Tech Lead Note:</strong> Jangan lupa <code class="font-mono">defer ticker.Stop()</code> untuk melepas resource timer runtime Go, dan selalu return <code class="font-mono">ctx.Err()</code> saat context dibatalkan agar caller mengetahui penyebab spesifik (Canceled vs DeadlineExceeded).
+                                    </p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-3">
@@ -574,6 +762,75 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
                     <div class="p-3 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-900/60 text-xs text-teal-800 dark:text-teal-200 space-y-1">
                         <strong>Tugas Debugging:</strong> Jika <code class="font-mono">status == "PROCESSING"</code>, segera kembalikan <code class="font-mono">false, ErrInFlightConflict</code> agar request kedua dicegat dengan HTTP 409 Conflict.
                     </div>
+
+                    <!-- 3-Tier Progressive Hint System -->
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/70 dark:bg-slate-950/40">
+                        <div class="px-3 py-2 bg-slate-100 dark:bg-slate-850/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <span>💡</span> Sistem Bantuan Berjenjang (3-Tier Hints)
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Buka bertahap jika buntu</span>
+                        </div>
+                        <div class="p-2 sm:p-2.5 space-y-2">
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-amber-600 dark:text-amber-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔍 Hint 1: Clue Konseptual</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Idempotency membedakan status <code class="font-mono text-teal-500">PROCESSING</code> (transaksi sedang berjalan di worker lain) dan <code class="font-mono text-teal-500">COMPLETED</code> (transaksi sudah tuntas). Request konkuren dengan key yang sama saat in-flight wajib ditolak dengan status konflik (HTTP 409).
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-orange-600 dark:text-orange-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🧩 Hint 2: Pseudocode / Kerangka Logika</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    <pre class="bg-slate-900 text-slate-200 p-2.5 rounded font-mono text-[11px] overflow-x-auto">if exists {
+    if status == "PROCESSING" {
+        return false, ErrInFlightConflict
+    }
+    if status == "COMPLETED" {
+        return false, ErrSuccessReplay
+    }
+}
+m.store[key] = "PROCESSING"
+return true, nil</pre>
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔑 Hint 3: Solusi Standar Tech Lead + Penjelasan</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                                    <pre class="bg-[#070b14] text-emerald-400 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px] overflow-x-auto"><code>func (m *IdempotencyManager) AcquireOrReplay(key string) (bool, error) {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+
+    status, exists := m.store[key]
+    if exists {
+        if status == "PROCESSING" {
+            return false, ErrInFlightConflict
+        }
+        if status == "COMPLETED" {
+            return false, ErrSuccessReplay
+        }
+    }
+
+    m.store[key] = "PROCESSING"
+    return true, nil
+}</code></pre>
+                                    <p class="text-[11px] text-slate-500 italic">
+                                        💡 <strong>Tech Lead Note:</strong> Jangan lupa melakukan lock map sebelum membaca dan menulis. Pola status transisi State Machine (NEW &rarr; PROCESSING &rarr; COMPLETED / FAILED) adalah standar industri fintech mencegah race condition tingkat API gateway.
+                                    </p>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-3">
@@ -623,6 +880,66 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
                     </p>
                     <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-800 dark:text-rose-200 space-y-1">
                         <strong>Tugas Debugging:</strong> Jika data tidak ada di cache: 1) Panggil <code class="font-mono">dbData := dbQueryFallback(productID)</code>, 2) Simpan ke <code class="font-mono">m.cacheStore[productID] = dbData</code>, 3) Kembalikan <code class="font-mono">dbData, nil</code>!
+                    </div>
+
+                    <!-- 3-Tier Progressive Hint System -->
+                    <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/70 dark:bg-slate-950/40">
+                        <div class="px-3 py-2 bg-slate-100 dark:bg-slate-850/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <span>💡</span> Sistem Bantuan Berjenjang (3-Tier Hints)
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">Buka bertahap jika buntu</span>
+                        </div>
+                        <div class="p-2 sm:p-2.5 space-y-2">
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-amber-600 dark:text-amber-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔍 Hint 1: Clue Konseptual</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    Pola Cache-Aside mengasumsikan Cache adalah pembantu, bukan sumber kebenaran tunggal (single source of truth). Jika data nihil di cache (Cache Miss), aplikasi harus memuat data dari database utama, menuliskan hasilnya kembali ke cache untuk request berikutnya, lalu mengembalikannya ke klien.
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-orange-600 dark:text-orange-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🧩 Hint 2: Pseudocode / Kerangka Logika</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    <pre class="bg-slate-900 text-slate-200 p-2.5 rounded font-mono text-[11px] overflow-x-auto">data, found := m.cacheStore[productID]
+if found {
+    return data, nil
+}
+dbData := dbQueryFallback(productID)
+m.cacheStore[productID] = dbData
+return dbData, nil</pre>
+                                </div>
+                            </details>
+
+                            <details class="group bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 text-xs transition">
+                                <summary class="font-bold text-emerald-600 dark:text-emerald-400 cursor-pointer flex items-center justify-between select-none">
+                                    <span>🔑 Hint 3: Solusi Standar Tech Lead + Penjelasan</span>
+                                    <span class="text-[10px] text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+                                </summary>
+                                <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                                    <pre class="bg-[#070b14] text-emerald-400 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px] overflow-x-auto"><code>func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID string, dbQueryFallback func(string) string) (string, error) {
+    data, found := m.cacheStore[productID]
+    if found {
+        return data, nil
+    }
+
+    // Cache Miss -> Ambil dari Database & Update Cache
+    dbData := dbQueryFallback(productID)
+    m.cacheStore[productID] = dbData
+    return dbData, nil
+}</code></pre>
+                                    <p class="text-[11px] text-slate-500 italic">
+                                        💡 <strong>Tech Lead Note:</strong> Cache-Aside adalah pola paling umum untuk read-heavy workload di backend skala besar. Dalam produksi, penulisan ke cache disertai dengan TTL (Time To Live, misal 5 menit) untuk menjaga sinkronisasi data dengan database.
+                                    </p>
+                                </div>
+                            </details>
+                        </div>
                     </div>
                 </div>
 
