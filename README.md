@@ -56,23 +56,23 @@ backend-user-test-sandbox/
 
 ---
 
-## 🌐 3 Pilar Ekosistem Sandbox (Pemisahan Pembelajaran, Latihan, & Ujian)
+### 🌐 3 Pilar Ekosistem Sandbox (Pemisahan Pembelajaran, Latihan, & Ujian)
 
-Untuk memberikan pengalaman belajar yang terstruktur dan memisahkan proses seleksi formal dari tempat berlatih bebas tekanan, sandbox ini membagi fitur ke dalam **3 Halaman Mandiri**:
+Untuk memberikan pengalaman belajar yang terstruktur dan memisahkan proses seleksi formal dari tempat berlatih bebas tekanan, sandbox ini membagi fitur ke dalam **3 Halaman Mandiri + 1 Halaman Penawaran Kerja**:
 
 ```text
-┌─────────────────────────┐     ┌─────────────────────────────┐     ┌─────────────────────────┐
-│     📚 BOOTCAMP         │     │     ⚡ EXERCISE LAB         │     │   🏆 HIRING GAUNTLET    │
-│       (/bootcamp)       │────▶│       (/exercise)           │────▶│      (/ atau /hiring)       │
-│  Fondasi Teori & Konsep │     │  Latihan Mental & Debugging │     │ 5 Tahap Seleksi Formal  │
-│  Active Recall Flashcard│     │  Repetisi Bebas Tekanan     │     │ Offer Letter Cetak A4   │
-└─────────────────────────┘     └─────────────────────────────┘     └─────────────────────────┘
+┌─────────────────────────┐     ┌─────────────────────────────┐     ┌─────────────────────────┐     ┌─────────────────────────┐
+│     📚 BOOTCAMP         │     │     ⚡ EXERCISE LAB         │     │   🏆 HIRING GAUNTLET    │     │   📜 RESMI OFFER LETTER │
+│       (/bootcamp)       │────▶│       (/exercise)           │────▶│      (/ atau /hiring)       │────▶│         (/offer)        │
+│  Fondasi Teori & Konsep │     │  Latihan Mental & Debugging │     │ 5 Tahap Seleksi Formal  │     │ 1 Lembar A4 Eksekutif   │
+│  Active Recall Flashcard│     │  Repetisi Bebas Tekanan     │     │ Standar Seleksi Fintech │     │ Tanda Tangan & Stempel  │
+└─────────────────────────┘     └─────────────────────────────┘     └─────────────────────────┘     └─────────────────────────┘
 ```
 
 1. **📚 Bootcamp (`/bootcamp`) — Tempat Mempelajari Teori Fundamental**:
    - Modul Algoritma: Analisis Big-O $\mathcal{O}(1)$ vs $\mathcal{O}(N)$ vs $\mathcal{O}(N^2)$, pola Target Complement, dan trade-off memori Slice vs Hash Map di Go.
    - Modul System Design: Mengapa disable button di frontend tidak cukup (API Idempotency), Double-Entry Ledger atomik, dan proteksi Token Bucket Rate Limiting.
-   - **Active Recall Flashcard Simulator**: 5 pertanyaan verbal wawancara Tech Lead untuk melatih daya ingat aktif.
+   - **Active Recall Flashcard Simulator**: 5 pertanyaan verbal wawancara Tech Lead untuk melatih daya ingat aktif kandidat.
 
 2. **⚡ Exercise Lab (`/exercise`) — Melatih Mental Live Coding & Repetisi Debugging**:
    - **Tujuan Khusus**: Mengasah ketenangan mental kandidat menghadapi sesi live coding tanpa rasa takut gagal atau konsekuensi penolakan rekrutmen.
@@ -85,61 +85,71 @@ Untuk memberikan pengalaman belajar yang terstruktur dan memisahkan proses selek
    - **Stopwatch Mental Timer**: Fitur pengukur waktu opsional untuk melatih ritme mengetik di bawah simulasi batas waktu.
 
 3. **🏆 Hiring Gauntlet (`/` atau `/hiring`) — Simulasi Ujian Seleksi Resmi 5 Tahap**:
-   - Pipeline evaluasi teknis formal berbobot 20% per tahap:
+   - Pipeline evaluasi teknis formal berbobot 20% per tahap dengan mode *Reviewer Unlock*:
      * **Tahap 1: Live Coding DSA** (Financial Transaction Deduplication $\mathcal{O}(N)$).
      * **Tahap 2: System Design Architecture Defense** (Idempotency, Double-Entry Ledger, Circuit Breaker).
      * **Tahap 3: Take-Home Code Review** (Clean Architecture, SQL Migration, Docker Compose, Postman).
      * **Tahap 4: Incident Resiliency War Room** (Token Bucket Rate Limiting 40 RPS).
-     * **Tahap 5: Surat Penawaran Kerja Resmi (Offer Letter)** (Format cetak resmi legal A4 2 Halaman Pas).
+     * **Tahap 5: Observability & RCA** (Diagnosa Lonjakan Latensi p99 4.850ms & Connection Pool Starvation).
 
-## 🛠️ Persyaratan Sistem & Tech Stack
-
-- **Go (Golang)**: Versi 1.23+ (Disarankan 1.27)
-- **Docker & Docker Compose**: Untuk menjalankan PostgreSQL 16 & Redis 7 secara lokal
-- **Frontend Dashboard**: Go `html/template` + HTMX (tanpa perlu Node.js atau `npm`)
-- **Real-time Event**: Server-Sent Events (SSE) bawaan Go HTTP standard library
+4. **📜 Surat Penawaran Kerja Resmi (`/offer`) — 1 Lembar A4 Eksekutif**:
+   - Format cetak tunggal pas 1 lembar A4 (*Single-Page A4 Executive Contract*).
+   - Fitur canvas tanda tangan digital interaktif kandidat & stempel korporasi resmi PT ITP.
+   - Rincian kompensasi lengkap, Engineering Scorecard 5 tahap, dan QR code verifikasi sah.
 
 ---
 
-## 🚀 Panduan Menjalankan Sandbox
+## 🛠️ Persyaratan Sistem & Tech Stack
 
-### 1. Menjalankan Database & Cache Lokal (Docker Compose)
-Jalankan container PostgreSQL 16 dan Redis 7 dengan satu perintah:
+- **Go (Golang)**: Versi 1.23+ (Disarankan 1.27) &mdash; Seluruh template web di-*embed* langsung ke binary (`//go:embed`).
+- **Docker & Docker Compose**: Untuk menjalankan PostgreSQL 16 & Redis 7 secara lokal.
+- **Frontend Dashboard**: Go `html/template` + HTMX + Tailwind CSS (Zero `node_modules`, tanpa butuh Node.js/npm).
+- **Real-time Event**: Server-Sent Events (SSE) bawaan Go HTTP standard library.
+
+---
+
+## 🚀 Panduan Menjalankan Sandbox & Opsi Deployment
+
+Sandbox ini sudah **100% Siap Deploy (Production-Ready)** dalam berbagai skenario:
+
+### Opsi A: Jalankan Lokal Cepat (Binary Standalone)
+Aplikasi memiliki fallback memory/mock sehingga dapat langsung dijalankan tanpa database eksternal:
 
 ```bash
-docker compose up -d
+# Kompilasi & jalankan binary
+go run ./cmd/sandbox
+
+# Atau jalankan file binary (Windows):
+.\sandbox.exe
+```
+Buka browser di: **`http://localhost:8080`**
+
+---
+
+### Opsi B: Full Stack Docker Compose (Aplikasi + PostgreSQL 16 + Redis 7)
+Jalankan stack kontainer lengkap dengan satu perintah:
+
+```bash
+docker compose up -d --build
 ```
 
-- **PostgreSQL**: Port `5432` (`postgres:postgres@localhost:5432/fintech_db?sslmode=disable`)
-- **Redis**: Port `6379` (`redis://localhost:6379`)
+- **Aplikasi Web**: Port `8080`
+- **PostgreSQL 16**: Port `5432` (`postgres:postgrespassword@localhost:5432/fintech_sandbox`)
+- **Redis 7**: Port `6379` (`redis://localhost:6379`)
 
 Untuk mematikan container:
 ```bash
 docker compose down
 ```
 
-### 2. Menjalankan Aplikasi Sandbox
-Jalankan server HTTP lokal:
+---
 
-```bash
-# Melalui Go CLI
-go run ./cmd/sandbox
-
-# Atau jika menggunakan binary yang sudah dikompilasi (Windows)
-.\sandbox.exe
-```
-
-Buka peramban (browser) di alamat:
-👉 **[http://localhost:8080](http://localhost:8080)**
-
-### 3. Menjalankan Online via Laptop Sendiri + Cloudflare Tunnel (100% Gratis & Publik)
-Jika Anda ingin membagikan sandbox ini ke interviewer, teman belajar, atau mencobanya langsung dari smartphone tanpa biaya sewa VPS:
+### Opsi C: Online via Laptop Sendiri + Cloudflare Tunnel (100% Gratis & Global HTTPS)
+Jika Anda ingin membagikan sandbox ini ke interviewer, teman belajar, atau mencobanya langsung dari smartphone tanpa menyewa VPS atau membuka port router (CGNAT):
 
 1. **Pastikan aplikasi aktif di port 8080**:
    ```bash
    .\sandbox.exe
-   # atau via Docker Compose lengkap:
-   docker compose up -d --build
    ```
 
 2. **Jalankan Cloudflare Tunnel**:
@@ -150,11 +160,16 @@ Jika Anda ingin membagikan sandbox ini ke interviewer, teman belajar, atau menco
    # Atau melalui PowerShell:
    .\scripts\tunnel.ps1
 
-   # Atau langsung melalui CLI:
+   # Atau langsung via cloudflared CLI:
    cloudflared tunnel --url http://localhost:8080
    ```
 
-3. **Akses Publik**: Tautan publik HTTPS (contoh: `https://fintech-sandbox.trycloudflare.com`) akan digenerate secara instan dengan enkripsi SSL resmi dan streaming SSE real-time aktif tanpa perlu registrasi domain atau membuka port router!
+3. **Akses Publik Global**:
+   Terminal akan langsung menampilkan tautan aman HTTPS yang dapat diakses dari mana saja di internet:
+   👉 **`https://<nama-tunnel-unik>.trycloudflare.com`**
+   - Mendukung streaming Server-Sent Events (SSE) real-time.
+   - Otomatis terproteksi sertifikat SSL/TLS resmi Cloudflare Edge.
+   - Siap dites langsung oleh siapa saja di browser desktop maupun mobile.
 
 ---
 
@@ -205,11 +220,13 @@ Tersedia dua panduan komprehensif bagi kandidat:
 
 ---
 
-## 📄 Format Dokumen Cetak Surat Penawaran Kerja (Tahap 5)
-Ketika kandidat menyelesaikan 5 tahap evaluasi, sistem secara otomatis menerbitkan dokumen legal A4:
-- Standar tipografi resmi korporasi: **Times New Roman 12pt** dengan spasi teratur.
-- Kop surat formal, nomor surat keputusan rekrutmen, dan rincian kompensasi bulanan (*IDR 13.500.000* + tunjangan).
-- Fitur cetak langsung (`window.print()`) yang otomatis menyembunyikan navigasi web untuk hasil cetak PDF/kertas A4 bersih.
+## 📄 Format Dokumen Cetak Surat Penawaran Kerja (Offer Letter)
+Ketika kandidat menyelesaikan 5 tahap evaluasi, sistem menerbitkan dokumen penawaran kerja legal resmi:
+- **Format 1 Lembar Penuh A4 (`Single-Page A4 Executive Contract`)**: Presisi 1 lembar tanpa halaman kosong atau pemotongan canggung.
+- **Tipografi Bersih & Proporsional**: Ukuran huruf 8pt–8.5pt standar kontrak korporasi dengan kop surat SCBD resmi.
+- **Tanda Tangan Digital & Stempel**: Fasilitas canvas tanda tangan digital calon karyawan berdampingan dengan stempel resmi korporasi PT ITP.
+- **Ekspor PDF Bersih**: Tekan `Ctrl + P`, pilih *Simpan sebagai PDF*, hilangkan centang *"Header dan footer"*, centang *"Grafik latar belakang"*.
+
 
 ---
 
