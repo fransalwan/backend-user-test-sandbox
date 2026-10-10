@@ -184,6 +184,18 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 			containsBody:   "ACCEPTED & VERIFIED",
 		},
 		{
+			name:   "Exercise Drill Evaluation - Redis Cache Aside Refactor",
+			method: "POST",
+			url:    "/api/exercise/eval-drill",
+			formData: url.Values{
+				"drill":  {"cache"},
+				"action": {"submit"},
+				"code":   {"package main\nfunc GetProduct(id string) string {\n if val, ok := cacheStore[id]; ok { return val }\n val := dbFallback(id)\n cacheStore[id] = val\n return val\n}"},
+			},
+			expectedStatus: http.StatusOK,
+			containsBody:   "ACCEPTED & CACHE VERIFIED",
+		},
+		{
 			name:   "Exercise Theory Quiz Check - All Correct",
 			method: "POST",
 			url:    "/api/exercise/quiz-check",

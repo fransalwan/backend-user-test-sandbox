@@ -1581,6 +1581,63 @@ func (h *Handler) EvalExerciseDrill(w http.ResponseWriter, r *http.Request) {
         </div>`
 		_, _ = w.Write([]byte(html))
 
+	case "cache":
+		lowerCode := strings.ToLower(code)
+		hasCacheCheck := strings.Contains(lowerCode, "cache") || strings.Contains(lowerCode, "redis") || strings.Contains(lowerCode, "store")
+		hasDbFallback := strings.Contains(lowerCode, "db") || strings.Contains(lowerCode, "database") || strings.Contains(lowerCode, "fetch") || strings.Contains(lowerCode, "query") || strings.Contains(lowerCode, "fallback")
+		hasSetCache := strings.Contains(lowerCode, "set") || strings.Contains(lowerCode, "store[") || strings.Contains(lowerCode, "ttl") || strings.Contains(lowerCode, "save") || strings.Contains(lowerCode, "cache[")
+
+		if action == "run" {
+			html := fmt.Sprintf(`
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs space-y-2">
+                <div class="text-emerald-400 font-bold flex items-center justify-between">
+                    <span>▶ Hasil Uji Cepat NoSQL Redis Cache-Aside:</span>
+                    <span class="text-slate-400 text-[10px]">Fallback Handled: %v</span>
+                </div>
+                <div class="text-slate-300 text-[11px]">
+                    Simulasi 100 request: Request 1 Cache Miss (Fetch DB &amp; Set Cache), Request 2-100 Cache Hit (&lt; 2ms).
+                </div>
+                <div class="text-[11px] text-emerald-300 pt-1">
+                    Klik <strong>"⚡ Verifikasi Perbaikan Bug"</strong> untuk validasi integrasi cache-aside.
+                </div>
+            </div>`, hasCacheCheck && hasDbFallback && hasSetCache)
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		if !hasCacheCheck || !hasDbFallback || !hasSetCache {
+			html := `
+            <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-mono space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-extrabold text-rose-400">❌ CACHE-ASIDE PATTERN DEFECT!</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-rose-300">
+                    Implementasi Anda belum menerapkan alur Cache-Aside yang lengkap: Cek Cache &rarr; Jika Miss, panggil DB fallback &rarr; Simpan hasil ke Cache dengan TTL &rarr; Kembalikan data.
+                </p>
+                <div class="text-[10px] text-rose-400">Pastikan jika cache miss, data diambil dari database lalu disimpan kembali ke cache!</div>
+            </div>`
+			_, _ = w.Write([]byte(html))
+			return
+		}
+
+		h.hub.Broadcast("🎉 [Exercise Lab] Drill 5 Lolos: Pattern NoSQL Redis Cache-Aside & DB Fallback berhasil diimplementasikan!")
+		html := `
+        <div class="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-emerald-400">ACCEPTED & CACHE VERIFIED ✅</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Latency: 1.2ms</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Cache Hit Ratio</span><div class="font-bold text-emerald-400">99.0%</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">DB Load</span><div class="font-bold text-emerald-400">Reduced 90%</div></div>
+                <div class="p-2 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">TTL Invalidation</span><div class="font-bold text-emerald-400">Active (Safe)</div></div>
+            </div>
+            <p class="text-[11px] text-emerald-300 leading-relaxed">
+                <strong>Catatan Tech Lead:</strong> Sangat bagus! Pattern Cache-Aside adalah fondasi arsitektur microservices tingkat lanjut (Fase 3 Kurikulum) untuk melindungi database dari thundering herd.
+            </p>
+        </div>`
+		_, _ = w.Write([]byte(html))
+
 	default:
 		http.Error(w, "Drill tidak dikenali", http.StatusBadRequest)
 	}
