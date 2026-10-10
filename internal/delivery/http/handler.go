@@ -24,6 +24,7 @@ type Handler struct {
 	tmpl           *template.Template
 	bootcampTmpl   *template.Template
 	exerciseTmpl   *template.Template
+	offerTmpl      *template.Template
 	hub            *SSEHub
 	raceSim        *racecondition.Simulator
 	idempotencySim *idempotency.Simulator
@@ -52,6 +53,11 @@ func NewHandler() (*Handler, error) {
 		return nil, fmt.Errorf("gagal mem-parsing template exercise.html: %w", err)
 	}
 
+	offerTmpl, err := template.ParseFS(templateFS, "templates/offer.html")
+	if err != nil {
+		return nil, fmt.Errorf("gagal mem-parsing template offer.html: %w", err)
+	}
+
 	raceSim := racecondition.NewSimulator(100000) // Saldo awal $1,000.00
 	idemSim := idempotency.NewSimulator()
 	sagaSim := distributed.NewSimulator()
@@ -62,6 +68,7 @@ func NewHandler() (*Handler, error) {
 		tmpl:           tmpl,
 		bootcampTmpl:   bootcampTmpl,
 		exerciseTmpl:   exerciseTmpl,
+		offerTmpl:      offerTmpl,
 		hub:            hub,
 		raceSim:        raceSim,
 		idempotencySim: idemSim,
@@ -767,9 +774,9 @@ func (h *Handler) EvalScenario05RCA(w http.ResponseWriter, r *http.Request) {
         </p>
         <div class="pt-2 border-t border-emerald-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span class="text-[11px] text-emerald-200 font-bold">🏆 Seluruh 5 Tahap Pengujian Teknis Lolos Sempurna!</span>
-            <button type="button" onclick="document.getElementById('official-offer-letter-doc').scrollIntoView({ behavior: 'smooth' })" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md active:scale-95 flex items-center justify-center gap-1.5">
-                <span>📜</span> <span>Lihat &amp; Cetak Surat Penawaran Kerja (Offer Letter)</span>
-            </button>
+            <a href="/offer" target="_blank" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs transition shadow-md active:scale-95 flex items-center justify-center gap-1.5">
+                <span>📜</span> <span>Buka Surat Penawaran Kerja Resmi (Offer Letter Page) ↗</span>
+            </a>
         </div>
     </div>`
 	_, _ = w.Write([]byte(html))
@@ -1399,6 +1406,14 @@ func (h *Handler) Exercise(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := h.exerciseTmpl.Execute(w, nil); err != nil {
 		http.Error(w, "Gagal merender halaman exercise", http.StatusInternalServerError)
+	}
+}
+
+// OfferLetter menampilkan surat penawaran kerja resmi pada halaman tersendiri yang siap cetak (A4 printable).
+func (h *Handler) OfferLetter(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := h.offerTmpl.Execute(w, nil); err != nil {
+		http.Error(w, "Gagal merender surat penawaran kerja", http.StatusInternalServerError)
 	}
 }
 

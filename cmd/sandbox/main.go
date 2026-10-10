@@ -21,6 +21,8 @@ func main() {
 	mux.HandleFunc("/hiring", handler.Index)
 	mux.HandleFunc("/bootcamp", handler.Bootcamp)
 	mux.HandleFunc("/exercise", handler.Exercise)
+	mux.HandleFunc("/offer", handler.OfferLetter)
+	mux.HandleFunc("/offer-letter", handler.OfferLetter)
 	mux.HandleFunc("/health", handler.HealthCheck)
 	mux.HandleFunc("/api/events", handler.EventsStream)
 	mux.HandleFunc("/api/wallets", handler.GetWallets)

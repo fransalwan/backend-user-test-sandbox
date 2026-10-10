@@ -218,6 +218,13 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			containsBody:   "100/100 RCA ACCEPTED",
 		},
+		{
+			name:           "Offer Letter Standalone Page",
+			method:         "GET",
+			url:            "/offer",
+			expectedStatus: http.StatusOK,
+			containsBody:   "SURAT PENAWARAN KERJA",
+		},
 	}
 
 	for _, tt := range tests {
@@ -239,6 +246,8 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 				handler.Bootcamp(w, req)
 			case "/exercise":
 				handler.Exercise(w, req)
+			case "/offer":
+				handler.OfferLetter(w, req)
 			case "/api/gamification/status":
 				handler.GetGamificationStatus(w, req)
 			case "/api/scenarios/02/defend":
