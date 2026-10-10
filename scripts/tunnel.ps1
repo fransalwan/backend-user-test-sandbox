@@ -31,3 +31,4 @@ if ($cloudflaredCmd) {
     Write-Host "       .\cloudflared.exe tunnel --url http://localhost:8080" -ForegroundColor Yellow
     Write-Host ""
 }
+

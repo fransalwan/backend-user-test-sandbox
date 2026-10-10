@@ -427,6 +427,10 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+
             setupEditorWithGutter('drill-1-editor', 'drill-1-gutter', 'drill-1-save-status', 'drill_code_1', STARTER_DRILL_1_MONEY);
             setupEditorWithGutter('drill-2-editor', 'drill-2-gutter', 'drill-2-save-status', 'drill_code_2', STARTER_DRILL_2_RACE);
             setupEditorWithGutter('drill-3-editor', 'drill-3-gutter', 'drill-3-save-status', 'drill_code_3', STARTER_DRILL_3_LEAK);
@@ -480,7 +484,7 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
     <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6">
 
         <!-- Banner Intro & Mental Timer -->
-        <div class="bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-slate-900/60 border border-amber-500/30 rounded-2xl p-5 sm:p-7 shadow-lg">
+        <div class="bg-gradient-to-r from-amber-50 via-orange-50/40 to-slate-50 dark:from-amber-950/40 dark:via-orange-950/30 dark:to-slate-900/60 border border-amber-300 dark:border-amber-500/30 rounded-2xl p-5 sm:p-7 shadow-sm dark:shadow-lg">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                 <div class="space-y-2">
                     <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[11px] font-bold uppercase tracking-wider">
@@ -495,10 +499,10 @@ func (m *ProductCacheManager) GetProductDetail(ctx context.Context, productID st
                 </div>
 
                 <!-- Live Coding Pressure Simulator (Stopwatch Box) -->
-                <div class="p-4 rounded-2xl bg-slate-900/90 border border-amber-500/30 flex flex-col items-center justify-center space-y-2 flex-shrink-0 shadow-inner min-w-[280px]">
-                    <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Live Coding Stopwatch</span>
-                    <div id="timer-display" class="font-mono text-3xl font-black text-emerald-400 tracking-wider">00:00</div>
-                    <span id="timer-pace-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">🟢 Zona Tenang (&lt; 5m): Analisis &amp; Desain</span>
+                <div class="p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-amber-300 dark:border-amber-500/30 flex flex-col items-center justify-center space-y-2 flex-shrink-0 shadow-sm dark:shadow-inner min-w-[280px]">
+                    <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">Live Coding Stopwatch</span>
+                    <div id="timer-display" class="font-mono text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-wider">00:00</div>
+                    <span id="timer-pace-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">🟢 Zona Tenang (&lt; 5m): Analisis &amp; Desain</span>
                     <div class="flex items-center gap-2 w-full pt-1">
                         <button id="timer-toggle-btn" type="button" onclick="toggleMentalTimer()" class="flex-1 py-1.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition flex items-center justify-center gap-1">
                             <span>▶</span> <span>Mulai Stopwatch</span>

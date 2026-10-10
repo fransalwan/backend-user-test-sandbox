@@ -53,6 +53,130 @@
             const modal = document.getElementById('customize-modal');
             if (modal) modal.classList.toggle('hidden');
         }
+
+        // ================= DIGITAL SIGNATURE PAD (CANVAS) LOGIC =================
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let canvasHasDrawn = false;
+
+        function initSignaturePad() {
+            const canvas = document.getElementById('signature-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#0f172a'; // Tinta pena resmi gelap
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDraw(e) {
+                isDrawing = true;
+                const pos = getPos(e);
+                lastX = pos.x;
+                lastY = pos.y;
+                const placeholder = document.getElementById('canvas-placeholder');
+                if (placeholder) placeholder.classList.add('hidden');
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                if (e.cancelable) e.preventDefault();
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                lastX = pos.x;
+                lastY = pos.y;
+                canvasHasDrawn = true;
+            }
+
+            function stopDraw() {
+                isDrawing = false;
+            }
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDraw);
+            canvas.addEventListener('mouseleave', stopDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDraw);
+        }
+
+        function openSignatureModal() {
+            const modal = document.getElementById('signature-modal');
+            if (modal) modal.classList.remove('hidden');
+            setTimeout(initSignaturePad, 50);
+        }
+
+        function closeSignatureModal() {
+            const modal = document.getElementById('signature-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function clearSignatureCanvas() {
+            const canvas = document.getElementById('signature-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvasHasDrawn = false;
+            const placeholder = document.getElementById('canvas-placeholder');
+            if (placeholder) placeholder.classList.remove('hidden');
+        }
+
+        function applySignature() {
+            const canvas = document.getElementById('signature-canvas');
+            if (!canvas || !canvasHasDrawn) {
+                alert('Silakan goreskan tanda tangan terlebih dahulu pada area kanvas.');
+                return;
+            }
+
+            const dataUrl = canvas.toDataURL('image/png');
+            localStorage.setItem('candidate_signature_data', dataUrl);
+            renderStoredSignature();
+            closeSignatureModal();
+        }
+
+        function renderStoredSignature() {
+            const saved = localStorage.getItem('candidate_signature_data');
+            const img = document.getElementById('candidate-signature-img');
+            const btn = document.getElementById('btn-open-sign');
+            const dateEl = document.getElementById('candidate-signature-date');
+
+            if (saved && img) {
+                img.src = saved;
+                img.classList.remove('hidden');
+                if (btn) {
+                    btn.innerHTML = "✍️ Ubah Tanda Tangan";
+                    btn.className = "no-print text-[9.5px] text-slate-400 hover:text-slate-600 block mt-0.5";
+                }
+                if (dateEl) {
+                    const today = new Date();
+                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                    dateEl.innerHTML = `Tanggal: ${today.toLocaleDateString('id-ID', options)}`;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+
+            renderStoredSignature();
+        });
     </script>
     <style>
         /* ================= FORMAT CETAK DOKUMEN RESMI A4 (OFFER LETTER) ================= */
@@ -594,14 +718,20 @@
 
                     <div class="grid grid-cols-2 gap-8 text-xs print:text-[10.5px]">
                         <!-- Kolom Kiri: Calon Karyawan -->
-                        <div class="text-center space-y-12 print:space-y-10">
+                        <div class="text-center space-y-2 relative">
                             <div class="text-[11px] font-semibold text-slate-700 print:text-[10px]">
                                 Disetujui dan Diterima Oleh,<br>
                                 <strong class="text-slate-900">Calon Karyawan</strong>
                             </div>
-                            <div class="pt-2 border-t border-slate-400 w-44 mx-auto print:w-40">
-                                <div class="font-bold text-slate-900 text-xs print:text-[11px]">{{.CandidateName}}</div>
-                                <div class="text-[9.5px] text-slate-500">Tanggal: ........................................</div>
+                            <div id="signature-display-box" class="h-16 flex flex-col items-center justify-center">
+                                <img id="candidate-signature-img" src="" alt="Tanda Tangan" class="hidden max-h-14 max-w-full object-contain mx-auto" />
+                                <button type="button" id="btn-open-sign" onclick="openSignatureModal()" class="no-print text-[10.5px] text-cyan-600 hover:text-cyan-700 font-semibold border border-dashed border-cyan-400 px-3 py-1.5 rounded-lg hover:bg-cyan-50 transition active:scale-95">
+                                    ✍️ Bubuhkan Tanda Tangan
+                                </button>
+                            </div>
+                            <div class="pt-1 border-t border-slate-400 w-44 mx-auto print:w-40">
+                                <div class="font-bold text-slate-900 text-xs print:text-[11px]" id="candidate-signature-name">{{.CandidateName}}</div>
+                                <div class="text-[9.5px] text-slate-500" id="candidate-signature-date">Tanggal: ........................................</div>
                             </div>
                         </div>
 
@@ -630,9 +760,26 @@
                     </div>
                 </div>
 
-                <!-- DISCLAIMER & LEGAL NOTICE -->
-                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[9.5px] text-slate-500 leading-relaxed text-justify print:bg-white print:p-1.5 print:text-[8.5px]">
-                    <strong>Catatan Legalitas &amp; Kerahasiaan:</strong> Dokumen ini diterbitkan secara sah dan dilindungi oleh peraturan perundang-undangan ketenagakerjaan Republik Indonesia. Segala rincian paket remunerasi, kompensasi, dan klausul yang tercantum di dalamnya bersifat sangat rahasia (strictly confidential) dan hanya ditujukan kepada pihak penerima yang disebutkan di atas.
+                <!-- DISCLAIMER & QR CODE VERIFIKASI RESMI -->
+                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[9.5px] text-slate-500 leading-relaxed text-justify print:bg-white print:p-1.5 print:text-[8.5px] flex items-center justify-between gap-3">
+                    <div class="flex-1">
+                        <strong>Catatan Legalitas &amp; Kerahasiaan:</strong> Dokumen ini diterbitkan secara sah dan dilindungi oleh peraturan perundang-undangan ketenagakerjaan Republik Indonesia. Segala rincian paket remunerasi, kompensasi, dan klausul yang tercantum di dalamnya bersifat sangat rahasia (strictly confidential) dan hanya ditujukan kepada pihak penerima yang disebutkan di atas.
+                    </div>
+                    <div class="flex-shrink-0 flex flex-col items-center justify-center text-center p-1.5 bg-white border border-slate-300 rounded-lg shadow-sm">
+                        <svg class="w-10 h-10 print:w-8 print:h-8 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                            <circle cx="6.5" cy="6.5" r="1.5" fill="currentColor"></circle>
+                            <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"></circle>
+                            <circle cx="6.5" cy="17.5" r="1.5" fill="currentColor"></circle>
+                            <path d="M14 14h3v3h-3z" fill="currentColor"></path>
+                            <path d="M19 14v3"></path>
+                            <path d="M14 19h3"></path>
+                            <path d="M19 19h2v2h-2z" fill="currentColor"></path>
+                        </svg>
+                        <span class="text-[6.5px] font-mono font-bold text-slate-600 block mt-0.5">VERIFIED ASSESSMENT</span>
+                    </div>
                 </div>
 
                 <!-- FOOTER LEMBAR 2 -->
@@ -690,6 +837,40 @@
                     <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow">Simpan &amp; Terapkan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL TANDA TANGAN DIGITAL ================= -->
+    <div id="signature-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 no-print">
+        <div class="relative bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">✍️</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Bubuhkan Tanda Tangan Digital</h3>
+                        <p class="text-[11px] text-slate-500">Tanda tangani kanvas di bawah menggunakan mouse atau sentuhan layar.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSignatureModal()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 flex items-center justify-center transition">✕</button>
+            </div>
+
+            <div class="space-y-2">
+                <div class="relative border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white rounded-2xl overflow-hidden shadow-inner flex justify-center items-center">
+                    <canvas id="signature-canvas" width="440" height="150" class="cursor-crosshair touch-none"></canvas>
+                    <div id="canvas-placeholder" class="pointer-events-none absolute text-xs text-slate-400 select-none">
+                        Goreskan tanda tangan Anda di sini...
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-slate-500 px-1">
+                    <span>💡 Tips: Goreskan tanda tangan dengan jelas</span>
+                    <button type="button" onclick="clearSignatureCanvas()" class="text-rose-500 hover:text-rose-600 font-semibold transition">Hapus / Bersihkan</button>
+                </div>
+            </div>
+
+            <div class="pt-2 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-800">
+                <button type="button" onclick="closeSignatureModal()" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold">Batal</button>
+                <button type="button" onclick="applySignature()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md">Terapkan ke Dokumen</button>
+            </div>
         </div>
     </div>
 

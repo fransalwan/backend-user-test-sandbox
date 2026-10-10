@@ -1,12 +1,50 @@
+# =========================================================================
+# Git Ignore: Fintech Junior Backend Assessment Sandbox
+# =========================================================================
+
+# 1. Binary Kompilasi Sistem
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-*.test
-*.out
+sandbox
+sandbox.exe
+
+# 2. Tooling Cloudflare Tunnel & Sertifikat Lokal
+cloudflared
+cloudflared.exe
+.cloudflared/
+*.pem
+cert.pem
+
+# 3. Direktori Data Persistensi Database Lokal
+pgdata/
+redisdata/
+data/
+*.sqlite
+*.sqlite3
+
+# 4. Environment Variables & Rahasia
 .env
+.env.*
+!.env.example
+
+# 5. Editor & Sistem Operasi
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+Thumbs.db
+.DS_Store
+
+# 6. Test & Coverage Artifacts
+*.out
+*.test
+coverage.txt
+coverage.html
+test.log
 tmp/
 dist/
-coverage.txt
 kurikulum/
