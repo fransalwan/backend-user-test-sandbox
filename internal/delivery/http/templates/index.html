@@ -1039,9 +1039,10 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 display: none !important;
             }
 
+            /* Hilangkan margin default browser agar URL dan Judul Dokumen tidak tercetak */
             @page {
                 size: A4 portrait;
-                margin: 8mm 10mm 8mm 10mm;
+                margin: 0 !important;
             }
 
             html, body {
@@ -1050,8 +1051,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 100% !important;
-                height: auto !important;
+                width: 210mm !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -1072,7 +1072,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 display: none !important;
             }
 
-            /* LEMBAR 1: Persis 1 Lembar A4 Pertama */
+            /* LEMBAR 1: Persis 1 Lembar A4 Pertama (210mm x 297mm) */
             .offer-page-1 {
                 page-break-before: avoid !important;
                 break-before: avoid !important;
@@ -1080,17 +1080,23 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 break-after: page !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                display: block !important;
-                height: auto !important;
-                max-height: none !important;
-                overflow: visible !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                width: 210mm !important;
+                height: 296mm !important;
+                max-height: 296mm !important;
+                min-height: 296mm !important;
+                padding: 7mm 13mm 7mm 13mm !important;
+                box-sizing: border-box !important;
+                margin: 0 auto !important;
+                overflow: hidden !important;
                 border: none !important;
                 box-shadow: none !important;
+                background: #ffffff !important;
             }
 
-            /* LEMBAR 2: Persis 1 Lembar A4 Kedua */
+            /* LEMBAR 2: Persis 1 Lembar A4 Kedua (210mm x 297mm) */
             .offer-page-2 {
                 page-break-before: always !important;
                 break-before: page !important;
@@ -1098,20 +1104,26 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 break-after: avoid !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                display: block !important;
-                height: auto !important;
-                max-height: none !important;
-                overflow: visible !important;
-                margin: 0 !important;
-                padding: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                width: 210mm !important;
+                height: 296mm !important;
+                max-height: 296mm !important;
+                min-height: 296mm !important;
+                padding: 7mm 13mm 7mm 13mm !important;
+                box-sizing: border-box !important;
+                margin: 0 auto !important;
+                overflow: hidden !important;
                 border: none !important;
                 box-shadow: none !important;
+                background: #ffffff !important;
             }
 
             /* SKALASI HURUF DINAMIS & PENGATURAN SPASI CETAK KOMPAK */
             .offer-page {
-                font-size: 7.8pt !important;
-                line-height: 1.25 !important;
+                font-size: 7.4pt !important;
+                line-height: 1.22 !important;
                 background: #ffffff !important;
                 color: #0f172a !important;
             }
@@ -1120,119 +1132,146 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                 box-sizing: border-box !important;
             }
 
-            /* Kompresi Spacing Vertikal */
-            .offer-page.space-y-4 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 4px !important;
-            }
+            /* Kompresi Spacing Vertikal Print */
+            .offer-page.space-y-4 > :not([hidden]) ~ :not([hidden]),
             .offer-page .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 3.5px !important;
-            }
-            .offer-page .space-y-3 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 2.5px !important;
             }
-            .offer-page .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+            .offer-page.space-y-3 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-3 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 2px !important;
             }
-            .offer-page .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+            .offer-page.space-y-2 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-2 > :not([hidden]) ~ :not([hidden]) {
                 margin-top: 1.5px !important;
             }
-            .offer-page .space-y-12 > :not([hidden]) ~ :not([hidden]),
-            .offer-page .print\:space-y-10 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 14px !important;
+            .offer-page.space-y-1\.5 > :not([hidden]) ~ :not([hidden]),
+            .offer-page .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 1.2px !important;
             }
 
             /* Kop Surat Compact */
             .offer-page h1 {
-                font-size: 10.5pt !important;
+                font-size: 9.8pt !important;
                 line-height: 1.15 !important;
                 margin: 0 !important;
             }
             .offer-page .w-12.h-12,
             .offer-page .print\:w-11 {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 10pt !important;
-                border-radius: 6px !important;
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 9pt !important;
+                border-radius: 5px !important;
             }
 
             /* Headings Seksi (I, II, III, IV, V) */
             .offer-page .font-bold.uppercase {
-                font-size: 7.8pt !important;
+                font-size: 7.2pt !important;
                 letter-spacing: 0.04em !important;
-                padding-bottom: 2px !important;
-                margin-bottom: 2px !important;
+                padding-bottom: 1.5px !important;
+                margin-bottom: 1.5px !important;
             }
 
             /* Paragraf & Text */
             .offer-page p {
-                font-size: 7.8pt !important;
-                line-height: 1.26 !important;
-                margin-bottom: 2px !important;
+                font-size: 7.2pt !important;
+                line-height: 1.22 !important;
+                margin-bottom: 1.5px !important;
             }
 
             /* Box Card Ketentuan (Bagian I) */
-            .offer-page .p-2.rounded-lg,
-            .offer-page .print\:p-1\.5 {
-                padding: 2px 4.5px !important;
+            .offer-page .grid-cols-2 .p-2.rounded-lg,
+            .offer-page .grid-cols-2 .print\:p-1\.5 {
+                padding: 1.8px 3.5px !important;
                 border-radius: 4px !important;
             }
-            .offer-page .p-2.rounded-lg span {
-                line-height: 1.2 !important;
+            .offer-page .grid-cols-2 .text-\[9\.5px\] {
+                font-size: 6pt !important;
+                line-height: 1.05 !important;
+            }
+            .offer-page .grid-cols-2 .text-xs,
+            .offer-page .grid-cols-2 .print\:text-\[10\.5px\] {
+                font-size: 7pt !important;
+                line-height: 1.12 !important;
             }
 
             /* Tabel Remunerasi (Bagian II) */
             .offer-page table {
-                font-size: 7.2pt !important;
+                font-size: 6.8pt !important;
                 width: 100% !important;
             }
             .offer-page table th,
             .offer-page table td {
-                padding: 1.8px 3.5px !important;
-                line-height: 1.2 !important;
+                padding: 1.5px 3.5px !important;
+                line-height: 1.15 !important;
             }
 
-            /* Scorecard 4 Card (Bagian III) */
+            /* Scorecard 5 Card (Bagian III) */
+            .offer-page .grid-cols-2.sm\:grid-cols-5 .p-2,
+            .offer-page .grid-cols-2.sm\:grid-cols-5 .print\:p-1,
             .offer-page .grid-cols-4 .p-2,
             .offer-page .grid-cols-4 .print\:p-1\.5 {
-                padding: 2px !important;
+                padding: 1.5px 2px !important;
             }
+            .offer-page .grid-cols-2.sm\:grid-cols-5 .font-black,
             .offer-page .grid-cols-4 .font-black {
-                font-size: 8pt !important;
+                font-size: 7.2pt !important;
             }
 
             /* Tanda Tangan & Stempel (Bagian V) */
+            .offer-page #signature-display-box {
+                height: 38px !important;
+                min-height: 38px !important;
+            }
+            .offer-page #candidate-signature-img {
+                max-height: 36px !important;
+            }
             .offer-page .pt-6.border-t,
             .offer-page .pt-2.border-t,
             .offer-page .border-t.border-slate-400 {
-                padding-top: 2px !important;
+                padding-top: 1.5px !important;
             }
             .offer-page .w-20.h-20,
             .offer-page .print\:w-16 {
-                width: 40px !important;
-                height: 40px !important;
+                width: 38px !important;
+                height: 38px !important;
                 margin-top: 1px !important;
                 margin-bottom: 1px !important;
                 border-width: 1.5px !important;
             }
             .offer-page .w-20.h-20 div,
             .offer-page .print\:text-\[6\.5px\] {
-                font-size: 4.8pt !important;
+                font-size: 4.5pt !important;
                 line-height: 1.05 !important;
+            }
+            .offer-page .w-44.mx-auto,
+            .offer-page .w-48.mx-auto,
+            .offer-page .print\:w-40,
+            .offer-page .print\:w-44 {
+                width: 120px !important;
             }
 
             /* Disclaimer Box */
             .offer-page .p-2\.5.rounded-lg,
             .offer-page .print\:p-1\.5 {
-                padding: 2.5px 4.5px !important;
-                font-size: 6.5pt !important;
-                line-height: 1.2 !important;
+                padding: 2px 3.5px !important;
+                font-size: 6pt !important;
+                line-height: 1.15 !important;
+            }
+            .offer-page .p-2\.5.rounded-lg svg,
+            .offer-page .print\:w-8 {
+                width: 24px !important;
+                height: 24px !important;
+            }
+            .offer-page .p-2\.5.rounded-lg span {
+                font-size: 5.2pt !important;
             }
 
-            /* Footer */
+            /* Footer Lembar */
             .offer-page .border-t.border-slate-200 {
-                padding-top: 2px !important;
-                margin-top: 2px !important;
-                font-size: 6.5pt !important;
+                padding-top: 1.5px !important;
+                margin-top: 1.5px !important;
+                font-size: 6pt !important;
             }
         }
     </style>
