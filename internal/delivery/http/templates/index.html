@@ -999,7 +999,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                     <span class="text-xs text-slate-400 hidden sm:inline">Bobot 20% per tahap menuju Surat Penawaran Kerja</span>
                 </div>
                 <p class="text-xs text-slate-300">
-                    Selesaikan seluruh 5 pengujian teknis untuk membuka <strong>Surat Penawaran Kerja (Offer Letter)</strong> resmi di Tahap 5.
+                    Selesaikan seluruh 5 pengujian teknis (DSA, Arsitektur, API, Concurrency, hingga Observability &amp; RCA) untuk membuka <strong>Surat Penawaran Kerja (Offer Letter)</strong> resmi di Tahap 5!
                 </p>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0 flex-wrap">
@@ -1016,7 +1016,7 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
         <section class="no-print bg-slate-100 dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-1.5 sm:p-2 rounded-2xl shadow-sm">
             <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth pb-1 sm:pb-0">
                 <button id="tab-scenario-1" onclick="switchScenario(1)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white shadow-md shadow-emerald-950/40 border border-emerald-500/50 transition-all scale-[1.02] whitespace-nowrap flex-shrink-0">
-                    <span>💻</span> <span>Tahap 1: Live Coding</span>
+                    <span>💻</span> <span>Tahap 1: Online Assessment DSA</span>
                     <span id="tab-badge-1" class="hidden"></span>
                 </button>
                 <button id="tab-scenario-2" onclick="switchScenario(2)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
@@ -1024,15 +1024,15 @@ CREATE TABLE IF NOT EXISTS ledger_entries (
                     <span id="tab-badge-2" class="hidden"></span>
                 </button>
                 <button id="tab-scenario-3" onclick="switchScenario(3)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>📦</span> <span>Tahap 3: Take-Home Test</span>
+                    <span>📦</span> <span>Tahap 3: Take-Home API</span>
                     <span id="tab-badge-3" class="hidden"></span>
                 </button>
                 <button id="tab-scenario-4" onclick="switchScenario(4)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-dark-850 border border-slate-200 dark:border-slate-800 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>🔥</span> <span>Tahap 4: War Room</span>
+                    <span>🔥</span> <span>Tahap 4: Concurrency War Room</span>
                     <span id="tab-badge-4" class="hidden"></span>
                 </button>
-                <button id="tab-scenario-5" onclick="switchScenario(5)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-amber-600 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-dark-850 border border-amber-300 dark:border-amber-500/30 transition-all whitespace-nowrap flex-shrink-0">
-                    <span>🏆</span> <span>Tahap 5: Offer Letter</span>
+                <button id="tab-scenario-5" onclick="switchScenario(5)" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-semibold rounded-xl bg-white dark:bg-dark-900 text-cyan-600 dark:text-cyan-400 hover:bg-slate-100 dark:hover:bg-dark-850 border border-cyan-300 dark:border-cyan-500/30 transition-all whitespace-nowrap flex-shrink-0">
+                    <span>📊</span> <span>Tahap 5: Observability &amp; RCA</span>
                     <span id="tab-badge-5" class="hidden"></span>
                 </button>
                 <button hx-post="/api/gamification/reset" hx-target="#gamification-hud-container" class="text-xs text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-3 py-1.5 transition ml-auto whitespace-nowrap">
@@ -1638,18 +1638,178 @@ func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string 
 
             <!-- ========================================================================= -->
             <!-- ========================================================================= -->
-            <!-- ================= TAHAP 5: OFFER LETTER (DEDICATED FULL VIEW) ============ -->
+            <!-- ================= TAHAP 5: OBSERVABILITY & INCIDENT RCA + OFFER LETTER === -->
             <!-- ========================================================================= -->
             <div id="scenario-5-view" class="hidden space-y-6">
+                <!-- PANEL UJIAN TEKNIS TAHAP 5: OBSERVABILITY & ROOT CAUSE ANALYSIS (RCA) -->
+                <div class="no-print bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-7 shadow-lg space-y-5">
+                    <div class="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider font-mono">
+                                    Tahap 5 &bull; Ujian Teknis Terakhir (Bobot 20%)
+                                </span>
+                                <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 font-mono">
+                                    Production Observability &amp; RCA
+                                </span>
+                            </div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white mt-1">
+                                Investigasi Insiden Lonjakan Latensi Transaksi &amp; Connection Pool Starvation
+                            </h2>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                                Analisis telemetry metrics Prometheus &amp; OpenTelemetry distributed trace, tentukan akar masalah insiden p99 4.800ms, dan ajukan solusi remedi arsitektur.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Telemetry Health Radar (Metrics Cards) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-rose-700 dark:text-rose-400">P99 API Latency</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 font-mono">CRITICAL</span>
+                            </div>
+                            <div class="text-xl sm:text-2xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1">4.850 ms</div>
+                            <div class="text-[10px] text-rose-600/80 dark:text-rose-400/80 mt-0.5">SLA Target &lt; 50 ms jebol drastis</div>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-amber-700 dark:text-amber-400">PostgreSQL Pool</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono">WARNING</span>
+                            </div>
+                            <div class="text-xl sm:text-2xl font-black font-mono text-amber-600 dark:text-amber-400 mt-1">98 / 100 Conn</div>
+                            <div class="text-[10px] text-amber-600/80 dark:text-amber-400/80 mt-0.5">Connection pool hampir habis (exhausted)</div>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-cyan-700 dark:text-cyan-400">Redis Cache Hit Ratio</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-mono">DROPPED</span>
+                            </div>
+                            <div class="text-xl sm:text-2xl font-black font-mono text-cyan-600 dark:text-cyan-400 mt-1">12.4%</div>
+                            <div class="text-[10px] text-cyan-600/80 dark:text-cyan-400/80 mt-0.5">Cache Stampede (Thundering Herd ke DB)</div>
+                        </div>
+                    </div>
+
+                    <!-- Distributed Trace Waterfall Visualizer -->
+                    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-950 p-4 font-mono text-xs space-y-2">
+                        <div class="flex items-center justify-between text-slate-400 text-[11px] pb-2 border-b border-slate-800">
+                            <span class="flex items-center gap-1.5 text-cyan-400 font-bold">
+                                <span>🔍</span> OpenTelemetry Trace Waterfall: TraceID #8f2a991b (POST /v1/payments/settlement)
+                            </span>
+                            <span class="text-rose-400 font-bold">Total Duration: 4.852 ms</span>
+                        </div>
+                        <div class="space-y-1.5 text-[11px]">
+                            <!-- Span 1 -->
+                            <div class="p-2 rounded bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[9px] font-bold">HTTP IN</span>
+                                    <span class="text-white">payments.handler: POST /v1/payments/settlement</span>
+                                </div>
+                                <span class="text-slate-400 font-mono">4.852 ms</span>
+                            </div>
+                            <!-- Span 2 -->
+                            <div class="p-2 rounded bg-slate-900 border border-slate-800 ml-3 sm:ml-5 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[9px] font-bold">REDIS</span>
+                                    <span class="text-slate-300">cache.Get("settlement_summary_alice") &rarr; <span class="text-amber-400 font-bold">Cache MISS</span></span>
+                                </div>
+                                <span class="text-slate-400 font-mono">1.8 ms</span>
+                            </div>
+                            <!-- Span 3: The Bottleneck -->
+                            <div class="p-2 rounded bg-rose-950/40 border border-rose-800/80 ml-6 sm:ml-10 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[9px] font-bold">POSTGRES</span>
+                                    <span class="text-rose-200">
+                                        db.QueryRow("SELECT * FROM transactions WHERE user_id = $1 ORDER BY created_at DESC")
+                                        <span class="text-rose-400 block sm:inline text-[10px]">[Seq Scan on 15,000,000 rows &bull; Missing Composite Index]</span>
+                                    </span>
+                                </div>
+                                <span class="text-rose-400 font-bold font-mono">4.800 ms (98.9% Total Time!)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Investigasi & Action Plan RCA -->
+                    <form hx-post="/api/scenarios/05/rca" hx-target="#rca-result-container" class="space-y-4 pt-1">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Pertanyaan 1: Root Cause -->
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                                <div class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <span>🎯</span> 1. Identifikasi Akar Masalah (Root Cause):
+                                </div>
+                                <div class="space-y-2 text-xs">
+                                    <label class="flex items-start gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-cyan-500 cursor-pointer">
+                                        <input type="radio" name="root_cause" value="missing_composite_index" checked class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                        <span class="text-slate-700 dark:text-slate-300">
+                                            <strong>Query PostgreSQL Lambat (Full Table Scan):</strong> Tabel <code>transactions</code> (15 juta baris) tidak memiliki composite index <code>(user_id, created_at)</code>, memicu disk IO intensif dan menyandera DB connection pool.
+                                        </span>
+                                    </label>
+                                    <label class="flex items-start gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-cyan-500 cursor-pointer">
+                                        <input type="radio" name="root_cause" value="network_cable" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                        <span class="text-slate-700 dark:text-slate-300">
+                                            <strong>Kabel Jaringan Data Center:</strong> Terjadi gangguan fisik pada kabel switch rack server SCBD.
+                                        </span>
+                                    </label>
+                                    <label class="flex items-start gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-cyan-500 cursor-pointer">
+                                        <input type="radio" name="root_cause" value="gc_pause" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                        <span class="text-slate-700 dark:text-slate-300">
+                                            <strong>Garbage Collection Stop-The-World:</strong> Runtime Go terhenti 4.8 detik akibat memori penuh.
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Pertanyaan 2: Solusi Remediasi -->
+                            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                                <div class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    <span>🛠️</span> 2. Rencana Aksi Remediasi SRE &amp; Arsitektur:
+                                </div>
+                                <div class="space-y-2 text-xs">
+                                    <label class="flex items-start gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-cyan-500 cursor-pointer">
+                                        <input type="radio" name="remediation" value="composite_index_singleflight" checked class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                        <span class="text-slate-700 dark:text-slate-300">
+                                            <strong>Composite Index + Singleflight Pattern:</strong> Tambahkan <code>CREATE INDEX CONCURRENTLY idx_tx_user_created ON transactions(user_id, created_at DESC)</code> (tanpa lock tabel) dan gunakan <code>singleflight</code> pada cache miss untuk memotong thundering herd.
+                                        </span>
+                                    </label>
+                                    <label class="flex items-start gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-cyan-500 cursor-pointer">
+                                        <input type="radio" name="remediation" value="restart_db" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                        <span class="text-slate-700 dark:text-slate-300">
+                                            <strong>Auto-Restart Cron Database:</strong> Lakukan reboot terjadwal pada PostgreSQL setiap 10 menit untuk membebaskan koneksi pool.
+                                        </span>
+                                    </label>
+                                    <label class="flex items-start gap-2 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-cyan-500 cursor-pointer">
+                                        <input type="radio" name="remediation" value="mongo_nosql_rewrite" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                        <span class="text-slate-700 dark:text-slate-300">
+                                            <strong>Rewrite ke NoSQL:</strong> Hapus PostgreSQL dan tulis ulang seluruh data transaksi ke database NoSQL tanpa index.
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <span class="text-[11px] text-slate-500">Hasil evaluasi komite akan disiarkan langsung melalui real-time stream.</span>
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-950/40 active:scale-95 flex items-center gap-2">
+                                <span>⚡</span> <span>Kirim Analisis RCA &amp; Validasi Tahap 5</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Tempat Output Hasil Evaluasi RCA -->
+                    <div id="rca-result-container"></div>
+                </div>
+
                 <!-- Bar Kontrol Layar (Akan disembunyikan otomatis saat Cetak) -->
                 <div class="no-print bg-white dark:bg-dark-900 border border-amber-300 dark:border-amber-500/30 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
                             <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800/40">
-                                Tahap 5 &bull; Keputusan Hiring & Penawaran Resmi
+                                Dokumen Resmi Kelulusan &bull; Penawaran Kerja
                             </span>
-                            <span class="px-2.5 py-1 text-[11px] font-bold rounded-md bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">
-                                STRONG HIRE APPROVED ✓
+                            <span class="px-2.5 py-1 text-[11px] font-bold rounded-md bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40">
+                                TERBUKA SETELAH EVALUASI TUNTAS ✓
                             </span>
                         </div>
                         <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1839,26 +1999,31 @@ func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string 
                             <div class="font-bold text-[11px] uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1">
                                 III. Lampiran Rapor Evaluasi Teknis (Engineering Committee Scorecard)
                             </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs print:text-[10px]">
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                                    <div class="text-[9.5px] text-slate-500 font-medium">Tahap 1: Live Coding DSA</div>
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-center text-xs print:text-[9.5px]">
+                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
+                                    <div class="text-[9px] text-slate-500 font-medium">Tahap 1: Online DSA</div>
                                     <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                                    <div class="text-[8.5px] text-slate-500 mt-0.5">Tx Deduplication O(N)</div>
+                                    <div class="text-[8px] text-slate-500 mt-0.5">Deduplication O(N)</div>
                                 </div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                                    <div class="text-[9.5px] text-slate-500 font-medium">Tahap 2: System Design</div>
+                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
+                                    <div class="text-[9px] text-slate-500 font-medium">Tahap 2: System Design</div>
                                     <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                                    <div class="text-[8.5px] text-slate-500 mt-0.5">Idempotency &amp; Ledger</div>
+                                    <div class="text-[8px] text-slate-500 mt-0.5">Idempotency &amp; Ledger</div>
                                 </div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                                    <div class="text-[9.5px] text-slate-500 font-medium">Tahap 3: Take-Home Code</div>
+                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
+                                    <div class="text-[9px] text-slate-500 font-medium">Tahap 3: Take-Home API</div>
                                     <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                                    <div class="text-[8.5px] text-slate-500 mt-0.5">ACID DB &amp; Table Tests</div>
+                                    <div class="text-[8px] text-slate-500 mt-0.5">ACID DB &amp; Table Tests</div>
                                 </div>
-                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1.5">
-                                    <div class="text-[9.5px] text-slate-500 font-medium">Tahap 4: War Room</div>
+                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1">
+                                    <div class="text-[9px] text-slate-500 font-medium">Tahap 4: War Room</div>
                                     <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
-                                    <div class="text-[8.5px] text-slate-500 mt-0.5">Zero Overselling (429)</div>
+                                    <div class="text-[8px] text-slate-500 mt-0.5">Zero Overselling (429)</div>
+                                </div>
+                                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200 print:bg-white print:p-1 col-span-2 sm:col-span-1">
+                                    <div class="text-[9px] text-slate-500 font-medium">Tahap 5: Observability</div>
+                                    <div class="font-black text-emerald-700 text-sm mt-0.5 print:text-xs">NILAI: A (100)</div>
+                                    <div class="text-[8px] text-slate-500 mt-0.5">RCA &amp; Index Scan</div>
                                 </div>
                             </div>
                         </div>
@@ -1965,26 +2130,26 @@ func FindDuplicateTransactions(txs []Transaction, windowSeconds int64) []string 
                     <h3 class="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                         🎯 Alur Evaluasi Kompetensi Kandidat (5 Tahapan Teknis):
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 0 &bull; Fundamental &amp; Sandbox Lab</strong>
-                            Kuasai invarian uang integer sen (<code class="font-mono text-emerald-500">int64</code>), pembukuan berpasangan (double-entry), dan pencegahan race condition.
-                        </div>
-                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 1 &bull; Live Coding DSA (Bobot 20%)</strong>
+                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 1 &bull; Online Assessment DSA (20%)</strong>
                             Implementasikan algoritma <strong>Transaction Deduplication</strong> dalam kompleksitas waktu optimal <code class="font-mono text-cyan-500">O(N)</code> Hash Map.
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 2 &bull; System Design Defense (Bobot 20%)</strong>
+                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 2 &bull; System Design Defense (20%)</strong>
                             Pertahankan keputusan teknis arsitektur: Idempotency Storage, Ledger Data Model, dan Third-Party Webhook Resiliency.
                         </div>
                         <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 3 &bull; Clean Architecture & DB (Bobot 20%)</strong>
+                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 3 &bull; Clean Architecture API (20%)</strong>
                             Terapkan Clean Architecture, skema SQL Migrations, Docker Compose lokal, dan isolasi transaksi ACID database (<code class="font-mono text-emerald-500">SELECT FOR UPDATE</code>).
                         </div>
-                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 sm:col-span-2">
-                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 4 &bull; Incident Resiliency (Bobot 20%) &rarr; Tahap 5 (Offer Letter)</strong>
-                            Mitigasi insiden Flash Sale Thundering Herd dengan <strong>Token Bucket Rate Limiter</strong> (40 RPS) untuk mencegah kuota minus dan DB pool exhaustion, lalu cetak Surat Penawaran Kerja resmi A4 di Tahap 5!
+                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800">
+                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 4 &bull; Concurrency War Room (20%)</strong>
+                            Mitigasi insiden Flash Sale Thundering Herd dengan <strong>Token Bucket Rate Limiter</strong> (40 RPS) untuk mencegah kuota minus dan DB pool exhaustion.
+                        </div>
+                        <div class="p-3 rounded-xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 sm:col-span-2 lg:col-span-2">
+                            <strong class="text-slate-900 dark:text-white block mb-1">Tahap 5 &bull; Observability &amp; Incident RCA (20%) &rarr; Offer Letter</strong>
+                            Analisis OpenTelemetry trace &amp; metrics p99 4.800ms, terapkan composite index dan singleflight cache stampede mitigation, lalu terbitkan Surat Penawaran Kerja resmi A4!
                         </div>
                     </div>
                 </div>

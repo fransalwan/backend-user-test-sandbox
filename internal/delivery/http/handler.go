@@ -541,37 +541,33 @@ func (h *Handler) RunScenario04(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(html))
 }
 
-// GetGamificationStatus mengembalikan status kelulusan 6 tahap alur kandidat (0 Bootcamp s/d 5 Offer).
+// GetGamificationStatus mengembalikan status kelulusan 5 tahap seleksi teknis kandidat.
 func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) {
 	h.gamifyMu.RLock()
-	s0 := h.stagePassed[0]
 	s1 := h.stagePassed[1]
 	s2 := h.stagePassed[2]
 	s3 := h.stagePassed[3]
 	s4 := h.stagePassed[4]
-	s5 := s1 && s2 && s3 && s4
+	s5 := h.stagePassed[5]
 	h.gamifyMu.RUnlock()
 
-	levelTitle := "Tahap 0: Screening Awal & Lab Fondasi Moneter"
-	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Screening Awal</span>`
+	levelTitle := "Tahap 1: Online Assessment DSA (Financial Transaction Deduplication)"
+	statusBadge := `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">Tahap 1: Evaluasi DSA</span>`
 	if s5 {
-		levelTitle = "🏆 EVALUASI TUNTAS - SURAT PENAWARAN RESMI TERBIT!"
+		levelTitle = "🏆 5/5 UJIAN TEKNIS TUNTAS - SURAT PENAWARAN RESMI TERBIT!"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 animate-pulse">STRONG HIRE APPROVED ✓</span>`
 	} else if s4 {
-		levelTitle = "Tahap 5: Peninjauan Tawaran Kerja (Job Offer Letter)"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">Siap Review Penawaran</span>`
+		levelTitle = "Tahap 5: Observability & Incident RCA (Production Tracing & Root Cause)"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40">Tahap Akhir Evaluasi</span>`
 	} else if s3 {
-		levelTitle = "Tahap 4: Production War Room (Flash Sale Rate Limiter & Concurrency Incident)"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/40">Tahap Akhir Evaluasi</span>`
+		levelTitle = "Tahap 4: Concurrency War Room (Flash Sale Rate Limiter & Concurrency Incident)"
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40">War Room Incident</span>`
 	} else if s2 {
 		levelTitle = "Tahap 3: Take-Home Core Payment API Review"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/40">Ujian Praktik</span>`
+		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/40">Ujian Praktik API</span>`
 	} else if s1 {
 		levelTitle = "Tahap 2: System Design Payment Architecture Board"
 		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Arsitektur Terbuka</span>`
-	} else if s0 {
-		levelTitle = "Tahap 1: Live Coding DSA (Financial Transaction Deduplication)"
-		statusBadge = `<span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40">Fondasi Terverifikasi ✓</span>`
 	}
 
 	coreStepsCompleted := 0
@@ -590,12 +586,11 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
 		passed    bool
 		isCurrent bool
 	}{
-		{0, "📚", "Tahap 0", "Teori & Lab", s0, !s0},
-		{1, "💻", "Tahap 1", "Live Coding DSA", s1, s0 && !s1},
+		{1, "💻", "Tahap 1", "Online Assessment DSA", s1, !s1},
 		{2, "🏛️", "Tahap 2", "System Design", s2, s1 && !s2},
 		{3, "📦", "Tahap 3", "Take-Home API", s3, s2 && !s3},
-		{4, "🔥", "Tahap 4", "War Room Incident", s4, s3 && !s4},
-		{5, "📜", "Tahap 5", "Offer Letter", s5, s4 && !s5},
+		{4, "🔥", "Tahap 4", "Concurrency War Room", s4, s3 && !s4},
+		{5, "📊", "Tahap 5", "Observability & RCA", s5, s4 && !s5},
 	}
 
 	var stepperItems strings.Builder
@@ -663,7 +658,7 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
             </div>
         </div>
 
-        <!-- Professional Interview Assessment Pipeline Stepper (Tahap 0 s/d Tahap 5) -->
+        <!-- Professional Interview Assessment Pipeline Stepper (5 Tahap Teknis) -->
         <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80">
             <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-2 font-medium">
                 <span class="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
@@ -686,7 +681,6 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
         <script>
             if (typeof updateNavTabBadges === 'function') {
                 updateNavTabBadges({
-                    0: %t,
                     1: %t,
                     2: %t,
                     3: %t,
@@ -695,20 +689,90 @@ func (h *Handler) GetGamificationStatus(w http.ResponseWriter, r *http.Request) 
                 });
             }
         </script>
-    </div>`, levelTitle, coreStepsCompleted, statusBadge, coreStepsCompleted, progressPct, stepperItems.String(), progressPct, s0, s1, s2, s3, s4, s5)
+    </div>`, levelTitle, coreStepsCompleted, statusBadge, coreStepsCompleted, progressPct, stepperItems.String(), progressPct, s1, s2, s3, s4, s5)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(html))
 }
 
-// ResetGamification mereset status evaluasi teknis kandidat.
+// ResetGamification mereset status evaluasi teknis kandidat kembali ke awal.
 func (h *Handler) ResetGamification(w http.ResponseWriter, r *http.Request) {
 	h.gamifyMu.Lock()
 	h.stagePassed = make(map[int]bool)
 	h.gamifyMu.Unlock()
 
-	h.hub.Broadcast("🔄 Status evaluasi teknis kandidat telah di-reset kembali ke Tahap 0 (Screening Awal).")
+	h.hub.Broadcast("🔄 Status evaluasi teknis kandidat telah di-reset kembali ke Tahap 1 (Online Assessment DSA).")
 	h.GetGamificationStatus(w, r)
+}
+
+// EvalScenario05RCA mengevaluasi investigasi root cause analysis insiden produksi Tahap 5.
+func (h *Handler) EvalScenario05RCA(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Permintaan tidak valid", http.StatusBadRequest)
+		return
+	}
+
+	rootCause := r.FormValue("root_cause")
+	remediation := r.FormValue("remediation")
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Jawaban benar: missing_composite_index & composite_index_singleflight
+	if rootCause != "missing_composite_index" || remediation != "composite_index_singleflight" {
+		html := `
+        <div class="p-4 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-mono space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-rose-400">❌ DIAGNOSIS RCA KURANG TEPAT!</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-rose-300">
+                Analisis jejak trace OpenTelemetry menunjukkan bahwa latency 4.800ms terjadi pada PostgreSQL span karena <strong>Sequential Scan pada tabel transactions (15 juta baris)</strong> tanpa composite index (user_id, created_at). Restart server atau memigrasi database bukanlah remedi profesional standar fintech.
+            </p>
+            <div class="text-[10px] text-rose-400">
+                Petunjuk: Buat composite index secara CONCURRENTLY dan pasang singleflight cache pattern untuk mencegah cache stampede!
+            </div>
+        </div>`
+		_, _ = w.Write([]byte(html))
+		return
+	}
+
+	h.markStagePassed(5, "Observability & Incident RCA Certified")
+	h.hub.Broadcast("🎉 [Tahap 5 Selesai] Evaluasi Root Cause Analysis & Observability Disetujui Komite! Surat Penawaran Kerja (Offer Letter) Resmi Terbit.")
+
+	w.Header().Set("HX-Trigger", "refreshWallets")
+
+	html := `
+    <div class="p-4 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-200 text-xs font-mono space-y-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-extrabold text-emerald-400">✅ 100/100 RCA ACCEPTED & SIGN-OFF APPROVED!</span>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px]">P99: 1.2ms (Recovered)</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center text-[11px]">
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-400">Query Plan</div>
+                <div class="font-bold text-emerald-400">Index Scan (O(log N))</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-400">DB Conn Pool</div>
+                <div class="font-bold text-emerald-400">12 / 100 (Healthy)</div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div class="text-slate-400">Cache Stampede</div>
+                <div class="font-bold text-emerald-400">Mitigated (Singleflight)</div>
+            </div>
+        </div>
+        <p class="text-[11px] text-emerald-300 leading-relaxed">
+            <strong>Catatan Principal SRE &amp; VP of Engineering:</strong> Analisis Anda luar biasa tajam! Penerapan <code>CREATE INDEX CONCURRENTLY</code> tanpa table lock di jam kerja dan <code>golang.org/x/sync/singleflight</code> memulihkan SLA platform transaksi ke 99.99%.
+        </p>
+        <div class="pt-2 border-t border-emerald-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span class="text-[11px] text-emerald-200 font-bold">🏆 Seluruh 5 Tahap Pengujian Teknis Lolos Sempurna!</span>
+            <button type="button" onclick="document.getElementById('official-offer-letter-doc').scrollIntoView({ behavior: 'smooth' })" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-md active:scale-95 flex items-center justify-center gap-1.5">
+                <span>📜</span> <span>Lihat &amp; Cetak Surat Penawaran Kerja (Offer Letter)</span>
+            </button>
+        </div>
+    </div>`
+	_, _ = w.Write([]byte(html))
 }
 
 // ClearScenario03 membersihkan riwayat outbox events.

@@ -207,6 +207,17 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			containsBody:   "SKOR SEMPURNA: 100/100",
 		},
+		{
+			name:   "Tahap 5 Incident RCA - Valid Diagnosis & Remediation",
+			method: "POST",
+			url:    "/api/scenarios/05/rca",
+			formData: url.Values{
+				"root_cause":  {"missing_composite_index"},
+				"remediation": {"composite_index_singleflight"},
+			},
+			expectedStatus: http.StatusOK,
+			containsBody:   "100/100 RCA ACCEPTED",
+		},
 	}
 
 	for _, tt := range tests {
@@ -234,6 +245,8 @@ func TestHttpEndpoints_TableDriven(t *testing.T) {
 				handler.DefendScenario02(w, req)
 			case "/api/scenarios/03/submit-repo":
 				handler.SubmitScenario03Repo(w, req)
+			case "/api/scenarios/05/rca":
+				handler.EvalScenario05RCA(w, req)
 			case "/api/docs/postman":
 				handler.DownloadPostmanCollection(w, req)
 			case "/api/exercise/eval-drill":

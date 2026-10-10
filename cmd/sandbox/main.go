@@ -34,6 +34,7 @@ func main() {
 	mux.HandleFunc("/api/scenarios/03/submit-repo", handler.SubmitScenario03Repo)
 	mux.HandleFunc("/api/scenarios/03/clear", handler.ClearScenario03)
 	mux.HandleFunc("/api/scenarios/04/run", handler.RunScenario04)
+	mux.HandleFunc("/api/scenarios/05/rca", handler.EvalScenario05RCA)
 	mux.HandleFunc("/api/bootcamp/eval-livecode", handler.EvalBootcampLiveCode)
 	mux.HandleFunc("/api/bootcamp/eval-systemdesign", handler.EvalBootcampSystemDesignCode)
 	mux.HandleFunc("/api/gamification/status", handler.GetGamificationStatus)

@@ -213,16 +213,22 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
                     numHtml += `<div class="code-editor-line">${i}</div>`;
                 }
                 gutter.innerHTML = numHtml;
+                gutter.scrollTop = editor.scrollTop;
             }
 
             updateGutter();
+
             editor.addEventListener('input', function() {
                 updateGutter();
                 localStorage.setItem(storageKey, editor.value);
                 if (status) {
-                    status.textContent = 'Tersimpan otomatis di browser';
+                    status.textContent = '✓ Tersimpan lokal';
                     status.className = 'text-[11px] text-emerald-500 font-mono';
                 }
+            });
+
+            editor.addEventListener('scroll', function() {
+                gutter.scrollTop = editor.scrollTop;
             });
 
             editor.addEventListener('keydown', function(e) {
@@ -233,8 +239,153 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
                     this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
                     this.selectionStart = this.selectionEnd = start + 4;
                     updateGutter();
+                } else if (e.key === 'Enter') {
+                    // Auto-indent matching previous line
+                    const start = this.selectionStart;
+                    const lines = this.value.substring(0, start).split('\n');
+                    const currentLine = lines[lines.length - 1];
+                    const match = currentLine.match(/^\s+/);
+                    if (match) {
+                        e.preventDefault();
+                        const indent = match[0];
+                        const extraIndent = currentLine.trim().endsWith('{') ? '    ' : '';
+                        const insertText = '\n' + indent + extraIndent;
+                        this.setRangeText(insertText, start, start, 'end');
+                        updateGutter();
+                    }
                 }
             });
+        }
+
+        // ================= PLAYGROUND ACTIONS & RUNTIME SIMULATION =================
+        function copyBootcampCode(phase) {
+            const editor = document.getElementById(`bootcamp-editor-phase-${phase}`);
+            const btn = document.getElementById(`btn-copy-phase-${phase}`);
+            if (!editor) return;
+            navigator.clipboard.writeText(editor.value).then(() => {
+                if (btn) {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '<span>✓</span> <span>Tersalin!</span>';
+                    btn.classList.add('bg-emerald-700', 'text-white');
+                    setTimeout(() => {
+                        btn.innerHTML = orig;
+                        btn.classList.remove('bg-emerald-700', 'text-white');
+                    }, 1800);
+                }
+            });
+        }
+
+        function resetBootcampCode(phase) {
+            let defaultCode = '';
+            let storageKey = '';
+            if (phase === 1) { defaultCode = CODE_FASE_1; storageKey = 'draft_bootcamp_fase1'; }
+            else if (phase === 2) { defaultCode = CODE_FASE_2; storageKey = 'draft_bootcamp_fase2'; }
+            else if (phase === 3) { defaultCode = CODE_FASE_3; storageKey = 'draft_bootcamp_fase3'; }
+
+            localStorage.removeItem(storageKey);
+            const editor = document.getElementById(`bootcamp-editor-phase-${phase}`);
+            if (editor) {
+                editor.value = defaultCode;
+                editor.dispatchEvent(new Event('input'));
+                const status = document.getElementById(`bootcamp-status-phase-${phase}`);
+                if (status) {
+                    status.textContent = '↺ Template di-reset';
+                    status.className = 'text-[11px] text-amber-400 font-mono';
+                }
+            }
+        }
+
+        function clearBootcampTerminal(phase) {
+            const term = document.getElementById(`bootcamp-terminal-output-${phase}`);
+            const status = document.getElementById(`bootcamp-terminal-status-${phase}`);
+            if (term) {
+                term.innerHTML = '<div class="text-slate-500 italic">// Terminal dibersihkan. Klik "▶ Jalankan Kode" untuk mengeksekusi ulang.</div>';
+            }
+            if (status) {
+                status.textContent = '● Siap dieksekusi';
+                status.className = 'text-[10px] text-slate-500 font-mono';
+            }
+        }
+
+        function runBootcampSimulation(phase) {
+            const term = document.getElementById(`bootcamp-terminal-output-${phase}`);
+            const status = document.getElementById(`bootcamp-terminal-status-${phase}`);
+            if (!term) return;
+
+            if (status) {
+                status.textContent = '⚡ Sedang Menjalankan...';
+                status.className = 'text-[10px] text-amber-400 font-mono animate-pulse';
+            }
+
+            term.innerHTML = `
+                <div class="text-cyan-400 font-bold">$ go run main.go</div>
+                <div class="text-slate-400 text-[11px]">[Compiling main.go with Go 1.27 compiler...]</div>
+            `;
+
+            setTimeout(() => {
+                if (phase === 1) {
+                    term.innerHTML += `
+                        <div class="text-slate-300">[INFO] Inisialisasi HotWallet dengan Saldo Awal: Rp 1.000,00</div>
+                        <div class="text-cyan-300">[CONCURRENCY] Memulai 10 goroutine deposit paralel (@ Rp 500,00)...</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #1] sync.Mutex Lock -> Saldo: Rp 1.500,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #2] sync.Mutex Lock -> Saldo: Rp 2.000,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #3] sync.Mutex Lock -> Saldo: Rp 2.500,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #4] sync.Mutex Lock -> Saldo: Rp 3.000,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #5] sync.Mutex Lock -> Saldo: Rp 3.500,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #6] sync.Mutex Lock -> Saldo: Rp 4.000,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #7] sync.Mutex Lock -> Saldo: Rp 4.500,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #8] sync.Mutex Lock -> Saldo: Rp 5.000,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #9] sync.Mutex Lock -> Saldo: Rp 5.500,00 -> Unlock</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Goroutine #10] sync.Mutex Lock -> Saldo: Rp 6.000,00 -> Unlock</div>
+                        <div class="text-emerald-400 font-bold pt-1">===============================================================</div>
+                        <div class="text-emerald-400 font-bold">✅ EKSEKUSI SUKSES: Saldo Akhir Terverifikasi = Rp 6.000,00</div>
+                        <div class="text-emerald-300 text-[11px]">🛡️ ZERO DATA RACE: 10/10 mutasi saldo terlindungi mutlak oleh sync.Mutex.</div>
+                        <div class="text-emerald-400 font-bold">===============================================================</div>
+                    `;
+                } else if (phase === 2) {
+                    term.innerHTML += `
+                        <div class="text-slate-300">[INFO] Inisialisasi Worker Pool (3 Workers, Buffer Channel: 10)</div>
+                        <div class="text-cyan-300">[DISPATCHER] Memasukkan 5 Task Finansial ke Channel tasks...</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 1] Memproses Task Tx #1 (Rp 50.000)... Selesai (52ms)</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 2] Memproses Task Tx #2 (Rp 75.000)... Selesai (49ms)</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 3] Memproses Task Tx #3 (Rp 120.000)... Selesai (51ms)</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 1] Memproses Task Tx #4 (Rp 200.000)... Selesai (53ms)</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 2] Memproses Task Tx #5 (Rp 350.000)... Selesai (50ms)</div>
+                        <div class="text-amber-400 text-[11px]">[TIMEOUT SIGNAL] Context timeout 200ms tercapai -> &lt;-ctx.Done()</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 1] Graceful shutdown (Context Cancelled)</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 2] Graceful shutdown (Context Cancelled)</div>
+                        <div class="text-slate-400 text-[11px] pl-2">[Worker 3] Graceful shutdown (Context Cancelled)</div>
+                        <div class="text-emerald-400 font-bold pt-1">===============================================================</div>
+                        <div class="text-emerald-400 font-bold">✅ WORKER POOL TERMINATED CLEANLY</div>
+                        <div class="text-emerald-300 text-[11px]">🛡️ ZERO GOROUTINE LEAK: Seluruh worker keluar secara graceful tanpa blocking.</div>
+                        <div class="text-emerald-400 font-bold">===============================================================</div>
+                    `;
+                } else if (phase === 3) {
+                    term.innerHTML += `
+                        <div class="text-slate-300">[INFO] Memulai Simulasi Cache-Aside Engine (Redis NoSQL + PostgreSQL Fallback)</div>
+                        <div class="text-slate-500 text-[11px]">---------------------------------------------------------------</div>
+                        <div class="text-cyan-300">[REQUEST #1] GET /wallet/balance?user_id=usr_9981</div>
+                        <div class="text-amber-400 text-[11px] pl-2">[Redis Cache MISS] Key 'usr_9981' tidak ditemukan di memory cache.</div>
+                        <div class="text-slate-300 text-[11px] pl-2">[PostgreSQL Query] SELECT balance FROM wallets WHERE user_id = 'usr_9981' (Latency: 45ms)</div>
+                        <div class="text-emerald-400 text-[11px] pl-2">[Redis Cache POPULATED] Key 'usr_9981' disimpan ke Redis (TTL: 60s)</div>
+                        <div class="text-slate-200 text-[11px] pl-2">Hasil: Saldo Rp 8.750.000,00 (Source: PostgreSQL Database)</div>
+                        <div class="text-slate-500 text-[11px]">---------------------------------------------------------------</div>
+                        <div class="text-cyan-300">[REQUEST #2] GET /wallet/balance?user_id=usr_9981</div>
+                        <div class="text-emerald-400 text-[11px] pl-2">[Redis Cache HIT] Key 'usr_9981' ditemukan di Redis! (Latency: 0.7ms)</div>
+                        <div class="text-slate-200 text-[11px] pl-2">Hasil: Saldo Rp 8.750.000,00 (Source: Redis In-Memory Cache)</div>
+                        <div class="text-emerald-400 font-bold pt-1">===============================================================</div>
+                        <div class="text-emerald-400 font-bold">✅ PATTERN CACHE-ASIDE TERVALIDASI LENGKAP</div>
+                        <div class="text-emerald-300 text-[11px]">🛡️ 98.4% Latency Reduction: Database relasional terlindungi dari beban tinggi.</div>
+                        <div class="text-emerald-400 font-bold">===============================================================</div>
+                    `;
+                }
+
+                if (status) {
+                    status.textContent = '🟢 Eksekusi Sukses (Exit Code 0)';
+                    status.className = 'text-[10px] text-emerald-400 font-mono';
+                }
+                term.scrollTop = term.scrollHeight;
+            }, 450);
         }
 
         // ================= STUDY TRACKER & CHECKLIST LOGIC =================
@@ -540,21 +691,60 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
                 </div>
             </div>
 
-            <!-- Interaktif Playground Fase 1 -->
-            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-md">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <span>💻</span> Playground Kode Fase 1: Hot Wallet &amp; Concurrency Mutex
-                        </span>
-                        <span id="bootcamp-status-phase-1" class="text-[11px] text-slate-400 font-mono">Tersimpan lokal</span>
+            <!-- Interaktif Playground Fase 1 (Modern IDE Chrome & Output Console) -->
+            <div class="rounded-2xl border border-slate-700/80 bg-[#0d1117] shadow-xl overflow-hidden font-mono text-xs">
+                <!-- IDE Window Titlebar -->
+                <div class="bg-[#161b22] px-4 py-2.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 select-none">
+                    <!-- Window Controls & File Tab -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block border border-rose-600/40"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block border border-amber-600/40"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block border border-emerald-600/40"></span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-[#0d1117] px-3 py-1 rounded-t-lg border-t border-l border-r border-slate-700/60 text-slate-200 text-xs font-semibold">
+                            <span class="text-teal-400 font-bold">🐹</span>
+                            <span>main.go</span>
+                            <span class="text-[10px] text-teal-400/80 bg-teal-500/10 px-1.5 py-0.5 rounded font-mono">Go 1.27</span>
+                        </div>
                     </div>
-                    <span class="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Go 1.27 Syntax</span>
+                    
+                    <!-- IDE Actions -->
+                    <div class="flex items-center gap-2">
+                        <span id="bootcamp-status-phase-1" class="text-[11px] text-slate-400 font-mono hidden sm:inline">Tersimpan lokal</span>
+                        <button type="button" onclick="copyBootcampCode(1)" id="btn-copy-phase-1" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition flex items-center gap-1.5 text-[11px]">
+                            <span>📋</span> <span>Salin</span>
+                        </button>
+                        <button type="button" onclick="resetBootcampCode(1)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-600 transition flex items-center gap-1.5 text-[11px]">
+                            <span>↺</span> <span>Reset</span>
+                        </button>
+                        <button type="button" onclick="runBootcampSimulation(1)" class="px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold transition shadow-sm flex items-center gap-1.5 text-[11px] active:scale-95">
+                            <span>▶</span> <span>Jalankan Kode</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden font-mono text-xs bg-slate-950 flex">
-                    <div id="bootcamp-gutter-phase-1" class="bg-slate-900 text-slate-500 py-3 px-2 select-none text-right font-mono text-xs border-r border-slate-800"></div>
-                    <textarea id="bootcamp-editor-phase-1" spellcheck="false" class="w-full h-64 bg-slate-950 text-slate-100 p-3 font-mono text-xs leading-relaxed outline-none resize-y"></textarea>
+                <!-- Code Editor Body -->
+                <div class="flex bg-[#0d1117] h-64 overflow-hidden relative">
+                    <div id="bootcamp-gutter-phase-1" class="bg-[#090d16] text-slate-500 py-3 px-3 select-none text-right font-mono text-xs border-r border-slate-800/80 overflow-hidden min-w-[45px]"></div>
+                    <textarea id="bootcamp-editor-phase-1" spellcheck="false" class="w-full h-full bg-[#0d1117] text-slate-100 p-3 font-mono text-xs sm:text-[13px] leading-relaxed outline-none resize-none overflow-y-auto selection:bg-teal-800 selection:text-white" style="tab-size: 4;"></textarea>
+                </div>
+
+                <!-- Terminal Console Output Window -->
+                <div class="border-t border-slate-800 bg-[#070a12]">
+                    <div class="px-4 py-1.5 bg-[#0b0f19] border-b border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 select-none">
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-400 font-bold">&gt;_</span>
+                            <span class="font-semibold text-slate-300">Terminal - Simulasi Go Runtime</span>
+                            <span id="bootcamp-terminal-status-1" class="text-[10px] text-slate-500 font-mono">● Siap dieksekusi</span>
+                        </div>
+                        <button type="button" onclick="clearBootcampTerminal(1)" class="text-[10px] text-slate-400 hover:text-slate-200 transition">
+                            Bersihkan Terminal
+                        </button>
+                    </div>
+                    <div id="bootcamp-terminal-output-1" class="p-3.5 font-mono text-xs text-slate-300 space-y-1 min-h-[110px] max-h-[190px] overflow-y-auto select-text">
+                        <div class="text-slate-500 italic">// Klik tombol "▶ Jalankan Kode" di atas untuk mensimulasikan output runtime Go...</div>
+                    </div>
                 </div>
             </div>
 
@@ -733,21 +923,60 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
                 </div>
             </div>
 
-            <!-- Interaktif Playground Fase 2 -->
-            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-md">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <span>💻</span> Playground Kode Fase 2: Worker Pool &amp; Context Cancellation
-                        </span>
-                        <span id="bootcamp-status-phase-2" class="text-[11px] text-slate-400 font-mono">Tersimpan lokal</span>
+            <!-- Interaktif Playground Fase 2 (Modern IDE Chrome & Output Console) -->
+            <div class="rounded-2xl border border-slate-700/80 bg-[#0d1117] shadow-xl overflow-hidden font-mono text-xs">
+                <!-- IDE Window Titlebar -->
+                <div class="bg-[#161b22] px-4 py-2.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 select-none">
+                    <!-- Window Controls & File Tab -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block border border-rose-600/40"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block border border-amber-600/40"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block border border-emerald-600/40"></span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-[#0d1117] px-3 py-1 rounded-t-lg border-t border-l border-r border-slate-700/60 text-slate-200 text-xs font-semibold">
+                            <span class="text-teal-400 font-bold">🐹</span>
+                            <span>worker_pool.go</span>
+                            <span class="text-[10px] text-teal-400/80 bg-teal-500/10 px-1.5 py-0.5 rounded font-mono">Go 1.27</span>
+                        </div>
                     </div>
-                    <span class="text-xs font-mono text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded">Go Concurrency Pattern</span>
+                    
+                    <!-- IDE Actions -->
+                    <div class="flex items-center gap-2">
+                        <span id="bootcamp-status-phase-2" class="text-[11px] text-slate-400 font-mono hidden sm:inline">Tersimpan lokal</span>
+                        <button type="button" onclick="copyBootcampCode(2)" id="btn-copy-phase-2" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition flex items-center gap-1.5 text-[11px]">
+                            <span>📋</span> <span>Salin</span>
+                        </button>
+                        <button type="button" onclick="resetBootcampCode(2)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-600 transition flex items-center gap-1.5 text-[11px]">
+                            <span>↺</span> <span>Reset</span>
+                        </button>
+                        <button type="button" onclick="runBootcampSimulation(2)" class="px-3 py-1 rounded-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold transition shadow-sm flex items-center gap-1.5 text-[11px] active:scale-95">
+                            <span>▶</span> <span>Jalankan Kode</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden font-mono text-xs bg-slate-950 flex">
-                    <div id="bootcamp-gutter-phase-2" class="bg-slate-900 text-slate-500 py-3 px-2 select-none text-right font-mono text-xs border-r border-slate-800"></div>
-                    <textarea id="bootcamp-editor-phase-2" spellcheck="false" class="w-full h-64 bg-slate-950 text-slate-100 p-3 font-mono text-xs leading-relaxed outline-none resize-y"></textarea>
+                <!-- Code Editor Body -->
+                <div class="flex bg-[#0d1117] h-64 overflow-hidden relative">
+                    <div id="bootcamp-gutter-phase-2" class="bg-[#090d16] text-slate-500 py-3 px-3 select-none text-right font-mono text-xs border-r border-slate-800/80 overflow-hidden min-w-[45px]"></div>
+                    <textarea id="bootcamp-editor-phase-2" spellcheck="false" class="w-full h-full bg-[#0d1117] text-slate-100 p-3 font-mono text-xs sm:text-[13px] leading-relaxed outline-none resize-none overflow-y-auto selection:bg-teal-800 selection:text-white" style="tab-size: 4;"></textarea>
+                </div>
+
+                <!-- Terminal Console Output Window -->
+                <div class="border-t border-slate-800 bg-[#070a12]">
+                    <div class="px-4 py-1.5 bg-[#0b0f19] border-b border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 select-none">
+                        <div class="flex items-center gap-2">
+                            <span class="text-teal-400 font-bold">&gt;_</span>
+                            <span class="font-semibold text-slate-300">Terminal - Simulasi Go Runtime</span>
+                            <span id="bootcamp-terminal-status-2" class="text-[10px] text-slate-500 font-mono">● Siap dieksekusi</span>
+                        </div>
+                        <button type="button" onclick="clearBootcampTerminal(2)" class="text-[10px] text-slate-400 hover:text-slate-200 transition">
+                            Bersihkan Terminal
+                        </button>
+                    </div>
+                    <div id="bootcamp-terminal-output-2" class="p-3.5 font-mono text-xs text-slate-300 space-y-1 min-h-[110px] max-h-[190px] overflow-y-auto select-text">
+                        <div class="text-slate-500 italic">// Klik tombol "▶ Jalankan Kode" di atas untuk mensimulasikan output runtime Go...</div>
+                    </div>
                 </div>
             </div>
 
@@ -922,21 +1151,60 @@ func (c *CacheAsideEngine) GetWalletBalance(ctx context.Context, userID string, 
                 </div>
             </div>
 
-            <!-- Interaktif Playground Fase 3 -->
-            <div class="rounded-2xl bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 p-5 sm:p-6 space-y-4 shadow-md">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <span>💻</span> Playground Kode Fase 3: NoSQL Redis Cache-Aside &amp; DB Fallback
-                        </span>
-                        <span id="bootcamp-status-phase-3" class="text-[11px] text-slate-400 font-mono">Tersimpan lokal</span>
+            <!-- Interaktif Playground Fase 3 (Modern IDE Chrome & Output Console) -->
+            <div class="rounded-2xl border border-slate-700/80 bg-[#0d1117] shadow-xl overflow-hidden font-mono text-xs">
+                <!-- IDE Window Titlebar -->
+                <div class="bg-[#161b22] px-4 py-2.5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 select-none">
+                    <!-- Window Controls & File Tab -->
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500/80 inline-block border border-rose-600/40"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block border border-amber-600/40"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block border border-emerald-600/40"></span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-[#0d1117] px-3 py-1 rounded-t-lg border-t border-l border-r border-slate-700/60 text-slate-200 text-xs font-semibold">
+                            <span class="text-rose-400 font-bold">🐹</span>
+                            <span>cache_aside.go</span>
+                            <span class="text-[10px] text-rose-400/80 bg-rose-500/10 px-1.5 py-0.5 rounded font-mono">Go 1.27</span>
+                        </div>
                     </div>
-                    <span class="text-xs font-mono text-rose-600 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">Redis NoSQL Pattern</span>
+                    
+                    <!-- IDE Actions -->
+                    <div class="flex items-center gap-2">
+                        <span id="bootcamp-status-phase-3" class="text-[11px] text-slate-400 font-mono hidden sm:inline">Tersimpan lokal</span>
+                        <button type="button" onclick="copyBootcampCode(3)" id="btn-copy-phase-3" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-600 transition flex items-center gap-1.5 text-[11px]">
+                            <span>📋</span> <span>Salin</span>
+                        </button>
+                        <button type="button" onclick="resetBootcampCode(3)" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-600 transition flex items-center gap-1.5 text-[11px]">
+                            <span>↺</span> <span>Reset</span>
+                        </button>
+                        <button type="button" onclick="runBootcampSimulation(3)" class="px-3 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold transition shadow-sm flex items-center gap-1.5 text-[11px] active:scale-95">
+                            <span>▶</span> <span>Jalankan Kode</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden font-mono text-xs bg-slate-950 flex">
-                    <div id="bootcamp-gutter-phase-3" class="bg-slate-900 text-slate-500 py-3 px-2 select-none text-right font-mono text-xs border-r border-slate-800"></div>
-                    <textarea id="bootcamp-editor-phase-3" spellcheck="false" class="w-full h-64 bg-slate-950 text-slate-100 p-3 font-mono text-xs leading-relaxed outline-none resize-y"></textarea>
+                <!-- Code Editor Body -->
+                <div class="flex bg-[#0d1117] h-64 overflow-hidden relative">
+                    <div id="bootcamp-gutter-phase-3" class="bg-[#090d16] text-slate-500 py-3 px-3 select-none text-right font-mono text-xs border-r border-slate-800/80 overflow-hidden min-w-[45px]"></div>
+                    <textarea id="bootcamp-editor-phase-3" spellcheck="false" class="w-full h-full bg-[#0d1117] text-slate-100 p-3 font-mono text-xs sm:text-[13px] leading-relaxed outline-none resize-none overflow-y-auto selection:bg-rose-900 selection:text-white" style="tab-size: 4;"></textarea>
+                </div>
+
+                <!-- Terminal Console Output Window -->
+                <div class="border-t border-slate-800 bg-[#070a12]">
+                    <div class="px-4 py-1.5 bg-[#0b0f19] border-b border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 select-none">
+                        <div class="flex items-center gap-2">
+                            <span class="text-rose-400 font-bold">&gt;_</span>
+                            <span class="font-semibold text-slate-300">Terminal - Simulasi Go Runtime</span>
+                            <span id="bootcamp-terminal-status-3" class="text-[10px] text-slate-500 font-mono">● Siap dieksekusi</span>
+                        </div>
+                        <button type="button" onclick="clearBootcampTerminal(3)" class="text-[10px] text-slate-400 hover:text-slate-200 transition">
+                            Bersihkan Terminal
+                        </button>
+                    </div>
+                    <div id="bootcamp-terminal-output-3" class="p-3.5 font-mono text-xs text-slate-300 space-y-1 min-h-[110px] max-h-[190px] overflow-y-auto select-text">
+                        <div class="text-slate-500 italic">// Klik tombol "▶ Jalankan Kode" di atas untuk mensimulasikan output runtime Go...</div>
+                    </div>
                 </div>
             </div>
 
